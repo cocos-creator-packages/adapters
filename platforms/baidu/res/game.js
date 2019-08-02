@@ -1,4 +1,4 @@
-require('./libs/wrapper/builtin');
+require('./libs/wrapper/builtin/index');
 window.DOMParser = require('./libs/common/xmldom/dom-parser').DOMParser;
 require('./libs/common/engine/globalAdapter');
 require('./libs/wrapper/unify');
@@ -26,7 +26,7 @@ window.__globalAdapter.init(function () {
             cc.Pipeline.Downloader.PackDownloader._doPreload("SUBDOMAIN_DATA", SUBDOMAIN_DATA);
         });
 
-        require('./libs/common/sub-context-adapter');  // TODO
+        require('./libs/wrapper/sub-context-adapter');
     }
     else {
         // Release Image objects after uploaded gl texture
