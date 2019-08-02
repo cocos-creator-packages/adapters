@@ -1,0 +1,10 @@
+module.exports = {
+    screenOrientation: "landscape",
+    networkTimeout: {
+        request: 5000,
+        connectSocket: 5000,
+        upload: 5000,
+        download: 5000,
+    },
+    showStatusBar: false,
+};
