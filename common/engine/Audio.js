@@ -26,6 +26,15 @@ if (Audio) {
             this._nextTime = 0;
             this._element.seek(num);
         },
+
+        stop () {
+            if (!this._element) return;
+            this._element.pause();
+            this._element.seek(0);
+            this._unbindEnded();
+            this.emit('stop');
+            this._state = Audio.State.STOPPED;
+        },
         
         // adapt some special operations on web platform
         _touchToPlay () { },
