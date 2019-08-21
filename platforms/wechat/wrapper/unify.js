@@ -45,6 +45,11 @@ if (window.__globalAdapter) {
     utils.cloneMethod(globalAdapter, wx, 'onShow');
     utils.cloneMethod(globalAdapter, wx, 'onHide');
 
+    // onError
+    utils.cloneMethod(globalAdapter, wx, 'onError');
+    // offError
+    utils.cloneMethod(globalAdapter, wx, 'offError');
+
     // Accelerometer
     let isAccelerometerInit = false;
     let deviceOrientation = 1;
