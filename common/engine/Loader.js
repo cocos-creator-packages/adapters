@@ -52,6 +52,14 @@ function downloadAudio (item, callback) {
     callback(null, dom);
 }
 
+function downloadVideo (item, callback) {
+    callback(null, item.url);
+}
+
+function loadVideo (item, callback) {
+    callback(null, item.url);
+}
+
 cc.loader.downloader.addHandlers({
     js : downloadScript,
 
@@ -63,9 +71,27 @@ cc.loader.downloader.addHandlers({
     ogg : downloadAudio,
     wav : downloadAudio,
     m4a : downloadAudio,
+
+    // Video
+    mp4: downloadVideo,
+    avi: downloadVideo,
+    mov: downloadVideo,
+    mpg: downloadVideo,
+    mpeg: downloadVideo,
+    rm: downloadVideo,
+    rmvb: downloadVideo,
 });
 
 cc.loader.loader.addHandlers({
+    // Video
+    mp4: loadVideo,
+    avi: loadVideo,
+    mov: loadVideo,
+    mpg: loadVideo,
+    mpeg: loadVideo,
+    rm: loadVideo,
+    rmvb: loadVideo,
+
     // Images
     png: loadImage,
     jpg: loadImage,

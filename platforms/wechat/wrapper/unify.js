@@ -14,6 +14,9 @@ if (window.__globalAdapter) {
     // Audio
     utils.cloneMethod(globalAdapter, wx, 'createInnerAudioContext');
 
+    // Video
+    utils.cloneMethod(globalAdapter, wx, 'createVideo');
+
     // FrameRate
     utils.cloneMethod(globalAdapter, wx, 'setPreferredFramesPerSecond');
 
