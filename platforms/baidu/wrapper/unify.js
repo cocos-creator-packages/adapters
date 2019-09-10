@@ -31,6 +31,7 @@ if (window.__globalAdapter) {
     // Message
     utils.cloneMethod(globalAdapter, swan, 'getOpenDataContext');
     utils.cloneMethod(globalAdapter, swan, 'onMessage');
+    globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
 
     // Subpackage
     utils.cloneMethod(globalAdapter, swan, 'loadSubpackage');
@@ -48,10 +49,13 @@ if (window.__globalAdapter) {
     // Accelerometer
     let isAccelerometerInit = false;
     let deviceOrientation = 1;
-    let systemInfo = swan.getSystemInfoSync();
-    let windowWidth = systemInfo.windowWidth;
-    let windowHeight = systemInfo.windowHeight;
-    let isLandscape = windowWidth > windowHeight;
+    let isLandscape = false;  // getSystemInfoSync not supported in sub context
+    if (swan.getSystemInfoSync) {
+        let systemInfo = swan.getSystemInfoSync();
+        let windowWidth = systemInfo.windowWidth;
+        let windowHeight = systemInfo.windowHeight;
+        isLandscape = windowWidth > windowHeight;
+    }
     if (swan.onDeviceOrientationChange) {
         swan.onDeviceOrientationChange(function (res) {
             if (res.value === 'landscape') {
@@ -75,7 +79,7 @@ if (window.__globalAdapter) {
                         x = -y;
                         y = tmp;
                     }
-                    
+
                     resClone.x = x * deviceOrientation;
                     resClone.y = y * deviceOrientation;
                     resClone.z = res.z;
