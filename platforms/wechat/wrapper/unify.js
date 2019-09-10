@@ -34,6 +34,7 @@ if (window.__globalAdapter) {
     // Message
     utils.cloneMethod(globalAdapter, wx, 'getOpenDataContext');
     utils.cloneMethod(globalAdapter, wx, 'onMessage');
+    globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
 
     // Subpackage
     utils.cloneMethod(globalAdapter, wx, 'loadSubpackage');

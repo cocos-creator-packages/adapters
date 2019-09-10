@@ -49,6 +49,7 @@ if (window.__globalAdapter) {
     // Message
     utils.cloneMethod(globalAdapter, my, 'getOpenDataContext');
     utils.cloneMethod(globalAdapter, my, 'onMessage');
+    globalAdapter.isSubContext = false;  // sub context not supported
 
     // Subpackage not supported
     // utils.cloneMethod(globalAdapter, my, 'loadSubpackage');
