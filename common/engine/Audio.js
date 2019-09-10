@@ -35,7 +35,22 @@ if (Audio) {
             this.emit('stop');
             this._state = Audio.State.STOPPED;
         },
-        
+
+        _bindEnded (callback) {
+            callback = callback || this._onended;
+            let elem = this._element;
+            if (elem) {
+              elem.onEnded && elem.onEnded(callback);
+            }
+        },
+
+        _unbindEnded () {
+            let elem = this._element;
+            if (elem) {
+              elem.offEnded && elem.offEnded();
+            }
+        },
+
         // adapt some special operations on web platform
         _touchToPlay () { },
         _forceUpdatingState () { },

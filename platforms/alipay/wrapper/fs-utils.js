@@ -42,12 +42,12 @@ function deleteFile (filePath, callback) {
     fs.unlink({
         filePath: filePath,
         success: function () {
-            cc.log('Removed local file ' + filePath + ' successfully!');
+            console.log('Removed local file ' + filePath + ' successfully!');
             callback && callback(null);
         },
         fail: function (res) {
-            console.warn(res.errMsg);
-            callback && callback(new Error(res.errMsg));
+            console.error('unlink file failed', res);
+            callback && callback(new Error(res.errorMessage));
         }
     });
 }
@@ -60,7 +60,8 @@ function downloadFile (remoteUrl, filePath, callback) {
             callback && callback(null, res.apFilePath);
         },
         fail: function (res) {
-            callback && callback(new Error(res.errMsg), null);
+            console.error('download file failed', res);
+            callback && callback(new Error(res.errorMessage), null);
         }
     });
 }
@@ -70,12 +71,12 @@ function saveFile (srcPath, destPath, callback) {
         tempFilePath: srcPath,
         filePath: destPath,
         success: function (res) {
-            cc.log('save file finished:' + destPath);
+            console.log('save file finished:' + destPath);
             callback && callback(null, res.savedFilePath);
         },
         fail: function (res) {
-            cc.log('save file failed:' + res.errMsg);
-            callback && callback(new Error(res.errMsg), null);
+            console.error('save file failed', res);
+            callback && callback(new Error(res.errorMessage), null);
         }
     });
 }
@@ -87,12 +88,12 @@ function copyFile (srcPath, destPath, callback) {
         srcPath: srcPath,
         destPath: destPath,
         success: function () {
-            cc.log('copy file finished:' + destPath);
+            console.log('copy file finished:' + destPath);
             callback && callback(null);
         },
         fail: function (res) {
-            cc.log('copy file failed:' + res.errMsg);
-            callback && callback(new Error(res.errMsg));
+            console.error('copy file failed', res);
+            callback && callback(new Error(res.errorMessage));
         }
     });
 }
@@ -108,8 +109,8 @@ function writeFile (path, data, encoding, callback) {
             callback(null);
         } : undefined,
         fail: function (res) {
-            console.warn(res.errMsg);
-            callback && callback(new Error(res.errMsg));
+            console.error('write file failed', res);
+            callback && callback(new Error(res.errorMessage));
         }
     });
 }
@@ -118,7 +119,11 @@ function writeFileSync (path, data, encoding) {
     var result = checkFsValid();
     if (result) return result;
     try {
-        fs.writeFileSync(path, data, encoding);
+        fs.writeFileSync({
+            filePath: path,
+            data: data,
+            encoding: encoding,
+        });
         return null;
     }
     catch (e) {
@@ -137,7 +142,8 @@ function readFile (filePath, encoding, callback) {
             callback(null, res.data);
         } : undefined,
         fail: function (res) {
-            callback && callback (new Error(res.errMsg), null);
+            console.error('read file failed', res);
+            callback && callback (new Error(res.errorMessage), null);
         }
     });
 }
@@ -153,7 +159,7 @@ function readDir (filePath, callback) {
             callback(null, res.files);
         } : undefined,
         fail: callback ? function (res) {
-            callback(new Error(res.errMsg), null);
+            callback(new Error(res.errorMessage), null);
         } : undefined
     });
 }
@@ -186,7 +192,10 @@ function makeDirSync (path, recursive) {
     var result = checkFsValid();
     if (result) return result;
     try {
-        fs.mkdirSync(path, recursive);
+        fs.mkdirSync({
+            dirPath: path,
+            recursive: recursive,
+        });
         return null;
     }
     catch (e) {
