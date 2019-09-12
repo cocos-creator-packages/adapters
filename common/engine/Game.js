@@ -65,11 +65,10 @@ Object.assign(game, {
         // Avoid setup to be called twice.
         if (this._rendererInitialized) return;
 
-        let localCanvas, localContainer;
-        
-        this.container = localContainer = document.createElement("DIV");
-        this.frame = localContainer.parentNode === document.body ? document.documentElement : localContainer.parentNode;
-        
+        // frame and container are useless on minigame platform
+        this.frame = this.container = document.createElement("DIV");
+
+        let localCanvas;
         if (__globalAdapter.isSubContext) {
             localCanvas = window.sharedCanvas || __globalAdapter.getSharedCanvas();
         }
@@ -90,7 +89,7 @@ Object.assign(game, {
             };
             renderer.initWebGL(localCanvas, opts);
             this._renderContext = renderer.device._gl;
-            
+
             // Enable dynamic atlas manager by default
             if (!cc.macro.CLEANUP_IMAGE_CACHE && dynamicAtlasManager) {
                 dynamicAtlasManager.enabled = true;
