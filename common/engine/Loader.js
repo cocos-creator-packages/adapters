@@ -46,10 +46,23 @@ function downloadAudio (item, callback) {
         return new Error(debug.getError(4927));
     }
 
-    var dom = document.createElement('audio');
-    dom.src = item.url;
-
-    callback(null, dom);
+    let innerAudioContext = __globalAdapter.createInnerAudioContext();
+    function success () {
+        innerAudioContext.offCanplay(success);
+        innerAudioContext.offError(fail);
+        callback(null, innerAudioContext);
+    }
+    function fail (res) {
+        innerAudioContext.offCanplay(success);
+        innerAudioContext.offError(fail);
+        if (typeof res === 'object') {
+            res = JSON.stringify(res);
+        }
+        callback(new Error(res), null);
+    }
+    innerAudioContext.onCanplay(success);
+    innerAudioContext.onError(fail);
+    innerAudioContext.src = item.url;
 }
 
 function downloadVideo (item, callback) {

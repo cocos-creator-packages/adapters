@@ -28,9 +28,14 @@ if (window.__globalAdapter) {
           cb && cb(res);
         });
     };
-    
+
     // Audio
-    utils.cloneMethod(globalAdapter, my, 'createInnerAudioContext');
+    globalAdapter.createInnerAudioContext = function () {
+        let innerAudioContext = my.createInnerAudioContext();
+        innerAudioContext.onCanplay = innerAudioContext.onCanPlay;
+        innerAudioContext.offCanplay = innerAudioContext.offCanPlay;
+        return innerAudioContext;
+    };
 
     // FrameRate
     utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
