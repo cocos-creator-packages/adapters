@@ -111,12 +111,20 @@ Object.assign(game, {
             inputManager.registerSystemEvent(this.canvas);
         }
 
-        function onHidden () {
-            game.emit(game.EVENT_HIDE);
+        var hidden = false;
+
+        function onHidden() {
+            if (!hidden) {
+                hidden = true;
+                game.emit(game.EVENT_HIDE);
+            }
         }
 
-        function onShown (res) {
-            game.emit(game.EVENT_SHOW, res);
+        function onShown(res) {
+            if (hidden) {
+                hidden = false;
+                game.emit(game.EVENT_SHOW, res);
+            }
         }
 
         // Maybe not support in open data context
