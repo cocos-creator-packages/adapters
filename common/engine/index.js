@@ -4,7 +4,7 @@ require('./DeviceMotionEvent');
 require('./Editbox');
 require('./Game');
 require('./InputManager');
-require('./Loader');
+require('./AssetManager');
 require('./Screen');
 require('./Texture2D');
 require('./VideoPlayer');

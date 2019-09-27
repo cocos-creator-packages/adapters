@@ -2,61 +2,7 @@ window.boot = function () {
     var settings = window._CCSettings;
     window._CCSettings = undefined;
 
-    if ( !settings.debug ) {
-        var uuids = settings.uuids;
-
-        var rawAssets = settings.rawAssets;
-        var assetTypes = settings.assetTypes;
-        var realRawAssets = settings.rawAssets = {};
-        for (var mount in rawAssets) {
-            var entries = rawAssets[mount];
-            var realEntries = realRawAssets[mount] = {};
-            for (var id in entries) {
-                var entry = entries[id];
-                var type = entry[1];
-                // retrieve minified raw asset
-                if (typeof type === 'number') {
-                    entry[1] = assetTypes[type];
-                }
-                // retrieve uuid
-                realEntries[uuids[id] || id] = entry;
-            }
-        }
-
-        var scenes = settings.scenes;
-        for (var i = 0; i < scenes.length; ++i) {
-            var scene = scenes[i];
-            if (typeof scene.uuid === 'number') {
-                scene.uuid = uuids[scene.uuid];
-            }
-        }
-
-        var packedAssets = settings.packedAssets;
-        for (var packId in packedAssets) {
-            var packedIds = packedAssets[packId];
-            for (var j = 0; j < packedIds.length; ++j) {
-                if (typeof packedIds[j] === 'number') {
-                    packedIds[j] = uuids[packedIds[j]];
-                }
-            }
-        }
-
-        var subpackages = settings.subpackages;
-        for (var subId in subpackages) {
-            var uuidArray = subpackages[subId].uuids;
-            if (uuidArray) {
-                for (var k = 0, l = uuidArray.length; k < l; k++) {
-                    if (typeof uuidArray[k] === 'number') {
-                        uuidArray[k] = uuids[uuidArray[k]];
-                    }
-                }
-            }
-        }
-    }
-
     var onStart = function () {
-        cc.loader.downloader._subpackages = settings.subpackages;
-
         cc.view.enableRetina(true);
         cc.view.resizeWithBrowserSize(true);
 
@@ -65,7 +11,6 @@ window.boot = function () {
         // load scene
         cc.director.loadScene(launchScene, null,
             function () {
-                cc.loader.onProgress = null;
                 console.log('Success to load scene: ' + launchScene);
             }
         );
@@ -98,15 +43,23 @@ window.boot = function () {
         collisionMatrix: settings.collisionMatrix,
     }
 
-    // init assets
-    cc.AssetLibrary.init({
-        libraryPath: 'res/import',
-        rawAssetsBase: 'res/raw-',
-        rawAssets: settings.rawAssets,
-        packedAssets: settings.packedAssets,
-        md5AssetsMap: settings.md5AssetsMap,
-        subpackages: settings.subpackages
-    });
-
-    cc.game.run(option, onStart);
+    cc.assetManager.init();
+    var resourcesRoot = 'assets/resources';
+    var internalRoot = 'assets/internal';
+    var scenesRoot = 'assets/scenes';
+    if (REMOTE_SERVER_ROOT) {
+        resourcesRoot = REMOTE_SERVER_ROOT + '/' + resourcesRoot;
+        internalRoot = REMOTE_SERVER_ROOT + '/' + internalRoot;
+        scenesRoot = REMOTE_SERVER_ROOT + '/' + scenesRoot;
+    }
+    var count = 0;
+    function cb (err) {
+        if (!err) count++;
+        if (count === 3) {
+            cc.game.run(option, onStart);
+        }
+    }
+    cc.assetManager.loadBundle(internalRoot, {ver: settings.internalVer},  cb);
+    cc.assetManager.loadBundle(resourcesRoot, {ver: settings.resourcesVer}, cb);
+    cc.assetManager.loadBundle(scenesRoot, {ver: settings.scenesVer}, cb);
 };

@@ -1,2 +1,1 @@
-require('./Loader');
 require('./Label');

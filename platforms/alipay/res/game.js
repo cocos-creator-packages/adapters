@@ -10,20 +10,15 @@ window.__globalAdapter.init(function () {
     require('./libs/common/engine');
     require('./libs/wrapper/engine');
     require('./main');
-    require('./libs/common/remote-downloader');
 
     // Adjust devicePixelRatio
     cc.view._maxPixelRatio = 4;
 
     // handle remote downloader
-    remoteDownloader.REMOTE_SERVER_ROOT = "";
-    remoteDownloader.SUBCONTEXT_ROOT = "";
-    var pipeBeforeDownloader = cc.loader.subPackPipe || cc.loader.md5Pipe || cc.loader.assetLoader;
-    cc.loader.insertPipeAfter(pipeBeforeDownloader, remoteDownloader);
+    window.REMOTE_SERVER_ROOT = "";
+    window.SUBCONTEXT_ROOT = "";
 
     // Release Image objects after uploaded gl texture
     cc.macro.CLEANUP_IMAGE_CACHE = true;
-
-    remoteDownloader.init();
     window.boot();
 });
