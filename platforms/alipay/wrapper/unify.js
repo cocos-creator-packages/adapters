@@ -51,9 +51,6 @@ if (window.__globalAdapter) {
     utils.cloneMethod(globalAdapter, my, 'onMessage');
     globalAdapter.isSubContext = false;  // sub context not supported
 
-    // Subpackage not supported
-    // utils.cloneMethod(globalAdapter, my, 'loadSubpackage');
-
     // SharedCanvas
     utils.cloneMethod(globalAdapter, my, 'getSharedCanvas');
 
