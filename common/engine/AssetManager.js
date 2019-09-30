@@ -1,5 +1,5 @@
 const cacheManager = require('../cache-manager');
-const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, readJsonSync } = require('./fs-utils');
+const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, readJsonSync } = require('../../wrapper/fs-utils');
 
 const REGEX = /^\w+:\/\/.*/;
 
