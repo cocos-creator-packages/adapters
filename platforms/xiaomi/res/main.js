@@ -14,6 +14,8 @@ window.__globalAdapter.init(function () {
     // Adjust devicePixelRatio
     cc.view._maxPixelRatio = 4;
 
+    // downloader polyfill
+    window.miDownloader = remoteDownloader;
     // handle remote downloader
     remoteDownloader.REMOTE_SERVER_ROOT = "";
     remoteDownloader.SUBCONTEXT_ROOT = "";
