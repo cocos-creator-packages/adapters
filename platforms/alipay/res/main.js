@@ -42,14 +42,14 @@ window.boot = function () {
         collisionMatrix: settings.collisionMatrix,
     }
 
-    cc.assetManager.init();
+    cc.assetManager.init({ bundleVers: settings.bundleVers });
     var resourcesRoot = 'assets/resources';
     var internalRoot = 'assets/internal';
-    var scenesRoot = 'assets/scenes';
+    var mainRoot = 'assets/main';
     if (REMOTE_SERVER_ROOT) {
         resourcesRoot = REMOTE_SERVER_ROOT + '/' + resourcesRoot;
         internalRoot = REMOTE_SERVER_ROOT + '/' + internalRoot;
-        scenesRoot = REMOTE_SERVER_ROOT + '/' + scenesRoot;
+        mainRoot = REMOTE_SERVER_ROOT + '/' + mainRoot;
     }
     var count = 0;
     function cb (err) {
@@ -58,7 +58,7 @@ window.boot = function () {
             cc.game.run(option, onStart);
         }
     }
-    cc.assetManager.loadBundle(internalRoot, {ver: settings.internalVer},  cb);
-    cc.assetManager.loadBundle(resourcesRoot, {ver: settings.resourcesVer}, cb);
-    cc.assetManager.loadBundle(scenesRoot, {ver: settings.scenesVer}, cb);
+    cc.assetManager.loadBundle(internalRoot,  cb);
+    cc.assetManager.loadBundle(resourcesRoot, cb);
+    cc.assetManager.loadBundle(mainRoot, cb);
 };

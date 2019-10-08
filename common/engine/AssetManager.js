@@ -241,13 +241,15 @@ cc.assetManager.loadBundle = function (root, options, onComplete) {
             options = null;
         }
         options = options || {};
-        options.priority = options.priority || 2;
-        var config = options.ver ? `${root}/config.${options.ver}.json` : `${root}/config.json`;
+        
         loadSubpackage(root, options.onProgress, function (err) {
             if (err) {
                 onComplete && onComplete(err, null);
                 return;
             }
+            options.priority = options.priority || 2;
+            var ver = options.ver || cc.assetManager.bundleVers[cc.path.basename(root)];
+            var config = ver ?  `${root}/config.${ver}.json`: `${root}/config.json`;
             downloader.download(root, config, '.json', options, function (err, json) {
                 var bundle = null;
                 if (!err) {
