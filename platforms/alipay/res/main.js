@@ -9,26 +9,24 @@ window.boot = function () {
 
         var launchScene = settings.launchScene;
 
-        // load scene
-        cc.director.loadScene(launchScene, null,
-            function () {
-                console.log('Success to load scene: ' + launchScene);
-            }
-        );
+        var mainRoot = REMOTE_SERVER_ROOT + '/assets/main';
+        cc.assetManager.loadBundle(mainRoot, function () {
+            // load scene
+            cc.director.loadScene(launchScene, null,
+                function () {
+                    console.log('Success to load scene: ' + launchScene);
+                }
+            );
+        });
     };
 
     // jsList
     var jsList = settings.jsList;
 
-    var bundledScript = settings.debug ? 'src/project.dev.js' : 'src/project.js';
     if (jsList) {
         jsList = jsList.map(function (x) {
             return 'src/' + x;
         });
-        jsList.push(bundledScript);
-    }
-    else {
-        jsList = [bundledScript];
     }
 
     var option = {
@@ -43,22 +41,16 @@ window.boot = function () {
     }
 
     cc.assetManager.init({ bundleVers: settings.bundleVers });
-    var resourcesRoot = 'assets/resources';
-    var internalRoot = 'assets/internal';
-    var mainRoot = 'assets/main';
-    if (REMOTE_SERVER_ROOT) {
-        resourcesRoot = REMOTE_SERVER_ROOT + '/' + resourcesRoot;
-        internalRoot = REMOTE_SERVER_ROOT + '/' + internalRoot;
-        mainRoot = REMOTE_SERVER_ROOT + '/' + mainRoot;
-    }
+
+    var resourcesRoot = REMOTE_SERVER_ROOT + '/assets/resources';
+    var internalRoot = REMOTE_SERVER_ROOT + '/assets/internal';
     var count = 0;
     function cb (err) {
         if (!err) count++;
-        if (count === 3) {
+        if (count === 2) {
             cc.game.run(option, onStart);
         }
     }
     cc.assetManager.loadBundle(internalRoot,  cb);
     cc.assetManager.loadBundle(resourcesRoot, cb);
-    cc.assetManager.loadBundle(mainRoot, cb);
 };
