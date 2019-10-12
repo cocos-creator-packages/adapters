@@ -1,5 +1,9 @@
-cc.loader.downloader.loadSubpackage = function (name, completeCallback) {
-    __globalAdapter.loadSubpackage({
+cc.loader.downloader.loadSubpackage = function (name, progressCallback, completeCallback) {
+    if (!completeCallback && progressCallback) {
+        completeCallback = progressCallback;
+        progressCallback = null;
+    }
+    var loadTask = __globalAdapter.loadSubpackage({
         name: name,
         success: function () {
             if (completeCallback) completeCallback();
@@ -7,7 +11,8 @@ cc.loader.downloader.loadSubpackage = function (name, completeCallback) {
         fail: function () {
             if (completeCallback) completeCallback(new Error(`Failed to load subpackage ${name}`));
         }
-    })
+    });
+    progressCallback && loadTask.onProgressUpdate(progressCallback);
 };
 
 function downloadScript (item, callback, isAsync) {
