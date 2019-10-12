@@ -67,9 +67,6 @@ function loadVideo (item, callback) {
 cc.loader.downloader.addHandlers({
     js : downloadScript,
 
-    pvr: cc.loader.downloader.extMap.png,
-    etc: cc.loader.downloader.extMap.png,
-
     // Audio
     mp3 : downloadAudio,
     ogg : downloadAudio,
@@ -106,9 +103,6 @@ cc.loader.loader.addHandlers({
     tiff: loadImage,
     webp: loadImage,
     image: loadImage,
-
-    pvr: cc.loader.loader.extMap.png,
-    etc: cc.loader.loader.extMap.png,
 
     // Font
     font: loadFont,
