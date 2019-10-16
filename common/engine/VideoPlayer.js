@@ -75,7 +75,7 @@
             self._duration = res.duration;
             self._currentTime = res.position;
         });
-        // onStop not supported
+        // onStop not supported, implemented in promise returned by video.stop call.
     };
 
     _p._unbindEvent = function () {
@@ -196,13 +196,20 @@
     };
 
     _p.stop = function () {
+        let self = this;
         let video = this._video;
         if (!video || !this._visible) return;
 
-        video.stop();
-
-        this._dispatchEvent(_impl.EventType.STOPPED);
-        this._playing = false;
+        video.stop().then(function (res) {
+            if (res.errMsg && !res.errMsg.includes('ok')) {
+                console.error('failed to stop video player');
+                return;
+            }
+            self._currentTime = 0;
+            video.seek(0);  // ensure to set currentTime by 0 when video is stopped
+            self._playing = false;
+            self._dispatchEvent(_impl.EventType.STOPPED);
+        });
     };
 
     _p.setVolume = function (volume) {
