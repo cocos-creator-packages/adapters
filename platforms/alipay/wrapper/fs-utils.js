@@ -53,7 +53,7 @@ var fsUtils = {
         });
     },
     
-    downloadFile (remoteUrl, filePath, header, onComplete) {
+    downloadFile (remoteUrl, filePath, header, onProgress, onComplete) {
         var options = {
             url: remoteUrl,
             success: function (res) {
@@ -70,7 +70,8 @@ var fsUtils = {
             }
         }
         if (header) options.header = header;
-        return my.downloadFile(options);
+        var task = my.downloadFile(options);
+        onProgress && task.onProgressUpdate(onProgress);
     },
     
     saveFile (srcPath, destPath, onComplete) {

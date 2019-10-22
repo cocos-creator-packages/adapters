@@ -53,7 +53,7 @@ var fsUtils = {
         });
     },
     
-    downloadFile (remoteUrl, filePath, header, onComplete) {
+    downloadFile (remoteUrl, filePath, header, onProgress, onComplete) {
         var options = {
             url: remoteUrl,
             success: function (res) {
@@ -75,7 +75,8 @@ var fsUtils = {
         }
         if (filePath) options.filePath = filePath;
         if (header) options.header = header;
-        return qg.downloadFile(options);
+        var task = qg.downloadFile(options);
+        onProgress && task.onProgressUpdate(onProgress);
     },
     
     saveFile (srcPath, destPath, onComplete) {

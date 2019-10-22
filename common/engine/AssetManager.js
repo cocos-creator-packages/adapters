@@ -61,7 +61,7 @@ function download (url, func, options, onProgress, onComplete) {
         func(result.url, options, onComplete);
     }
     else {
-        var task = downloadFile(url, null, options.header, function (err, path) {
+        downloadFile(url, null, options.header, onProgress, function (err, path) {
             if (err) {
                 onComplete(err, null);
                 return;
@@ -74,7 +74,6 @@ function download (url, func, options, onProgress, onComplete) {
                 onComplete(err, data);
             });
         });
-        onProgress && task.onProgressUpdate(onProgress);
     }
 }
 
