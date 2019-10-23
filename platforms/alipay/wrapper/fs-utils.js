@@ -218,4 +218,4 @@ function exists (filePath, callback) {
     });
 }
 
-module.exports = {fs, getUserDataPath, checkFsValid, readDir, exists, copyFile, downloadFile, readText, readArrayBuffer, saveFile, writeFile, deleteFile, writeFileSync, readJsonSync, makeDirSync};
+window.fsUtils = module.exports = {fs, getUserDataPath, checkFsValid, readDir, exists, copyFile, downloadFile, readText, readArrayBuffer, saveFile, writeFile, deleteFile, writeFileSync, readJsonSync, makeDirSync};
