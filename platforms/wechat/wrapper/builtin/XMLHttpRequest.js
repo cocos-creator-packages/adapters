@@ -89,7 +89,7 @@ export default class XMLHttpRequest extends EventTarget {
     if (this.readyState !== XMLHttpRequest.OPENED) {
       throw new Error("Failed to execute 'send' on 'XMLHttpRequest': The object's state must be OPENED.")
     } else {
-      wx.request({
+      let myRequestTask = wx.request({
         data,
         url: _url.get(this),
         method: _method.get(this),
@@ -146,6 +146,8 @@ export default class XMLHttpRequest extends EventTarget {
           _triggerEvent.call(this, 'loadend')
         }
       })
+
+      _requestTask.set(this, myRequestTask);
     }
   }
 

@@ -24,7 +24,7 @@
  ****************************************************************************/
 
 (function () {
-    if (!(cc && cc.VideoPlayer && cc.VideoPlayer.Impl && !__globalAdapter.createVideo)) {
+    if (!(cc && cc.VideoPlayer && cc.VideoPlayer.Impl && __globalAdapter.createVideo)) {
         return;
     }
 
@@ -75,7 +75,7 @@
             self._duration = res.duration;
             self._currentTime = res.position;
         });
-        // onStop not supported
+        // onStop not supported, implemented in promise returned by video.stop call.
     };
 
     _p._unbindEvent = function () {
@@ -196,13 +196,20 @@
     };
 
     _p.stop = function () {
+        let self = this;
         let video = this._video;
         if (!video || !this._visible) return;
 
-        video.stop();
-
-        this._dispatchEvent(_impl.EventType.STOPPED);
-        this._playing = false;
+        video.stop().then(function (res) {
+            if (res.errMsg && !res.errMsg.includes('ok')) {
+                console.error('failed to stop video player');
+                return;
+            }
+            self._currentTime = 0;
+            video.seek(0);  // ensure to set currentTime by 0 when video is stopped
+            self._playing = false;
+            self._dispatchEvent(_impl.EventType.STOPPED);
+        });
     };
 
     _p.setVolume = function (volume) {
@@ -283,20 +290,20 @@
         }
 
         if (!this._forceUpdate &&
-            this._m00 === _mat4_temp.m00 && this._m01 === _mat4_temp.m01 &&
-            this._m04 === _mat4_temp.m04 && this._m05 === _mat4_temp.m05 &&
-            this._m12 === _mat4_temp.m12 && this._m13 === _mat4_temp.m13 &&
+            this._m00 === _mat4_temp.m[0] && this._m01 === _mat4_temp.m[1] &&
+            this._m04 === _mat4_temp.m[4] && this._m05 === _mat4_temp.m[5] &&
+            this._m12 === _mat4_temp.m[12] && this._m13 === _mat4_temp.m[13] &&
             this._w === node._contentSize.width && this._h === node._contentSize.height) {
             return;
         }
 
         // update matrix cache
-        this._m00 = _mat4_temp.m00;
-        this._m01 = _mat4_temp.m01;
-        this._m04 = _mat4_temp.m04;
-        this._m05 = _mat4_temp.m05;
-        this._m12 = _mat4_temp.m12;
-        this._m13 = _mat4_temp.m13;
+        this._m00 = _mat4_temp.m[0];
+        this._m01 = _mat4_temp.m[1];
+        this._m04 = _mat4_temp.m[4];
+        this._m05 = _mat4_temp.m[5];
+        this._m12 = _mat4_temp.m[12];
+        this._m13 = _mat4_temp.m[13];
         this._w = node._contentSize.width;
         this._h = node._contentSize.height;
 
@@ -307,12 +314,12 @@
 
         let w = this._w * scaleX;
         let h = this._h * scaleY;
-        let appx = (w * _mat4_temp.m00) * node._anchorPoint.x;
-        let appy = (h * _mat4_temp.m05) * (1 - node._anchorPoint.y);  // original point of video is (0, 1)
-        let tx = _mat4_temp.m12 * scaleX - appx, ty = _mat4_temp.m13 * scaleY - appy;
+        let appx = (w * _mat4_temp.m[0]) * node._anchorPoint.x;
+        let appy = (h * _mat4_temp.m[5]) * (1 - node._anchorPoint.y);  // original point of video is (0, 1)
+        let tx = _mat4_temp.m[12] * scaleX - appx, ty = _mat4_temp.m[13] * scaleY - appy;
         // calculate scale
-        w *= _mat4_temp.m00;
-        h *= _mat4_temp.m05;
+        w *= _mat4_temp.m[0];
+        h *= _mat4_temp.m[5];
 
         this._video.x = tx;
         this._video.y = ty;
