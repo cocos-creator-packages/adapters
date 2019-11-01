@@ -48,7 +48,7 @@ Object.assign(game, {
         callback = function () {
             if (!self._paused) {
                 self._intervalId = window.requestAnimFrame(callback);
-                if (_frameRate === 30) {
+                if (_frameRate === 30  && !__globalAdapter.setPreferredFramesPerSecond) {
                     if (skip = !skip) {
                         return;
                     }
@@ -138,6 +138,8 @@ Object.assign(game, {
             game.resume();
         });
     },
+
+    end () { },  // mini game platform not support this api
 });
 
 //  Small game in the screen log
