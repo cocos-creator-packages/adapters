@@ -46,6 +46,46 @@ function loadImage (item) {
     return tex;
 }
 
+function downloadImage (item, callback, isCrossOrigin) {
+    if (isCrossOrigin === undefined) {
+        isCrossOrigin = true;
+    }
+
+    var url = item.url;
+    var img = new Image();
+    if (isCrossOrigin && window.location.protocol !== 'file:') {
+        img.crossOrigin = 'anonymous';
+    }
+    else {
+        img.crossOrigin = null;
+    }
+
+    function loadCallback () {
+        img.removeEventListener('load', loadCallback);
+        img.removeEventListener('error', errorCallback);
+
+        img.id = item.id;
+        callback(null, img);
+    }
+    function errorCallback () {
+        img.removeEventListener('load', loadCallback);
+        img.removeEventListener('error', errorCallback);
+
+        // Retry without crossOrigin mark if crossOrigin loading fails
+        // Do not retry if protocol is https, even if the image is loaded, cross origin image isn't renderable.
+        if (window.location.protocol !== 'https:' && img.crossOrigin && img.crossOrigin.toLowerCase() === 'anonymous') {
+            downloadImage(item, callback, false);
+        }
+        else {
+            callback(new Error(cc.debug.getError(4930, url)));
+        }
+    }
+
+    img.addEventListener('load', loadCallback);
+    img.addEventListener('error', errorCallback);
+    img.src = url;
+}
+
 function downloadAudio (item, callback) {
     if (cc.sys.__audioSupport.format.length === 0) {
         return new Error(debug.getError(4927));
@@ -71,6 +111,15 @@ function loadVideo (item, callback) {
 
 cc.loader.downloader.addHandlers({
     js : downloadScript,
+    png : downloadImage,
+    jpg : downloadImage,
+    bmp : downloadImage,
+    jpeg : downloadImage,
+    gif : downloadImage,
+    ico : downloadImage,
+    tiff : downloadImage,
+    webp : downloadImage,
+    image : downloadImage,
 
     // Audio
     mp3 : downloadAudio,
