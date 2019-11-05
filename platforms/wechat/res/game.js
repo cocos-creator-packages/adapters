@@ -9,7 +9,7 @@ window.__globalAdapter.init(function () {
     // Will be replaced with cocos2d-js path in editor
     require('cocos2d-js-path');
     require('./libs/common/engine/index');
-    // Introduce Cocos Services here
+    // Introduce Cocos Service here
     require('./main');
     require('./libs/common/remote-downloader');
 
