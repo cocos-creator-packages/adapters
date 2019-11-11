@@ -660,7 +660,6 @@ function eventHandlerFactory(type) {
         event.touches = rawEvent.touches;
         event.targetTouches = Array.prototype.slice.call(rawEvent.touches);
         // event.timeStamp = rawEvent.timeStamp
-        console.log(JSON.stringify(event.type));
         _document2.default.dispatchEvent(event);
     };
 }
@@ -1159,7 +1158,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function Image() {
     var image = my.createImage();
     if (!_util.isIDE) {
-        image.__proto__.__proto__ = new _HTMLImageElement2.default();
+        image.__proto__ = new _HTMLImageElement2.default();
         if (image.tagName === undefined) {
             image.tagName = "IMG";
         }
@@ -1666,7 +1665,8 @@ var XMLHttpRequest = function (_EventTarget) {
           fail: function fail(res) {
             var errorMessage = res.errorMessage;
 
-            if (res.data.includes("超时")) {
+            var data = res.data || "";
+            if (data.includes("超时") || errorMessage.includes("超时")) {
               _triggerEvent.call(_this2, 'timeout');
             }
 
