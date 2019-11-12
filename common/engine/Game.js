@@ -138,6 +138,8 @@ Object.assign(game, {
             game.resume();
         });
     },
+
+    end () { },  // mini game platform not support this api
 });
 
 //  Small game in the screen log
