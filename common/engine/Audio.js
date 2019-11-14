@@ -29,6 +29,7 @@ if (Audio) {
 
         stop () {
             if (!this._element) return;
+            // HACK: some platforms won't set currentTime to 0 when stop audio
             this._element.seek(0);
             this._element.stop();
             this._unbindEnded();
