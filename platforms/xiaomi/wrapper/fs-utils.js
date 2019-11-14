@@ -24,197 +24,226 @@
  ****************************************************************************/
 var fs = qg.getFileSystemManager ? qg.getFileSystemManager() : null;
 
-function getUserDataPath () {
-    return qg.env.USER_DATA_PATH;
-}
+var fsUtils = {
 
-function checkFsValid () {
-    if (!fs) {
-        console.warn('can not get the file system!');
-        return new Error('file system does not exist!');
-    }
-    return null;
-}
+    fs,
 
-function deleteFile (filePath, callback) {
-    var result = checkFsValid();
-    if (result) return result;
-    fs.unlink({
-        filePath: filePath,
-        success: function () {
-            cc.log('Removed local file ' + filePath + ' successfully!');
-            callback && callback(null);
-        },
-        fail: function (res) {
-            console.warn(res.errMsg);
-            callback && callback(new Error(res.errMsg));
+    manifestPath: 'manifest.json',
+
+    getUserDataPath () {
+        return qg.env.USER_DATA_PATH;
+    },
+    
+    checkFsValid () {
+        if (!fs) {
+            console.warn('can not get the file system!');
+            return false;
         }
-    });
-}
-
-function downloadFile (remoteUrl, filePath, callback) {
-    qg.downloadFile({
-        url: remoteUrl,
-        filePath: filePath,
-        success: function (res) {
-            if (res.statusCode === 200) {
-                callback && callback(null, res.tempFilePath || res.filePath);
+        return true;
+    },
+    
+    deleteFile (filePath, onComplete) {
+        fs.unlink({
+            filePath: filePath,
+            success: function () {
+                onComplete && onComplete(null);
+            },
+            fail: function (res) {
+                cc.warn('Delete file failed: ' + res.errMsg);
+                onComplete && onComplete(new Error(res.errMsg));
             }
-            else {
-                if (res.filePath) {
-                    deleteFile(res.filePath);
+        });
+    },
+    
+    downloadFile (remoteUrl, filePath, header, onProgress, onComplete) {
+        var options = {
+            url: remoteUrl,
+            success: function (res) {
+                if (res.statusCode === 200) {
+                    onComplete && onComplete(null, res.tempFilePath || res.filePath);
                 }
-                console.warn("Download file failed: " + remoteUrl);
-                callback && callback(new Error(res.errMsg), null);
+                else {
+                    if (res.filePath) {
+                        fsUtils.deleteFile(res.filePath);
+                    }
+                    cc.warn('Download file failed: ' + res.statusCode);
+                    onComplete && onComplete(new Error(res.statusCode), null);
+                }
+            },
+            fail: function (res) {
+                cc.warn('Download file failed: ' + res.errMsg);
+                onComplete && onComplete(new Error(res.errMsg), null);
             }
-        },
-        fail: function (res) {
-            console.warn(res.errMsg);
-            callback && callback(new Error(res.errMsg), null);
         }
-    });
-}
-
-function saveFile (srcPath, destPath, callback) {
-    qg.saveFile({
-        tempFilePath: srcPath,
-        filePath: destPath,
-        success: function (res) {
-            cc.log('save file finished:' + destPath);
-            callback && callback(null, res.savedFilePath);
-        },
-        fail: function (res) {
-            cc.log('save file failed:' + res.errMsg);
-            callback && callback(new Error(res.errMsg), null);
+        if (filePath) options.filePath = filePath;
+        if (header) options.header = header;
+        var task = qg.downloadFile(options);
+        onProgress && task.onProgressUpdate(onProgress);
+    },
+    
+    saveFile (srcPath, destPath, onComplete) {
+        qg.saveFile({
+            tempFilePath: srcPath,
+            filePath: destPath,
+            success: function (res) {
+                onComplete && onComplete(null);
+            },
+            fail: function (res) {
+                cc.warn('Save file failed: ' + res.errMsg);
+                onComplete && onComplete(new Error(res.errMsg));
+            }
+        });
+    },
+    
+    copyFile (srcPath, destPath, onComplete) {
+        fs.copyFile({
+            srcPath: srcPath,
+            destPath: destPath,
+            success: function () {
+                onComplete && onComplete(null);
+            },
+            fail: function (res) {
+                cc.warn('Copy file failed: ' + res.errMsg);
+                onComplete && onComplete(new Error(res.errMsg));
+            }
+        });
+    },
+    
+    writeFile (path, data, encoding, onComplete) {
+        fs.writeFile({
+            filePath: path,
+            encoding: encoding,
+            data: data,
+            success: function () {
+                onComplete && onComplete(null);
+            },
+            fail: function (res) {
+                cc.warn('Write file failed: ' + res.errMsg);
+                onComplete && onComplete(new Error(res.errMsg));
+            }
+        });
+    },
+    
+    writeFileSync (path, data, encoding) {
+        try {
+            fs.writeFileSync(path, data, encoding);
+            return null;
         }
-    });
-}
-
-function copyFile (srcPath, destPath, callback) {
-    var result = checkFsValid();
-    if (result) return result;
-    fs.copyFile({
-        srcPath: srcPath,
-        destPath: destPath,
-        success: function () {
-            cc.log('copy file finished:' + destPath);
-            callback && callback(null);
-        },
-        fail: function (res) {
-            cc.log('copy file failed:' + res.errMsg);
-            callback && callback(new Error(res.errMsg));
+        catch (e) {
+            cc.warn('Write file failed: ' + e.message);
+            return new Error(e.message);
         }
-    });
-}
+    },
+    
+    readFile (filePath, encoding, onComplete) {
+        fs.readFile({
+            filePath: filePath,
+            encoding: encoding,
+            success: function (res) {
+                onComplete && onComplete(null, res.data);
+            },
+            fail: function (res) {
+                cc.warn('Read file failed: ' + res.errMsg);
+                onComplete && onComplete (new Error(res.errMsg), null);
+            }
+        });
+    },
+    
+    readDir (filePath, callback) {
+        fs.readdir({
+            dirPath: filePath,
+            success: function (res) {
+                onComplete && onComplete(null, res.files);
+            },
+            fail: function (res) {
+                cc.warn('Read directory failed: ' + res.errMsg);
+                onComplete && onComplete(new Error(res.errMsg), null);
+            }
+        });
+    },
+    
+    readText (filePath, onComplete) {
+        fsUtils.readFile(filePath, 'utf8', onComplete);
+    },
+    
+    readArrayBuffer (filePath, onComplete) {
+        fsUtils.readFile(filePath, '', onComplete);
+    },
 
-function writeFile (path, data, encoding, callback) {
-    var result = checkFsValid();
-    if (result) return result;
-    fs.writeFile({
-        filePath: path,
-        encoding: encoding,
-        data: data,
-        success: callback ? function () {
-            callback(null);
-        } : undefined,
-        fail: function (res) {
-            console.warn(res.errMsg);
-            callback && callback(new Error(res.errMsg));
+    readJson (filePath, onComplete) {
+        fsUtils.readFile(filePath, 'utf8', function (err, text) {
+            var out = null;
+            if (!err) {
+                try {
+                    out = JSON.parse(text);
+                }
+                catch (e) {
+                    cc.warn('Read json failed: ' + e.message);
+                    err = new Error(e.message);
+                }
+            }
+            onComplete && onComplete(err, out);
+        });
+    },
+    
+    readJsonSync (path) {
+        try {
+            var str = fs.readFileSync(path, 'utf8');
+            return JSON.parse(str);
         }
-    });
-}
-
-function writeFileSync (path, data, encoding) {
-    var result = checkFsValid();
-    if (result) return result;
-    try {
-        fs.writeFileSync(path, data, encoding);
-        return null;
-    }
-    catch (e) {
-        console.warn(e.message);
-        return new Error(e.message);
-    }
-}
-
-function readFile (filePath, encoding, callback) {
-    var result = checkFsValid();
-    if (result) return result;
-    fs.readFile({
-        filePath: filePath,
-        encoding: encoding,
-        success: callback ? function (res) {
-            callback(null, res.data);
-        } : undefined,
-        fail: function (res) {
-            console.warn(res.errMsg);
-            callback && callback (new Error(res.errMsg), null);
+        catch (e) {
+            cc.warn('Read json failed: ' + e.message);
+            return new Error(e.message);
         }
-    });
-}
+    },
+    
+    makeDirSync (path, recursive) {
+        try {
+            fs.mkdirSync(path, recursive);
+            return null;
+        }
+        catch (e) {
+            cc.warn('Make directory failed: ' + e.message);
+            return new Error(e.message);
+        }
+    },
 
-function readDir (filePath, callback) {
-    var result = checkFsValid();
-    if (result) {
-        return result;
+    rmdirSync (dirPath, recursive) {
+        try {
+            fs.rmdirSync(dirPath, recursive);
+        }
+        catch (e) {
+            cc.warn('rm directory failed: ' + e.message);
+            return new Error(e.message);
+        }
+    },
+    
+    exists (filePath, onComplete) {
+        fs.access({
+            path: filePath,
+            success: function () {
+                onComplete && onComplete(true);
+            },
+            fail: function () {
+                onComplete && onComplete(false);
+            }
+        });
+    },
+
+    loadSubpackage (name, onProgress, onComplete) {
+        var task = qg.loadSubpackage({
+            name: name,
+            success: function () {
+                onComplete && onComplete();
+            },
+            fail: function (res) {
+                cc.warn('Load Subpackage failed: ' + res.errMsg);
+                onComplete && onComplete(new Error(`Failed to load subpackage ${name}: ${res.errMsg}`));
+            }
+        });
+        onProgress && task.onProgressUpdate(onProgress);
+        return task;
     }
-    fs.readdir({
-        dirPath: filePath,
-        success: callback ? function (res) {
-            callback(null, res.files);
-        } : undefined,
-        fail: callback ? function (res) {
-            callback(new Error(res.errMsg), null);
-        } : undefined
-    });
-}
+};
 
-function readText (filePath, callback) {
-    return readFile(filePath, 'utf8', callback);
-}
-
-function readArrayBuffer (filePath, callback) {
-    return readFile(filePath, '', callback);
-}
-
-function readJsonSync (path) {
-    var result = checkFsValid();
-    if (result) return result;
-    try {
-        var str = fs.readFileSync(path, 'utf8');
-        return JSON.parse(str);
-    }
-    catch (e) {
-        console.warn(e.message);
-        return new Error(e.message);
-    }
-}
-
-function makeDirSync (path, recursive) {
-    var result = checkFsValid();
-    if (result) return result;
-    try {
-        fs.mkdirSync(path, recursive);
-        return null;
-    }
-    catch (e) {
-        console.warn(e.message);
-        return new Error(e.message);
-    }
-}
-
-function exists (filePath, callback) {
-    var result = checkFsValid();
-    if (result) return result;
-    fs.access({
-        path: filePath,
-        success: callback ? function () {
-            callback(true);
-        } : undefined,
-        fail: callback ? function () {
-            callback(false);
-        } : undefined,
-    });
-}
-
-window.fsUtils = module.exports = {fs, getUserDataPath, checkFsValid, readDir, exists, copyFile, downloadFile, readText, readArrayBuffer, saveFile, writeFile, deleteFile, writeFileSync, readJsonSync, makeDirSync};
+cc.assetManager.fsUtils = module.exports = fsUtils;
