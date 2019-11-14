@@ -29,8 +29,8 @@ if (Audio) {
 
         stop () {
             if (!this._element) return;
-            this._element.pause();
             this._element.seek(0);
+            this._element.stop();
             this._unbindEnded();
             this.emit('stop');
             this._state = Audio.State.STOPPED;
