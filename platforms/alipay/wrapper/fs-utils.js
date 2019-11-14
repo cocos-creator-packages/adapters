@@ -28,13 +28,15 @@ var fsUtils = {
 
     fs,
 
+    manifestPath: 'game.json',
+
     getUserDataPath () {
         return my.env.USER_DATA_PATH;
     },
     
     checkFsValid () {
         if (!fs) {
-            console.warn('can not get the file system!');
+            console.warn('Can not get the file system!');
             return false;
         }
         return true;
@@ -234,7 +236,7 @@ var fsUtils = {
     },
 
     loadSubpackage (name, onProgress, onComplete) {
-        throw new Error('xiaomi does not support loadSubpackage');
+        throw new Error('Not Implemented');
     }
 };
 

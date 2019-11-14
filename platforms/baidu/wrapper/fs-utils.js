@@ -28,6 +28,8 @@ var fsUtils = {
 
     fs,
 
+    manifestPath: 'game.json',
+
     getUserDataPath () {
         return swan.env.USER_DATA_PATH;
     },

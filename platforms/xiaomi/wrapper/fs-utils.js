@@ -28,6 +28,8 @@ var fsUtils = {
 
     fs,
 
+    manifestPath: 'manifest.json',
+
     getUserDataPath () {
         return qg.env.USER_DATA_PATH;
     },

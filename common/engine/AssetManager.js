@@ -1,5 +1,5 @@
 const cacheManager = require('../cache-manager');
-const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, readJsonSync } = require('../../wrapper/fs-utils');
+const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, readJsonSync, manifestPath } = require('../../wrapper/fs-utils');
 
 const REGEX = /^\w+:\/\/.*/;
 
@@ -14,7 +14,7 @@ function downloadScript (url, options, onComplete) {
         options = null;
     }
     if (REGEX.test(url)) {
-        onComplete && onComplete(new Error('WeChat does not support loading remote scripts'));
+        onComplete && onComplete(new Error('Can not load remote scripts'));
     }
     else {
         require('../../../' + url);
@@ -208,16 +208,18 @@ var transformUrl = !isSubDomain ? function (url, options) {
     var inLocal = false;
     var inCache = false;
     if (REGEX.test(url)) {
-        var cache = cacheManager.cachedFiles.get(url);
-        if (!options.reload && cache) {
-            inCache = true;
-            url = cache.url;
-        }
-        else {
-            var tempUrl = cacheManager.tempFiles.get(url);
-            if (tempUrl) { 
-                inLocal = true;
-                url = tempUrl;
+        if (!options.reload) {
+            var cache = cacheManager.cachedFiles.get(url);
+            if (cache) {
+                inCache = true;
+                url = cache.url;
+            }
+            else {
+                var tempUrl = cacheManager.tempFiles.get(url);
+                if (tempUrl) { 
+                    inLocal = true;
+                    url = tempUrl;
+                }
             }
         }
     }
@@ -280,7 +282,7 @@ if (!isSubDomain) {
         originInit.call(cc.assetManager, options);
         cacheManager.init();
     };
-    var content = readJsonSync('game.json');
+    var content = readJsonSync(manifestPath);
     if (content.subpackages) {
         for (var i = 0, l = content.subpackages.length; i < l; i++) {
             subpackages.add(content.subpackages[i].root, content.subpackages[i]);

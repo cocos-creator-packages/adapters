@@ -28,6 +28,8 @@ var fsUtils = {
 
     fs,
 
+    manifestPath: 'game.json',
+
     getUserDataPath () {
         return wx.env.USER_DATA_PATH;
     },
