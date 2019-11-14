@@ -14,13 +14,15 @@ let systemInfo = {
         sys.languageCode = env.language.toLowerCase();
         var system = env.system.toLowerCase();
 
-        if (env.platform === "android") {
+        let platform = env.platform;
+        platform = platform.toLowerCase();
+        if (platform === "android") {
             sys.os = sys.OS_ANDROID;
         }
-        else if (env.platform === "ios") {
+        else if (platform === "ios") {
             sys.os = sys.OS_IOS;
         }
-        else if (env.platform === 'devtools') {
+        else if (platform === 'devtools') {
             sys.isMobile = false;
             if (system.indexOf('android') > -1) {
                 sys.os = sys.OS_ANDROID;
