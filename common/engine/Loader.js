@@ -83,7 +83,7 @@ function downloadImage (item, callback, isCrossOrigin) {
 
 function downloadAudio (item, callback) {
     if (cc.sys.__audioSupport.format.length === 0) {
-        return new Error(debug.getError(4927));
+        return new Error(cc.debug.getError(4927));
     }
 
     var dom = document.createElement('audio');
