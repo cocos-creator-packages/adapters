@@ -11,7 +11,7 @@ cc.loader.downloader.loadSubpackage = function (name, completeCallback) {
 
 function downloadAudio (item, callback) {
     if (cc.sys.__audioSupport.format.length === 0) {
-        return new Error(debug.getError(4927));
+        return new Error(cc.debug.getError(4927));
     }
 
     let audio = my.createInnerAudioContext();
