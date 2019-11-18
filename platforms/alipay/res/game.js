@@ -9,6 +9,7 @@ window.__globalAdapter.init(function () {
     require(window._CCSettings.debug ? 'cocos2d-js' : 'cocos2d-js-min');
     require('./libs/common/engine');
     require('./libs/wrapper/engine');
+    // Introduce Cocos Service here
     require('./main');
     require('./libs/common/remote-downloader');
 
