@@ -13,6 +13,8 @@ if (window.__globalAdapter) {
 
     // Audio
     utils.cloneMethod(globalAdapter, wx, 'createInnerAudioContext');
+    utils.cloneMethod(globalAdapter, wx, 'offAudioInterruptionBegin');
+    utils.cloneMethod(globalAdapter, wx, 'offAudioInterruptionEnd');
 
     // Video
     utils.cloneMethod(globalAdapter, wx, 'createVideo');
@@ -84,7 +86,7 @@ if (window.__globalAdapter) {
                         x = -y;
                         y = tmp;
                     }
-                    
+
                     resClone.x = x * deviceOrientation;
                     resClone.y = y * deviceOrientation;
                     resClone.z = res.z;
