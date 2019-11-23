@@ -1,5 +1,6 @@
 const AudioClip = cc.AudioClip;
-const AudioPlayerMini = cc.AudioPlayer;
+const AudioPlayerMini = require('./AudioPlayer');
+
 
 if(AudioClip && AudioPlayerMini) {
     Object.assign(AudioClip.prototype, {

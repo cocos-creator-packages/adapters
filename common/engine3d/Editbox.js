@@ -1,5 +1,3 @@
-// 使用原本的editbox
-
 (function () {
     if (!(cc && cc.EditBoxComponent)) {
         return;

@@ -1,18 +1,20 @@
-cc.loader.downloader.loadSubpackage = function (name, progressCallback, completeCallback) { //  子包加载有差异
-    if (!completeCallback && progressCallback) {
-        completeCallback = progressCallback;
-        progressCallback = null;
-    }
-    var loadTask = __globalAdapter.loadSubpackage({
+cc.loader.downloader.loadSubpackage = function(name, completeCallback) { // 子包处理略有差异
+    wx.loadSubpackage({
         name: name,
-        success: function () {
-            if (completeCallback) completeCallback();
+        success: function() {
+            Promise.all(packageModuleIds.map((id) => {
+                return ccEnv.imp(id);
+            })).then(() => {
+                if (completeCallback) { completeCallback(); }
+            }).catch((error) => {
+                console.error(error);
+                if (completeCallback) { completeCallback(new Error(`Failed to load subpackage ${name}`)); }
+            });
         },
-        fail: function () {
-            if (completeCallback) completeCallback(new Error(`Failed to load subpackage ${name}`));
-        }
+        fail: function() {
+            if (completeCallback) { completeCallback(new Error(`Failed to load subpackage ${name}`)); }
+        },
     });
-    progressCallback && loadTask.onProgressUpdate(progressCallback);
 };
 
 function downloadScript (item, callback, isAsync) {

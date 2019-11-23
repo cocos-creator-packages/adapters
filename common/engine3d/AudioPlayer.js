@@ -123,3 +123,5 @@ class AudioPlayerMini extends AudioPlayer {
         super.destroy();
     }
 }
+
+module.exports = AudioPlayerMini;

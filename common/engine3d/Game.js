@@ -90,7 +90,7 @@ Object.assign(game, {
             }
         }
 
-        if (hiddenPropName!) {
+        if (hiddenPropName) {
             const changeList = [
                 'visibilitychange',
                 'mozvisibilitychange',
