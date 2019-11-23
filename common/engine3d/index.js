@@ -1,10 +1,8 @@
-require('./Audio');
-require('./AudioEngine');
+require('./Audioclip');
+require('./AudioPlayer');
 require('./DeviceMotionEvent');
 require('./Editbox');
 require('./Game');
 require('./InputManager');
 require('./Loader');
 require('./Screen');
-require('./Texture2D');
-require('./VideoPlayer');
