@@ -243,7 +243,7 @@ cc.assetManager.loadBundle = function (root, options, onComplete) {
         }
         options = options || {};
         
-        loadSubpackage(root, options.onProgress, function (err) {
+        loadSubpackage(subpackages.get(root), options.onProgress, function (err) {
             if (err) {
                 onComplete && onComplete(err, null);
                 return;
@@ -285,7 +285,7 @@ if (!isSubDomain) {
     var content = readJsonSync(manifestPath);
     if (content.subpackages) {
         for (var i = 0, l = content.subpackages.length; i < l; i++) {
-            subpackages.add(content.subpackages[i].root, content.subpackages[i]);
+            subpackages.add(content.subpackages[i].root, content.subpackages[i].name);
         }
     }
 }
