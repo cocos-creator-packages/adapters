@@ -1,12 +1,16 @@
 import * as window from './window'
 import HTMLElement from './HTMLElement'
 import HTMLVideoElement from './HTMLVideoElement'
+import HTMLScriptElement from './HTMLScriptElement'
 import Image from './Image'
 import Audio from './Audio'
 import Canvas from './Canvas'
 import './EventIniter/index.js'
 
-const events = {}
+const events = {};
+const scripts = [];
+const queryScriptsRegex = /script\[type=\"(.*)\"\]/;
+const queryScriptSrcRegex = /script\[type=\"(.*)\"\]\[src\]/;
 
 const document = {
   readyState: 'complete',
@@ -31,6 +35,10 @@ const document = {
       return new Image()
     }else if (tagName === 'video') {
       return new HTMLVideoElement()
+    } else if (tagName === 'script') {
+      const scriptElement = new HTMLScriptElement();
+      scripts.push(scriptElement);
+      return scriptElement;
     }
 
     return new HTMLElement(tagName)
@@ -89,6 +97,16 @@ const document = {
       return [document.body]
     } else if (query === 'canvas') {
       return [window.canvas]
+    } else {
+      let match = queryScriptsRegex.exec(query);
+      if (match) {
+          return scripts.filter((script) => script.type === match[1]);
+      }
+
+      match = queryScriptSrcRegex.exec(query);
+      if (match) {
+        return scripts.filter((script) => script.type === match[1]).map((script) => script.src);
+      }
     }
     return []
   },
@@ -122,6 +140,12 @@ const document = {
       }
     }
   }
+}
+
+if (!window.fetch) {
+    window.fetch = (url) => {
+        throw new Error(`fetch() has not been implemented yet.`);
+    };
 }
 
 export default document
