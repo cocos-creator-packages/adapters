@@ -62,8 +62,8 @@ Object.assign(game, {
     },
 
     _initEvents () {
-        win = window;
-        hiddenPropName;
+        let win = window;
+        let hiddenPropName;
 
         if (typeof document.hidden !== 'undefined') {
             hiddenPropName = 'hidden';
@@ -136,10 +136,10 @@ Object.assign(game, {
             document.addEventListener('pageshow', onShown);
         }
 
-        this.on(Game.EVENT_HIDE, () => {
+        this.on(cc.Game.EVENT_HIDE, () => {
             cc.game.pause();
         });
-        this.on(Game.EVENT_SHOW, () => {
+        this.on(cc.Game.EVENT_SHOW, () => {
             cc.game.resume();
         });
     },
@@ -152,7 +152,7 @@ Object.assign(game, {
 
         this.onStart = onStart;
 
-        SplashScreen.instance.main(this._gfxDevice);
+        cc.SplashScreen.instance.main(this._gfxDevice);
 
         this.prepare(cc.game.onStart && cc.game.onStart.bind(cc.game));
     },
@@ -170,13 +170,13 @@ Object.assign(game, {
             this._setAnimFrame();
             this._runMainLoop();
 
-            this.emit(Game.EVENT_GAME_INITED);
+            this.emit(cc.Game.EVENT_GAME_INITED);
 
             if (cb) { cb(); }
         };
 
-        SplashScreen.instance.setOnFinish(start);
-        SplashScreen.instance.loadFinish = true;
+        cc.SplashScreen.instance.setOnFinish(start);
+        cc.SplashScreen.instance.loadFinish = true;
     },
 
 

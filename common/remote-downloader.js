@@ -46,17 +46,17 @@ function RemoteDownloader () {
 RemoteDownloader.ID = ID;
 
 RemoteDownloader.prototype.init = function () {
-    if (!isSubContext) {
+    if (!__globalAdapter.isSubContext) {
         this.cacheDir = fsUtils.getUserDataPath() + '/gamecaches';
         this.cachedFileName = 'cacheList.json';
         // whether or not cache asset into user's storage space
         this.cacheAsset = true;
         // cache one per cycle
-        this.cachePeriod = 500;
+        this.cachePeriod = 100;
         // whether or not storage space is run out of
         this.outOfStorage = false;
 
-        this.writeFilePeriod = 2000;
+        this.writeFilePeriod = 1000;
 
         cacheQueue = {};
         packageFiles = {};
@@ -90,7 +90,7 @@ RemoteDownloader.prototype.handle = function (item, callback) {
         }
     }
 
-    if (isSubContext) {
+    if (__globalAdapter.isSubContext) {
         // if getFileSystemManager interface is undefined, need to skip
         if (REGEX.test(item.url)) {
             return null;
@@ -103,7 +103,25 @@ RemoteDownloader.prototype.handle = function (item, callback) {
         return;
     }
 
-    readFromLocal(item, callback);
+    // readFromLocal(item, callback);
+    function seek (inPackage) {
+        if (inPackage) {
+            handleItem(item, callback);
+        }
+        else {
+            readFromLocal(item, callback);
+        }
+    }
+
+    if (item.url in packageFiles) {
+        seek(packageFiles[item.url]);
+    }
+    else {
+        fsUtils.exists(item.url, function (existance) {
+            packageFiles[item.url] = existance;
+            seek(existance);
+        });
+    }
 };
 
 RemoteDownloader.prototype.cleanOldAssets = function () {
@@ -147,11 +165,9 @@ RemoteDownloader.prototype.cleanCache = function (filePath) {
     if (filePath in cachedFiles) {
         var self = this;
         delete cachedFiles[filePath];
-        writeCacheFile(function () {
-            if (filePath in cachedFiles) return;
-            fsUtils.deleteFile(self.cacheDir + '/' + filePath, function (err) {
-                if (!err) self.outOfStorage = false;
-            });
+        fsUtils.writeFileSync(this.cacheDir + '/' + this.cachedFileName, JSON.stringify(cachedFiles), 'utf8');
+        fsUtils.deleteFile(this.cacheDir + '/' + filePath, function (err) {
+            if (!err) self.outOfStorage = false;
         });
     }
 };
@@ -183,26 +199,15 @@ RemoteDownloader.prototype.cleanAllCaches = function (exclude, callback) {
             delete cachedFiles[path];
             toDelete.push(path);
         }
-        writeCacheFile(function () {
-            var count = 0;
-            for (var i = 0, l = toDelete.length; i < l; i ++) {
-                if (toDelete[i] in cachedFiles) {
-                    count++;
-                    if (count === l) {
-                        self.outOfStorage = false;
-                        callback && callback(null);
-                    }
-                    continue;
-                }
-                fsUtils.deleteFile(self.cacheDir + '/' + toDelete[i], function (err) {
-                    count++;
-                    if (count === l) {
-                        self.outOfStorage = false;
-                        callback && callback(null);
-                    }
-                });
-            }
-        });
+        fsUtils.writeFileSync(self.cacheDir + '/' + self.cachedFileName, JSON.stringify(cachedFiles), 'utf8');
+        var count = 0;
+        for (var i = 0, l = toDelete.length; i < l; i ++) {
+            fsUtils.deleteFile(self.cacheDir + '/' + toDelete[i], function (err) {
+                if (!err) self.outOfStorage = false;
+                count++;
+                if (count === l) callback && callback(null);
+            })
+        }
     });
     if (result) callback(result);
 };
@@ -251,37 +256,21 @@ function readFromLocal (item, callback) {
     }
 
     var cachedPath = remoteDownloader.getCacheName(item.url);
+    var localPath = remoteDownloader.cacheDir + '/' + cachedPath;
 
     if (cachedPath in cachedFiles) {
         // cache new asset
         _newAssets[cachedPath] = true;
-        item.url = remoteDownloader.cacheDir + '/' + cachedPath;
+        item.url = localPath;
         registerFailHandler(item, cachedPath);
         handleItem(item, callback);
     }
     else {
-        function seek (inPackage) {
-            if (inPackage) {
-                handleItem(item, callback);
-            }
-            else {
-                if (!remoteDownloader.REMOTE_SERVER_ROOT) {
-                    callback(null, null);
-                    return;
-                }
-                downloadRemoteFile(item, callback);
-            }
+        if (!remoteDownloader.REMOTE_SERVER_ROOT) {
+            callback(null, null);
+            return;
         }
-    
-        if (item.url in packageFiles) {
-            seek(packageFiles[item.url]);
-        }
-        else {
-            fsUtils.exists(item.url, function (existance) {
-                packageFiles[item.url] = existance;
-                seek(existance);
-            });
-        }
+        downloadRemoteFile(item, callback);
     }
 }
 
@@ -291,36 +280,29 @@ function cacheFile (url, isCopy, cachePath) {
     if (!checkNextPeriod) {
         checkNextPeriod = true;
         function cache () {
+            checkNextPeriod = false;
             for (var srcUrl in cacheQueue) {
                 if (!remoteDownloader.outOfStorage) {
                     var item = cacheQueue[srcUrl]
                     var localPath = remoteDownloader.cacheDir + '/' + item.cachePath;
                     var func = fsUtils.copyFile;
-                    if (!item.isCopy) func = fsUtils.downloadFile; 
+                    if (!item.isCopy) func = fsUtils.downloadFile;
                     func(srcUrl, localPath, function (err) {
-                        checkNextPeriod = false;
                         if (err)  {
-                            if (errTest.test(err.message)) {
-                                remoteDownloader.outOfStorage = true;
-                                return;
-                            }
-                        } else {
-                            cachedFiles[item.cachePath] = 1;
-                            delete cacheQueue[srcUrl];
-                            writeCacheFile();
+                            errTest.test(err.message) && (remoteDownloader.outOfStorage = true);
+                            return;
                         }
-                        if (!cc.js.isEmptyObject(cacheQueue)) {
+                        cachedFiles[item.cachePath] = 1;
+                        writeCacheFile();
+                        if (!isEmptyObject(cacheQueue) && !checkNextPeriod) {
                             checkNextPeriod = true;
                             setTimeout(cache, remoteDownloader.cachePeriod);
                         }
                     });
-                }
-                else {
-                    checkNextPeriod = false;
+                    delete cacheQueue[srcUrl];
                 }
                 return;
             }
-            checkNextPeriod = false;
         };
         setTimeout(cache, remoteDownloader.cachePeriod);
     }
@@ -360,37 +342,15 @@ function downloadRemoteFile (item, callback) {
             handleItem(item, callback);
         });
     }
-    
+
 }
 
-var callbacks = [];
-var nextCallbacks = [];
-var startWrite = false;
-function writeCacheFile (cb) {
+function writeCacheFile () {
     function write () {
         writeCacheFileList = null;
-        startWrite = true;
-        fsUtils.writeFile(remoteDownloader.cacheDir + '/' + remoteDownloader.cachedFileName, JSON.stringify(cachedFiles), 'utf8', function () {
-            startWrite = false;
-            for (let i = 0, j = callbacks.length; i < j; i++) {
-                callbacks[i]();
-            }
-            callbacks.length = 0;
-            callbacks.push.apply(callbacks, nextCallbacks);
-            nextCallbacks.length = 0;
-        });
+        fsUtils.writeFile(remoteDownloader.cacheDir + '/' + remoteDownloader.cachedFileName, JSON.stringify(cachedFiles), 'utf8');
     }
-    if (!writeCacheFileList) {
-        writeCacheFileList = setTimeout(write, remoteDownloader.writeFilePeriod);
-        if (startWrite === true) {
-            cb && nextCallbacks.push(cb);
-        }
-        else {
-            cb && callbacks.push(cb);
-        }
-    } else {
-        cb && callbacks.push(cb);
-    }
+    !writeCacheFileList && (writeCacheFileList = setTimeout(write, remoteDownloader.writeFilePeriod));
 }
 
 function shouldReadFile (type) {
@@ -401,16 +361,22 @@ function getFileType (type) {
     return (map[type] || FileType.DEFAULT);
 }
 
+function isEmptyObject (obj) {
+    for (var key in obj) {
+      return false;
+    }
+    return true;
+  }
+
 var FileType = {
     'IMAGE': 1,
     'FONT': 2,
     'AUDIO': 3,
     'SCRIPT': 4,
-    'VIDEO': 5,
-    'TEXT': 6,
-    'BIN': 7,
-    'DEFAULT': 8,
-    'LOADABLE_MIN': 6
+    'TEXT': 5,
+    'BIN': 6,
+    'DEFAULT': 7,
+    'LOADABLE_MIN': 5
 };
 
 var map = {

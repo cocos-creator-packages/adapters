@@ -1,4 +1,4 @@
-cc.loader.downloader.loadSubpackage = function(name, completeCallback) { // 子包处理略有差异
+cc.loader.downloader.loadSubpackage = function(name, completeCallback) {
     wx.loadSubpackage({
         name: name,
         success: function() {
@@ -96,9 +96,16 @@ function downloadAudio (item, callback) {
     loadMiniAudio(item, callback);
 }
 
+const AudioPlayerMini = require('./AudioPlayer');
+
 function loadMiniAudio (item, callback) {
     const clip = __globalAdapter.createInnerAudioContext();
     clip.src = item.url;
+    item._owner._getPlayer = function (clip) {
+        let ctor = AudioPlayerMini;
+        this._loadMode = 2;
+        return ctor;
+    };
     clip.onCanplay(() => callback(null, clip));
 }
 
