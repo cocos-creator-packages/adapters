@@ -1,32 +1,44 @@
 import Canvas from './Canvas'
 
-export navigator from './navigator'
-export XMLHttpRequest from './XMLHttpRequest'
-export WebSocket from './WebSocket'
-export Image from './Image'
-export ImageBitmap from './ImageBitmap'
-export Audio from './Audio'
-export FileReader from './FileReader'
-export HTMLElement from './HTMLElement'
-export HTMLImageElement from './HTMLImageElement'
-export HTMLCanvasElement from './HTMLCanvasElement'
-export HTMLMediaElement from './HTMLMediaElement'
-export HTMLAudioElement from './HTMLAudioElement'
-export HTMLVideoElement from './HTMLVideoElement'
-export WebGLRenderingContext from './WebGLRenderingContext'
+export { default as navigator} from './navigator'
+export { default as XMLHttpRequest} from './XMLHttpRequest'
+export { default as WebSocket} from './WebSocket'
+export { default as Image} from './Image'
+export { default as ImageBitmap} from './ImageBitmap'
+export { default as Audio} from './Audio'
+export { default as FileReader} from './FileReader'
+export { default as HTMLElement} from './HTMLElement'
+export { default as HTMLImageElement} from './HTMLImageElement'
+export { default as HTMLCanvasElement} from './HTMLCanvasElement'
+export { default as HTMLMediaElement} from './HTMLMediaElement'
+export { default as HTMLAudioElement} from './HTMLAudioElement'
+export { default as HTMLVideoElement} from './HTMLVideoElement'
+export { default as WebGLRenderingContext} from './WebGLRenderingContext'
 export { TouchEvent, MouseEvent, DeviceMotionEvent } from './EventIniter/index.js'
-export localStorage from './localStorage'
-export location from './location'
+export { default as localStorage} from './localStorage'
+export { default as location} from './location'
 export * from './WindowProperties'
 
 // 暴露全局的 canvas
 GameGlobal.screencanvas = GameGlobal.screencanvas || new Canvas()
 const canvas = GameGlobal.screencanvas;
 
-export { canvas }
-export { setTimeout }
-export { setInterval }
-export { clearTimeout }
-export { clearInterval }
-export { requestAnimationFrame }
-export { cancelAnimationFrame }
+const {
+    setTimeout,
+    setInterval,
+    clearTimeout,
+    clearInterval,
+    requestAnimationFrame,
+    cancelAnimationFrame,
+} = window;
+
+
+export {
+    canvas,
+    setTimeout,
+    setInterval,
+    clearTimeout,
+    clearInterval,
+    requestAnimationFrame,
+    cancelAnimationFrame,
+};

@@ -20,18 +20,18 @@ class AudioPlayerMini extends AudioPlayer {
         this._audio.play();
         this._audio.stop();
 
-        this._audio.onPlay(function () {
+        this._audio.onPlay(() => {
             if (this._state === PlayingState.PLAYING) { return; }
             this._state = PlayingState.PLAYING;
             this._startTime = performance.now();
             this._eventTarget.emit('started');
         });
-        this._audio.onPause(function () {
+        this._audio.onPause(() => {
             if (this._state === PlayingState.STOPPED) { return; }
             this._state = PlayingState.STOPPED;
             this._offset += performance.now() - this._startTime;
         });
-        this._audio.onStop(function () {
+        this._audio.onStop(() => {
             if (this._state === PlayingState.STOPPED) { return; }
             this._state = PlayingState.STOPPED;
             this._offset = 0;
@@ -41,7 +41,7 @@ class AudioPlayerMini extends AudioPlayer {
                 this._oneShoting = false;
             }
         });
-        this._audio.onEnded(function () {
+        this._audio.onEnded(() => {
             if (this._state === PlayingState.STOPPED) { return; }
             this._state = PlayingState.STOPPED;
             this._offset = 0;
@@ -124,4 +124,4 @@ class AudioPlayerMini extends AudioPlayer {
     }
 }
 
-module.exports = AudioPlayerMini;
+export default AudioPlayerMini;
