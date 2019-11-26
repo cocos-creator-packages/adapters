@@ -74,7 +74,7 @@ class AudioPlayerMini extends AudioPlayer {
     playOneShot (volume) {
         /* InnerAudioContext doesn't support multiple playback at the
            same time so here we fall back to re-start style approach */
-        if (volume === undefine) { volume = 1; }
+        if (volume === undefined) { volume = 1; }
         if (!this._audio) { return; }
         this._offset = 0;
         this._oneShoting = true;

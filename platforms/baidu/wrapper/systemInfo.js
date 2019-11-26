@@ -1,4 +1,4 @@
-const systemInfo = require('../common/engine/globalAdapter/BaseSystemInfo');
+const systemInfo = require('../common/engine3d/globalAdapter/BaseSystemInfo');
 let _env = null;
 let adaptSysFunc = systemInfo.adaptSys;
 
@@ -40,7 +40,7 @@ Object.assign(systemInfo, {
                                 return data.devicePixelRatio;
                             },
                         });
-                        
+
                         cb && cb();
                     }
                 }
