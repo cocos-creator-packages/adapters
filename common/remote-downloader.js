@@ -46,7 +46,7 @@ function RemoteDownloader () {
 RemoteDownloader.ID = ID;
 
 RemoteDownloader.prototype.init = function () {
-    if (cc.sys.browserType !== cc.sys.BROWSER_TYPE_WECHAT_GAME_SUB) {
+    if (!__globalAdapter.isSubContext) {
         this.cacheDir = fsUtils.getUserDataPath() + '/gamecaches';
         this.cachedFileName = 'cacheList.json';
         // whether or not cache asset into user's storage space
@@ -90,7 +90,7 @@ RemoteDownloader.prototype.handle = function (item, callback) {
         }
     }
 
-    if (cc.sys.browserType === cc.sys.BROWSER_TYPE_WECHAT_GAME_SUB) {
+    if (__globalAdapter.isSubContext) {
         // if getFileSystemManager interface is undefined, need to skip
         if (REGEX.test(item.url)) {
             return null;

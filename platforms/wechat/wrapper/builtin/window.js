@@ -24,9 +24,9 @@ GameGlobal.screencanvas = GameGlobal.screencanvas || new Canvas()
 const canvas = GameGlobal.screencanvas;
 
 export { canvas }
-// export { setTimeout }
-// export { setInterval }
-// export { clearTimeout }
-// export { clearInterval }
-// export { requestAnimationFrame }
-// export { cancelAnimationFrame }
+export { setTimeout }
+export { setInterval }
+export { clearTimeout }
+export { clearInterval }
+export { requestAnimationFrame }
+export { cancelAnimationFrame }
