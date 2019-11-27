@@ -29,8 +29,9 @@ if (Audio) {
 
         stop () {
             if (!this._element) return;
-            this._element.pause();
+            // HACK: some platforms won't set currentTime to 0 when stop audio
             this._element.seek(0);
+            this._element.stop();
             this._unbindEnded();
             this.emit('stop');
             this._state = Audio.State.STOPPED;
