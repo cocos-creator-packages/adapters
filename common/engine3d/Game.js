@@ -121,11 +121,11 @@ Object.assign(game, {
             win.onfocus = onShown;
         }
 
-        if (wx.onShow) {
-            wx.onShow(onShown);
+        if ( __globalAdapter.onShow) {
+            __globalAdapter.onShow(onShown);
         }
-        if (wx.onHide) {
-            wx.onHide(onHidden);
+        if (__globalAdapter.onHide) {
+            __globalAdapter.onHide(onHidden);
         }
 
         if ('onpageshow' in window && 'onpagehide' in window) {
