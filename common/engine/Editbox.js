@@ -76,9 +76,11 @@
                     value: delegate._string,
                 });
             }
+            else {
+                this._showKeyboard();
+            }
 
             this._registerKeyboardEvent();
-            this._showKeyboard();
 
             this._editing = true;
             _currentEditBoxImpl = this;
