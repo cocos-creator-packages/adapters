@@ -55,9 +55,13 @@ function deleteFile (filePath, callback) {
 function downloadFile (remoteUrl, filePath, callback) {
     my.downloadFile({
         url: remoteUrl,
-        filePath: filePath,
         success: function (res) {
+          if (!filePath) {
             callback && callback(null, res.apFilePath);
+          }
+          else {
+            saveFile(res.apFilePath, filePath, callback)
+          }
         },
         fail: function (res) {
             console.error('download file failed', res);
