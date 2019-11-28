@@ -61,6 +61,87 @@ Object.assign(game, {
         self._paused = false;
     },
 
+    _initRenderer () {
+        // Avoid setup to be called twice.
+        if (this._rendererInitialized) return;
+
+        // tslint:disable-next-line: no-shadowed-variable
+        function addClass (element, name) {
+            const hasClass = (' ' + element.className + ' ').indexOf(' ' + name + ' ') > -1;
+            if (!hasClass) {
+                if (element.className) {
+                    element.className += ' ';
+                }
+                element.className += name;
+            }
+        }
+
+        let localCanvas;
+        let localContainer;
+
+        this.container = localContainer = document.createElement('div');
+        this.frame = localContainer.parentNode === document.body ? document.documentElement : localContainer.parentNode;
+        if (__globalAdapter.isSubContext) {
+            localCanvas = window.sharedCanvas || __globalAdapter.getSharedCanvas();
+        }
+        else if (CC_JSB) {
+            localCanvas = window.__canvas;
+        }
+        else {
+            localCanvas = window.canvas;
+        }
+        this.canvas = localCanvas;
+
+        this._determineRenderType();
+
+        // WebGL context created successfully
+        if (this.renderType === Game.RENDER_TYPE_WEBGL) {
+            let useWebGL2 = (!!window.WebGL2RenderingContext);
+
+            const userAgent = navigator.userAgent.toLowerCase();
+            if (userAgent.indexOf('safari') !== -1) {
+                if (userAgent.indexOf('chrome') === -1) {
+                    useWebGL2 = false;
+                }
+            }
+
+            // useWebGL2 = false;
+            if (useWebGL2 && cc.WebGL2GFXDevice) {
+                this._gfxDevice = new cc.WebGL2GFXDevice();
+            } else if (cc.WebGLGFXDevice) {
+                this._gfxDevice = new cc.WebGLGFXDevice();
+            }
+
+            const opts = {
+                canvasElm: localCanvas,
+                debug: true,
+                devicePixelRatio: window.devicePixelRatio,
+                nativeWidth: Math.floor(screen.width * cc.view._devicePixelRatio),
+                nativeHeight: Math.floor(screen.height * cc.view._devicePixelRatio),
+            };
+            // fallback if WebGL2 is actually unavailable (usually due to driver issues)
+            if (!this._gfxDevice.initialize(opts) && useWebGL2) {
+                this._gfxDevice = new cc.WebGLGFXDevice();
+                this._gfxDevice.initialize(opts);
+            }
+        }
+
+        if (!this._gfxDevice) {
+            // todo fix here for wechat game
+            console.error('can not support canvas rendering in 3D');
+            this.renderType = Game.RENDER_TYPE_CANVAS;
+            return;
+        }
+
+        this.canvas.oncontextmenu = () => {
+            if (!cc._isContextMenuEnable) { return false; }
+        };
+
+        this._rendererInitialized = true;
+
+        this.emit(Game.EVENT_RENDERER_INITED);
+    },
+
     _initEvents () {
         let win = window;
         let hiddenPropName;
