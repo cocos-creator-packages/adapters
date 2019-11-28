@@ -95,7 +95,7 @@ Object.assign(game, {
         this._determineRenderType();
 
         // WebGL context created successfully
-        if (this.renderType === Game.RENDER_TYPE_WEBGL) {
+        if (this.renderType === cc.Game.RENDER_TYPE_WEBGL) {
             let useWebGL2 = (!!window.WebGL2RenderingContext);
 
             const userAgent = navigator.userAgent.toLowerCase();
@@ -129,7 +129,7 @@ Object.assign(game, {
         if (!this._gfxDevice) {
             // todo fix here for wechat game
             console.error('can not support canvas rendering in 3D');
-            this.renderType = Game.RENDER_TYPE_CANVAS;
+            this.renderType = cc.Game.RENDER_TYPE_CANVAS;
             return;
         }
 
@@ -139,7 +139,7 @@ Object.assign(game, {
 
         this._rendererInitialized = true;
 
-        this.emit(Game.EVENT_RENDERER_INITED);
+        this.emit(cc.Game.EVENT_RENDERER_INITED);
     },
 
     _initEvents () {
@@ -161,13 +161,13 @@ Object.assign(game, {
         function onHidden () {
             if (!hidden) {
                 hidden = true;
-                cc.game.emit(Game.EVENT_HIDE);
+                cc.game.emit(cc.Game.EVENT_HIDE);
             }
         }
         function onShown () {
             if (hidden) {
                 hidden = false;
-                cc.game.emit(Game.EVENT_SHOW);
+                cc.game.emit(cc.Game.EVENT_SHOW);
             }
         }
 
