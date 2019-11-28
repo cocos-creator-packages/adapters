@@ -25,9 +25,9 @@
         return 'done';
     }
 
+    const BaseClass = EditBox._ImplClass;
     function MiniGameEditBoxImpl () {
-        this._delegate = null;
-        this._editing = false;
+        BaseClass.call(this);
 
         this._eventListeners = {
             onKeyboardInput: null,
@@ -36,7 +36,7 @@
         };
     }
 
-    js.extend(MiniGameEditBoxImpl, EditBox._ImplClass);
+    js.extend(MiniGameEditBoxImpl, BaseClass);
     EditBox._ImplClass = MiniGameEditBoxImpl;
 
     Object.assign(MiniGameEditBoxImpl.prototype, {
@@ -47,20 +47,7 @@
             }
             this._delegate = delegate;
         },
-    
-        setFocus (value) {
-            if (value) {
-                this.beginEditing();
-            }
-            else {
-                this.endEditing();
-            }
-        },
-    
-        isFocused () {
-            return this._editing;
-        },
-    
+
         beginEditing () {
             // In case multiply register events
             if (_currentEditBoxImpl === this) {
@@ -86,7 +73,7 @@
             _currentEditBoxImpl = this;
             delegate.editBoxEditingDidBegan();
         },
-        
+
         endEditing () {
             this._hideKeyboard();
             let cbs = this._eventListeners;
