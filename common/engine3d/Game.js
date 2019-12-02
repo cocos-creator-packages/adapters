@@ -61,6 +61,60 @@ Object.assign(game, {
         self._paused = false;
     },
 
+    _initRenderer () {
+        // Avoid setup to be called twice.
+        if (this._rendererInitialized) return;
+
+        let localCanvas;
+
+        // frame and container are useless on minigame platform
+        this.frame = this.container = document.createElement('div');
+        if (__globalAdapter.isSubContext) {
+            localCanvas = window.sharedCanvas || __globalAdapter.getSharedCanvas();
+        } else {
+            localCanvas = window.canvas;
+        }
+        this.canvas = localCanvas;
+
+        this._determineRenderType();
+
+        // WebGL context created successfully
+        if (this.renderType === cc.Game.RENDER_TYPE_WEBGL) {
+            let useWebGL2 = (!!window.WebGL2RenderingContext);
+
+            // useWebGL2 = false;
+            if (useWebGL2 && cc.WebGL2GFXDevice) {
+                this._gfxDevice = new cc.WebGL2GFXDevice();
+            } else if (cc.WebGLGFXDevice) {
+                this._gfxDevice = new cc.WebGLGFXDevice();
+            }
+
+            const opts = {
+                canvasElm: localCanvas,
+                debug: true,
+                devicePixelRatio: window.devicePixelRatio,
+                nativeWidth: Math.floor(screen.width * cc.view._devicePixelRatio),
+                nativeHeight: Math.floor(screen.height * cc.view._devicePixelRatio),
+            };
+            // fallback if WebGL2 is actually unavailable (usually due to driver issues)
+            if (!this._gfxDevice.initialize(opts) && useWebGL2) {
+                this._gfxDevice = new cc.WebGLGFXDevice();
+                this._gfxDevice.initialize(opts);
+            }
+        }
+
+        if (!this._gfxDevice) {
+            // todo fix here for wechat game
+            console.error('can not support canvas rendering in 3D');
+            this.renderType = cc.Game.RENDER_TYPE_CANVAS;
+            return;
+        }
+
+        this._rendererInitialized = true;
+
+        this.emit(cc.Game.EVENT_RENDERER_INITED);
+    },
+
     _initEvents () {
         let win = window;
         let hiddenPropName;
@@ -80,13 +134,13 @@ Object.assign(game, {
         function onHidden () {
             if (!hidden) {
                 hidden = true;
-                cc.game.emit(Game.EVENT_HIDE);
+                cc.game.emit(cc.Game.EVENT_HIDE);
             }
         }
         function onShown () {
             if (hidden) {
                 hidden = false;
-                cc.game.emit(Game.EVENT_SHOW);
+                cc.game.emit(cc.Game.EVENT_SHOW);
             }
         }
 
@@ -121,11 +175,11 @@ Object.assign(game, {
             win.onfocus = onShown;
         }
 
-        if (wx.onShow) {
-            wx.onShow(onShown);
+        if ( __globalAdapter.onShow) {
+            __globalAdapter.onShow(onShown);
         }
-        if (wx.onHide) {
-            wx.onHide(onHidden);
+        if (__globalAdapter.onHide) {
+            __globalAdapter.onHide(onHidden);
         }
 
         if ('onpageshow' in window && 'onpagehide' in window) {
