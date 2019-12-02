@@ -1,3 +1,4 @@
+// Alipay console.time have some error ,hack here
 let Timer = window.performance;
 let _timerTable = Object.create(null);
 

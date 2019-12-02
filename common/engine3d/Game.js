@@ -65,29 +65,13 @@ Object.assign(game, {
         // Avoid setup to be called twice.
         if (this._rendererInitialized) return;
 
-        // tslint:disable-next-line: no-shadowed-variable
-        function addClass (element, name) {
-            const hasClass = (' ' + element.className + ' ').indexOf(' ' + name + ' ') > -1;
-            if (!hasClass) {
-                if (element.className) {
-                    element.className += ' ';
-                }
-                element.className += name;
-            }
-        }
-
         let localCanvas;
-        let localContainer;
 
-        this.container = localContainer = document.createElement('div');
-        this.frame = localContainer.parentNode === document.body ? document.documentElement : localContainer.parentNode;
+        // frame and container are useless on minigame platform
+        this.frame = this.container = document.createElement('div');
         if (__globalAdapter.isSubContext) {
             localCanvas = window.sharedCanvas || __globalAdapter.getSharedCanvas();
-        }
-        else if (CC_JSB) {
-            localCanvas = window.__canvas;
-        }
-        else {
+        } else {
             localCanvas = window.canvas;
         }
         this.canvas = localCanvas;
@@ -97,13 +81,6 @@ Object.assign(game, {
         // WebGL context created successfully
         if (this.renderType === cc.Game.RENDER_TYPE_WEBGL) {
             let useWebGL2 = (!!window.WebGL2RenderingContext);
-
-            const userAgent = navigator.userAgent.toLowerCase();
-            if (userAgent.indexOf('safari') !== -1) {
-                if (userAgent.indexOf('chrome') === -1) {
-                    useWebGL2 = false;
-                }
-            }
 
             // useWebGL2 = false;
             if (useWebGL2 && cc.WebGL2GFXDevice) {
@@ -132,10 +109,6 @@ Object.assign(game, {
             this.renderType = cc.Game.RENDER_TYPE_CANVAS;
             return;
         }
-
-        this.canvas.oncontextmenu = () => {
-            if (!cc._isContextMenuEnable) { return false; }
-        };
 
         this._rendererInitialized = true;
 
