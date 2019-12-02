@@ -1,7 +1,6 @@
 import * as window from './window'
 import HTMLElement from './HTMLElement'
 import HTMLVideoElement from './HTMLVideoElement'
-import HTMLScriptElement from './HTMLScriptElement'
 import Image from './Image'
 import Audio from './Audio'
 import Canvas from './Canvas'
