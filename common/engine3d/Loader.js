@@ -107,6 +107,7 @@ function loadMiniAudio (item, callback) {
         return ctor;
     };
     clip.onCanplay(() => callback(null, clip));
+    clip.onError(() => callback(new Error('load audio failed')));
 }
 
 cc.loader.downloader.addHandlers({
