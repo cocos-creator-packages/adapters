@@ -206,7 +206,7 @@ Object.assign(game, {
 
         this.onStart = onStart;
 
-        cc.SplashScreen.instance.main(this._gfxDevice);
+        cc.internal.SplashScreen.instance.main(this._gfxDevice);
 
         this.prepare(cc.game.onStart && cc.game.onStart.bind(cc.game));
     },
@@ -229,8 +229,8 @@ Object.assign(game, {
             if (cb) { cb(); }
         };
 
-        cc.SplashScreen.instance.setOnFinish(start);
-        cc.SplashScreen.instance.loadFinish = true;
+        cc.internal.SplashScreen.instance.setOnFinish(start);
+        cc.internal.SplashScreen.instance.loadFinish = true;
     },
 
 

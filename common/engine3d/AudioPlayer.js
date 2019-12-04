@@ -1,4 +1,4 @@
-const AudioPlayer = cc.AudioPlayer;
+const AudioPlayer = cc.internal.AudioPlayer;
 
 const PlayingState = {
     INITIALIZING: 0,
