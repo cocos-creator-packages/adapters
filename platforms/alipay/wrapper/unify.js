@@ -28,9 +28,13 @@ if (window.__globalAdapter) {
           cb && cb(res);
         });
     };
-    
+
     // Audio
-    utils.cloneMethod(globalAdapter, my, 'createInnerAudioContext');
+    globalAdapter.createInnerAudioContext = function() {
+        let audio = my.createInnerAudioContext();
+        audio.onCanplay = audio.onCanPlay.bind(audio);
+        return audio;
+    }
 
     // FrameRate
     utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
@@ -80,16 +84,16 @@ if (window.__globalAdapter) {
     let isLandscape = windowWidth > windowHeight;
     function accelerometerChangeCallback (res, cb) {
         let resClone = {};
-                
+
         let x = res.x;
         let y = res.y;
-        
+
         if (isLandscape) {
             let tmp = x;
             x = -y;
             y = tmp;
         }
-        
+
         resClone.x = x;
         resClone.y = y;
         resClone.z = res.z;
