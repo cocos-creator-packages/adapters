@@ -90,7 +90,7 @@ class AudioPlayerMini extends AudioPlayer {
 
     setCurrentTime (val) {
         if (!this._audio) { return; }
-        this._offset = clamp(val, 0, this._duration) * 1000;
+        this._offset = cc.math.clamp(val, 0, this._duration) * 1000;
         this._startTime = performance.now();
         this._audio.seek(val);
     }
