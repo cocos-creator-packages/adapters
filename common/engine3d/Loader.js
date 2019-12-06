@@ -40,9 +40,9 @@ function loadImage (item) {
 
     // load cc.ImageAsset
     var rawUrl = item.rawUrl;
-    var imageAsset = item.imageAsset || new ImageAsset();
+    var imageAsset = item.imageAsset || new cc.ImageAsset();
     imageAsset._uuid = item.uuid;
-    imageAsset.url = rawUrl;
+    imageAsset._url = rawUrl;
     imageAsset._setRawAsset(rawUrl, false);
     imageAsset._nativeAsset = image;
     return imageAsset;
