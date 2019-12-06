@@ -106,8 +106,9 @@ function loadMiniAudio (item, callback) {
         this._loadMode = 2;
         return ctor;
     };
-    clip.onCanplay(() => callback(null, clip));
-    clip.onError(() => callback(new Error('load audio failed')));
+
+    // HACK: wechat does not callback when load large number of audios
+    callback(null, clip);
 }
 
 cc.loader.downloader.addHandlers({
