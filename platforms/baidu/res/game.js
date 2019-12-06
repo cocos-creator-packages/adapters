@@ -1,16 +1,15 @@
-require('./libs/wrapper/builtin/index');
-window.DOMParser = require('./libs/common/xmldom/dom-parser').DOMParser;
-require('./libs/common/engine/globalAdapter');
-require('./libs/wrapper/unify');
-require('./libs/wrapper/systemInfo');
+require('./dynamicRequire');
+require('adapter-js-path');
+__globalAdapter.init();
+
 // Ensure getting the system info in open data context
-window.__globalAdapter.init(function () {
+__globalAdapter.handleSystemInfo(() => {
+    require('cocos2d-js-path');
+    __globalAdapter.adaptEngine();
+
     require('./src/settings');
-    require(window._CCSettings.debug ? 'cocos2d-js' : 'cocos2d-js-min');
-    require('./libs/common/engine');
     // Introduce Cocos Service here
-    require('./main');
-    require('./libs/common/remote-downloader');
+    require('./main');  // TODO: move to common
 
     // Adjust devicePixelRatio
     cc.view._maxPixelRatio = 4;
@@ -28,8 +27,6 @@ window.__globalAdapter.init(function () {
         cc.game.once(cc.game.EVENT_ENGINE_INITED, function () {
             cc.Pipeline.Downloader.PackDownloader._doPreload("SUBDOMAIN_DATA", SUBDOMAIN_DATA);
         });
-
-        require('./libs/wrapper/sub-context-adapter');
     }
     else {
         // Release Image objects after uploaded gl texture
