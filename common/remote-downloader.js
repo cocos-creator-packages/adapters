@@ -23,7 +23,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 var ID = 'RemoteDownloader';
-const fsUtils = require('../wrapper/fs-utils');
+const fsUtils = window.fsUtils;
 
 const REGEX = /^\w+:\/\/.*/;
 const isSubContext = __globalAdapter.isSubContext;

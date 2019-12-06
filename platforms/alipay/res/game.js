@@ -1,32 +1,25 @@
-require('./libs/wrapper/builtin');
-window.DOMParser = require('./libs/common/xmldom/dom-parser').DOMParser;
-require('./libs/common/engine/globalAdapter');
-require('./libs/wrapper/unify');
-require('./libs/wrapper/systemInfo');
-// Ensure getting the system info in open data context
-window.__globalAdapter.init(function () {
-    require('./src/settings');
-    require(window._CCSettings.debug ? 'cocos2d-js' : 'cocos2d-js-min');
-    require('./libs/common/engine');
-    require('./libs/wrapper/engine');
-    // Introduce Cocos Service here
-    require('./main');
-    require('./libs/common/remote-downloader');
+require('adapter-js-path');
+__globalAdapter.init();
+require('cocos2d-js-path');
+__globalAdapter.adaptEngine();
 
-    // Adjust devicePixelRatio
-    cc.view._maxPixelRatio = 4;
+require('./src/settings');
+// Introduce Cocos Service here
+require('./main');  // TODO: move to common
 
-    // downloader polyfill
-    window.myDownloader = remoteDownloader;
-    // handle remote downloader
-    remoteDownloader.REMOTE_SERVER_ROOT = "";
-    remoteDownloader.SUBCONTEXT_ROOT = "";
-    var pipeBeforeDownloader = cc.loader.subPackPipe || cc.loader.md5Pipe || cc.loader.assetLoader;
-    cc.loader.insertPipeAfter(pipeBeforeDownloader, remoteDownloader);
+// Adjust devicePixelRatio
+cc.view._maxPixelRatio = 4;
 
-    // Release Image objects after uploaded gl texture
-    cc.macro.CLEANUP_IMAGE_CACHE = true;
+// downloader polyfill
+window.myDownloader = remoteDownloader;
+// handle remote downloader
+remoteDownloader.REMOTE_SERVER_ROOT = "";
+remoteDownloader.SUBCONTEXT_ROOT = "";
+var pipeBeforeDownloader = cc.loader.subPackPipe || cc.loader.md5Pipe || cc.loader.assetLoader;
+cc.loader.insertPipeAfter(pipeBeforeDownloader, remoteDownloader);
 
-    remoteDownloader.init();
-    window.boot();
-});
+// Release Image objects after uploaded gl texture
+cc.macro.CLEANUP_IMAGE_CACHE = true;
+
+remoteDownloader.init();
+window.boot();

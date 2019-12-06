@@ -16,8 +16,8 @@ cc.loader.downloader.loadSubpackage = function (name, progressCallback, complete
 };
 
 function downloadScript (item, callback, isAsync) {
-    var url = '../../../' + item.url;
-    require(url);
+    // adapter lib is on the root path
+    require(item.url);
     callback(null, item.url);
 }
 
