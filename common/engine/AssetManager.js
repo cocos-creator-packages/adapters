@@ -268,7 +268,7 @@ cc.assetManager.loadBundle = function (root, options, onComplete) {
 };
 
 if (!isSubDomain) {
-    cc.assetManager._transformPipeline.append(function (task) {
+    cc.assetManager.transformPipeline.append(function (task) {
         var input = task.output = task.input;
         for (var i = 0, l = input.length; i < l; i++) {
             var item = input[i];
