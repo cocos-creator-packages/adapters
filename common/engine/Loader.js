@@ -92,10 +92,13 @@ function downloadAudio (item, callback) {
     }
 
     var dom = document.createElement('audio');
+    dom.addEventListener('load', function () {
+        callback(null, dom);
+    });
+    dom.addEventListener('error', function () {
+        callback(new Error('load audio failed ' + item.url), null);
+    });
     dom.src = item.url;
-    
-    // HACK: wechat does not callback when load large number of assets
-    callback(null, dom);
 }
 
 function downloadVideo (item, callback) {
