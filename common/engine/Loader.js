@@ -16,8 +16,8 @@ cc.loader.downloader.loadSubpackage = function (name, progressCallback, complete
 };
 
 function downloadScript (item, callback, isAsync) {
-    // adapter lib is on the root path
-    require(item.url);
+    // implemented __cocos_require__ in ccRequire.js
+    __cocos_require__(item.url);
     callback(null, item.url);
 }
 

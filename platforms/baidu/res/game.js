@@ -1,4 +1,3 @@
-require('./dynamicRequire');
 require('adapter-js-path');
 __globalAdapter.init();
 
@@ -6,6 +5,7 @@ __globalAdapter.init();
 __globalAdapter.handleSystemInfo(() => {
     require('cocos2d-js-path');
     __globalAdapter.adaptEngine();
+    require('./ccRequire');
 
     require('./src/settings');
     // Introduce Cocos Service here

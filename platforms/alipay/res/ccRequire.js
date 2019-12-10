@@ -2,7 +2,7 @@ let moduleMap = {
     // build modules
 };
 
-GameGlobal.$require = function (moduleName) {
+window.__cocos_require__ = function (moduleName) {
     let func = moduleMap[moduleName];
     func && func();
 };

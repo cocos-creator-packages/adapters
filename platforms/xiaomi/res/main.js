@@ -3,6 +3,7 @@ require('adapter-js-path');
 __globalAdapter.init();
 require(window._CCSettings.debug ? 'cocos2d-js.js' : 'cocos2d-js-min.js');
 __globalAdapter.adaptEngine();
+require('./ccRequire');
 
 // Introduce Cocos Service here
 require('./boot');  // TODO: move to common
