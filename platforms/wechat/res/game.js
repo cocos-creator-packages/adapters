@@ -12,7 +12,7 @@ window.__globalAdapter.init(function () {
     // Introduce Cocos Service here
     require('./main');
     require('./libs/common/remote-downloader');
-    require('./libs/wrapper/engine');
+    require('./libs/wrapper/engine/index');
 
     // Adjust devicePixelRatio
     cc.view._maxPixelRatio = 4;
