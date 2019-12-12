@@ -34,22 +34,18 @@ Object.assign(adapter, {
                 if (data.fromAdapter) {
                     if (data.event === 'main-context-info') {
                         GameGlobal._env = data.sysInfo;  // revieve system info from main context
-                        Object.defineProperty(window, 'innerWidth', {
-                            enumerable: true,
-                            get () {
-                                return data.innerWidth;
+                        Object.defineProperties(window, {
+                            'innerWidth': {
+                                value: data.innerWidth,
+                                enumerable: true,
                             },
-                        });
-                        Object.defineProperty(window, 'innerHeight', {
-                            enumerable: true,
-                            get () {
-                                return data.innerHeight;
+                            'innerHeight': {
+                                value: data.innerHeight,
+                                enumerable: true,
                             },
-                        });
-                        Object.defineProperty(window, 'devicePixelRatio', {
-                            enumerable: true,
-                            get () {
-                                return data.devicePixelRatio;
+                            'devicePixelRatio': {
+                                value: data.devicePixelRatio,
+                                enumerable: true,
                             },
                         });
 
