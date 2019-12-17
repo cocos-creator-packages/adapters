@@ -1,1 +1,2 @@
 require('./Loader');
+require('./VideoPlayer');

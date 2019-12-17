@@ -23,6 +23,15 @@ export * from './WindowProperties'
 GameGlobal.screencanvas = GameGlobal.screencanvas || new Canvas()
 const canvas = GameGlobal.screencanvas;
 
+const {
+    setTimeout,
+    setInterval,
+    clearTimeout,
+    clearInterval,
+    requestAnimationFrame,
+    cancelAnimationFrame,
+} = GameGlobal;
+
 export { canvas }
 export { setTimeout }
 export { setInterval }

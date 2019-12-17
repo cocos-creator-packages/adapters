@@ -28,9 +28,9 @@
         return;
     }
 
-    var math = cc.vmath;
-    var _worldMat = math.mat4.create();
-    var _cameraMat = math.mat4.create();
+    var math = cc.math;
+    var _worldMat = cc.mat4();
+    var _cameraMat = cc.mat4();
     const PLAY_INTERVAL = 10;
     var playTimer = null;
 
