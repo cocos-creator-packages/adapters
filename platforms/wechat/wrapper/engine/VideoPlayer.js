@@ -28,7 +28,7 @@
         return;
     }
 
-    var math = cc.math;
+    const Mat4 = cc.Mat4;
     var _worldMat = cc.mat4();
     var _cameraMat = cc.mat4();
     const PLAY_INTERVAL = 10;
@@ -305,7 +305,8 @@
 
         let camera = cc.Camera.findCamera(node);
         camera.getWorldToScreenMatrix2D(_cameraMat);
-        math.mat4.mul(_cameraMat, _cameraMat, _worldMat);
+        Mat4.multiply(_cameraMat, _cameraMat, _worldMat);
+
 
         let viewScaleX = cc.view._scaleX,
             viewScaleY = cc.view._scaleY;
