@@ -1,6 +1,7 @@
 require('adapter-js-path');
 __globalAdapter.init();
 require('cocos2d-js-path');
+require('physics-js-path');
 __globalAdapter.adaptEngine();
 require('./ccRequire');
 

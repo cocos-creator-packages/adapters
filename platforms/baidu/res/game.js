@@ -4,6 +4,7 @@ __globalAdapter.init();
 // Ensure getting the system info in open data context
 __globalAdapter.handleSystemInfo(() => {
     require('cocos2d-js-path');
+    require('physics-js-path');
     __globalAdapter.adaptEngine();
     require('./ccRequire');
 
