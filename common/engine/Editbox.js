@@ -6,6 +6,7 @@
     const EditBox = cc.EditBox;
     const js = cc.js;
     const KeyboardReturnType = EditBox.KeyboardReturnType;
+    const MAX_VALUE = 65535;
     let _currentEditBoxImpl = null;
 
     function getKeyboardReturnType (type) {
@@ -132,10 +133,11 @@
         _showKeyboard () {
             let delegate = this._delegate;
             let multiline = (delegate.inputMode === EditBox.InputMode.ANY);
+            let maxLength = (delegate.maxLength < 0 ? MAX_VALUE : delegate.maxLength);
 
             __globalAdapter.showKeyboard({
                 defaultValue: delegate._string,
-                maxLength: delegate.maxLength,
+                maxLength: maxLength,
                 multiple: multiline,
                 confirmHold: false,
                 confirmType: getKeyboardReturnType(delegate.returnType),
