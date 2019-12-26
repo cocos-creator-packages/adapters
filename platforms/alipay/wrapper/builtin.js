@@ -1,3 +1,9 @@
+/*!
+ *
+ * 			adpater.js
+ * 			create time "1.0.1_1912261500"
+ *
+ */
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -155,7 +161,8 @@ var Audio = function (_HTMLAudioElement) {
         });
 
         innerAudioContext.onPlay(function () {
-            _this._paused = _innerAudioContextMap.get(_this).paused;
+            // this._paused = _innerAudioContextMap.get(this).paused
+            _this._paused = false;
             _this.dispatchEvent({ type: 'play' });
             if (typeof _this.onplay === "function") {
                 _this.onplay();
@@ -163,7 +170,7 @@ var Audio = function (_HTMLAudioElement) {
         });
 
         innerAudioContext.onPause(function () {
-            _this._paused = _innerAudioContextMap.get(_this).paused;
+            _this._paused = true;
             _this.dispatchEvent({ type: 'pause' });
             if (typeof _this.onpause === "function") {
                 _this.onpause();
@@ -171,10 +178,9 @@ var Audio = function (_HTMLAudioElement) {
         });
 
         innerAudioContext.onEnded(function () {
-            _this._paused = _innerAudioContextMap.get(_this).paused;
-            if (_innerAudioContextMap.get(_this).loop === false) {
-                _this.dispatchEvent({ type: 'ended' });
-            }
+            // this._paused = _innerAudioContextMap.get(this).paused
+            _this._paused = false;
+            _this.dispatchEvent({ type: 'ended' });
             _this.readyState = HAVE_ENOUGH_DATA;
 
             if (typeof _this.onended === "function") {
@@ -183,7 +189,8 @@ var Audio = function (_HTMLAudioElement) {
         });
 
         innerAudioContext.onError(function () {
-            _this._paused = _innerAudioContextMap.get(_this).paused;
+            // this._paused = _innerAudioContextMap.get(this).paused
+            _this._paused = true;
             _this.dispatchEvent({ type: 'error' });
             if (typeof _this.onerror === "function") {
                 _this.onerror();
@@ -364,7 +371,6 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
 function InvalidCharacterError(message) {
     this.message = message;
 }
@@ -398,10 +404,7 @@ function btoa(input) {
 // decoder
 // [https://gist.github.com/1020396] by [https://github.com/atk]
 function atob(input) {
-    var str = String(input).replace(/=+$/, '');
-    if (str.length % 4 === 1) {
-        throw new InvalidCharacterError("'atob' failed: The string to be decoded is not correctly encoded.");
-    }
+    var str = String(input).replace(/[=]+$/, '');
     var output = '';
     for (
     // initialize result and counters
@@ -660,7 +663,6 @@ function eventHandlerFactory(type) {
         event.touches = rawEvent.touches;
         event.targetTouches = Array.prototype.slice.call(rawEvent.touches);
         // event.timeStamp = rawEvent.timeStamp
-        console.log(JSON.stringify(event.type));
         _document2.default.dispatchEvent(event);
     };
 }
@@ -784,7 +786,7 @@ var EventTarget = function () {
             var listeners = _events.get(this)[event.type];
             if (listeners) {
                 for (var i = 0; i < listeners.length; i++) {
-                    listeners[i](event);
+                    listeners[i].call(this, event);
                 }
             }
         }
@@ -1081,6 +1083,9 @@ var HTMLMediaElement = function (_HTMLElement) {
     }, {
         key: "play",
         value: function play() {}
+    }, {
+        key: "canPlayType",
+        value: function canPlayType() {}
     }]);
 
     return HTMLMediaElement;
@@ -1159,7 +1164,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function Image() {
     var image = my.createImage();
     if (!_util.isIDE) {
-        image.__proto__.__proto__ = new _HTMLImageElement2.default();
+        image.__proto__ = new _HTMLImageElement2.default();
         if (image.tagName === undefined) {
             image.tagName = "IMG";
         }
@@ -1666,11 +1671,12 @@ var XMLHttpRequest = function (_EventTarget) {
           fail: function fail(res) {
             var errorMessage = res.errorMessage;
 
-            if (res.data.includes("超时")) {
+            var data = res.data || "";
+            if (data.includes("超时") || errorMessage.includes("超时")) {
               _triggerEvent.call(_this2, 'timeout');
             }
 
-            _triggerEvent.call(_this2, 'error', errorMessage);
+            _triggerEvent.call(_this2, 'error');
             _triggerEvent.call(_this2, 'loadend');
           }
         });
@@ -1755,6 +1761,8 @@ var _Canvas2 = _interopRequireDefault(_Canvas);
 
 __webpack_require__(/*! ./EventIniter/index.js */ "./src/EventIniter/index.js");
 
+var _WindowProperties = __webpack_require__(/*! ./WindowProperties */ "./src/WindowProperties.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var events = {};
@@ -1781,6 +1789,15 @@ var document = {
 
     head: new _HTMLElement2.default("head"),
     body: new _HTMLElement2.default("body"),
+
+    documentElement: {
+        clientWidth: _WindowProperties.screen.width,
+        clientHight: _WindowProperties.screen.height,
+        clientLeft: 0,
+        clientTop: 0,
+        scrollLeft: 0,
+        scrollTop: 0
+    },
 
     createElement: function createElement(tagName) {
         tagName = tagName.toLowerCase();
@@ -2072,6 +2089,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 var location = {
   href: 'game.js',
+  hostname: "alipay.com",
 
   reload: function reload() {},
   replace: function replace() {}
@@ -2137,7 +2155,7 @@ function getCurrentPosition(cb) {
 }
 
 var uaDesc = android ? 'Android; CPU ' + system : 'iPhone; CPU iPhone OS ' + system + ' like Mac OS X';
-var userAgent = "Mozilla/5.0 (" + uaDesc + ") AppleWebKit/603.1.30 (KHTML, like Gecko) Mobile/14E8301 MicroMessenger/6.6.0 AlipayMiniGame NetType/WIFI Language/" + language;
+var userAgent = "Mozilla/5.0 (" + uaDesc + ") AliApp(AP/" + systemInfo.version + ") AppleWebKit/603.1.30 (KHTML, like Gecko) Mobile/14E8301 MicroMessenger/6.6.0 AlipayMiniGame NetType/WIFI Language/" + language;
 if (window.navigator) {
     userAgent = window.navigator.userAgent + " AlipayMiniGame";
 }
@@ -2187,7 +2205,7 @@ function noop() {};
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 exports.isIDE = undefined;
 exports.transformArrayBufferToBase64 = transformArrayBufferToBase64;
@@ -2197,12 +2215,12 @@ exports.base64ToArrayBuffer = base64ToArrayBuffer;
 var _Base = __webpack_require__(/*! ../Base64 */ "./src/Base64.js");
 
 function transformArrayBufferToBase64(buffer) {
-    var binary = '';
-    var bytes = new Uint8Array(buffer);
-    for (var len = bytes.byteLength, i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return (0, _Base.btoa)(binary);
+  var binary = '';
+  var bytes = new Uint8Array(buffer);
+  for (var len = bytes.byteLength, i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return (0, _Base.btoa)(binary);
 }
 
 function encode(str) {
@@ -2229,10 +2247,7 @@ function encode(str) {
 function decode(str) {
   var encodings = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
   var res = '';
-  var string = String(str).replace(/=+$/, '');
-  if (string.length % 4 === 1) {
-    throw new Error('"atob" failed');
-  }
+  var string = String(str).replace(/[=]+$/, '');
   var o,
       r,
       i = 0,
@@ -2493,6 +2508,7 @@ var location = exports.location = _location2.default;
 
 // 暴露全局的 canvas
 window.screencanvas = window.screencanvas || new _Canvas2.default();
+window.self = window;
 var canvas = exports.canvas = window.screencanvas;
 
 function alert(msg) {
