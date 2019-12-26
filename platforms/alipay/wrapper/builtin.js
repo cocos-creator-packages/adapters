@@ -1,8 +1,8 @@
 /*!
- * 
+ *
  * 			adpater.js
  * 			create time "1.0.1_1912261500"
- * 			
+ *
  */
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -662,7 +662,7 @@ function eventHandlerFactory(type) {
         event.changedTouches = rawEvent.touches;
         event.touches = rawEvent.touches;
         event.targetTouches = Array.prototype.slice.call(rawEvent.touches);
-        // event.timeStamp = rawEvent.timeStamp   
+        // event.timeStamp = rawEvent.timeStamp
         _document2.default.dispatchEvent(event);
     };
 }
@@ -786,8 +786,7 @@ var EventTarget = function () {
             var listeners = _events.get(this)[event.type];
             if (listeners) {
                 for (var i = 0; i < listeners.length; i++) {
-                    var listener = listeners[i];
-                    listener.call(this, event);
+                    listeners[i].call(this, event);
                 }
             }
         }
