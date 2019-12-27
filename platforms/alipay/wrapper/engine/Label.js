@@ -12,7 +12,7 @@ if (cc && cc.LabelComponent) {
     };
 
     cc.game.on(cc.Game.EVENT_ENGINE_INITED, function () {
-        Object.assign(Label.CanvasPool, {
+        Object.assign(Label._canvasPool, {
             get() {
                 return canvasData;
             },
