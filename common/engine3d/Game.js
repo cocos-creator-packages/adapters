@@ -3,6 +3,7 @@ const renderer = cc.renderer;
 const game = cc.game;
 let _frameRate = 60;
 
+
 Object.assign(game, {
     setFrameRate (frameRate) {
         _frameRate = frameRate;
@@ -109,10 +110,6 @@ Object.assign(game, {
             this.renderType = cc.Game.RENDER_TYPE_CANVAS;
             return;
         }
-
-        this._rendererInitialized = true;
-
-        this.emit(cc.Game.EVENT_RENDERER_INITED);
     },
 
     _initEvents () {
@@ -199,50 +196,6 @@ Object.assign(game, {
     },
 
     end () { },  // mini game platform not support this api
-
-    run (config, onStart) {
-        this._initConfig(config);
-        this._initRenderer();
-
-        // load renderpipeline
-        cc.loader.load({ uuid: config.renderpipeline }, (err, asset) => {
-            // failed load renderPipeline
-            if (err || !(asset instanceof cc.RenderPipeline)) {
-                console.error(`Failed load renderpipeline: ${config.renderpipeline}`);
-                console.error(err);
-                cc.game.setRenderPipeline(null);
-            } else {
-                cc.game.setRenderPipeline(asset);
-            }
-
-            this.onStart = onStart;
-            cc.internal.SplashScreen.instance.main(this._gfxDevice);
-            this.prepare(cc.game.onStart && cc.game.onStart.bind(cc.game));
-        });
-    },
-
-    _prepareFinished (cb) {
-        this._prepared = true;
-
-        // Init engine
-        this._initEngine();
-
-        // Log engine version
-        console.log('Cocos Creator 3D v' + cc.ENGINE_VERSION);
-
-        const start = () => {
-            this._setAnimFrame();
-            this._runMainLoop();
-
-            this.emit(cc.Game.EVENT_GAME_INITED);
-
-            if (cb) { cb(); }
-        };
-
-        cc.internal.SplashScreen.instance.setOnFinish(start);
-        cc.internal.SplashScreen.instance.loadFinish = true;
-    },
-
 
 });
 
