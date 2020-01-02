@@ -74,9 +74,9 @@ cc.Canvas.prototype.update = function () {
         this.applySettings();
     }
 };
-let originApplySettings = cc.Canvas.prototype.applySettings;
+let originalApplySettings = cc.Canvas.prototype.applySettings;
 cc.Canvas.prototype.applySettings = function () {
-    originApplySettings.call(this);
+    originalApplySettings.call(this);
     this._width = cc.game.canvas.width;
     this._height = cc.game.canvas.height;
 };
