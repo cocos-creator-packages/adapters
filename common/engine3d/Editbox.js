@@ -160,7 +160,7 @@
             this.setMaxLength(delegate.maxLength);
             __globalAdapter.showKeyboard({
                 defaultValue: delegate.string,
-                maxLength: maxLength,
+                maxLength: this._maxLength,
                 multiple: multiline,
                 confirmHold: false,
                 confirmType: getKeyboardReturnType(delegate.returnType),
