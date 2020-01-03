@@ -115,8 +115,6 @@ class AudioPlayerMini extends AudioPlayer {
 
     destroy () {
         if (this._audio) { this._audio.destroy(); }
-        __globalAdapter.offAudioInterruptionBegin(this._onHide);
-        __globalAdapter.offAudioInterruptionEnd(this._onShow);
         super.destroy();
     }
 }

@@ -35,8 +35,6 @@ if (window.__globalAdapter) {
         audio.onCanplay = audio.onCanPlay.bind(audio);
         return audio;
     };
-    globalAdapter.offAudioInterruptionBegin = function(){};
-    globalAdapter.offAudioInterruptionEnd = function(){};
 
     // FrameRate
     utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
