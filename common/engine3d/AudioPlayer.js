@@ -32,22 +32,12 @@ class AudioPlayerMini extends AudioPlayer {
             if (this._state === PlayingState.STOPPED) { return; }
             this._state = PlayingState.STOPPED;
             this._offset = 0;
-            if (this._oneShoting) {
-                this._audio.volume = this._volume;
-                this._audio.loop = this._loop;
-                this._oneShoting = false;
-            }
         });
         this._audio.onEnded(() => {
             if (this._state === PlayingState.STOPPED) { return; }
             this._state = PlayingState.STOPPED;
             this._offset = 0;
             this._eventTarget.emit('ended');
-            if (this._oneShoting) {
-                this._audio.volume = this._volume;
-                this._audio.loop = this._loop;
-                this._oneShoting = false;
-            }
         });
         this._audio.onError(function (res) { return console.error(res.errMsg);});
     }
@@ -55,6 +45,11 @@ class AudioPlayerMini extends AudioPlayer {
     play () {
         if (!this._audio || this._state === PlayingState.PLAYING) { return; }
         if (this._blocking) { this._interrupted = true; return; }
+        if (this._oneShoting) {
+            this._audio.volume = this._volume;
+            this._audio.loop = this._loop;
+            this._oneShoting = false;
+        }
         this._audio.play();
     }
 
@@ -74,8 +69,8 @@ class AudioPlayerMini extends AudioPlayer {
         if (volume === undefined) { volume = 1; }
         if (!this._audio) { return; }
         this._offset = 0;
-        this._oneShoting = true;
         this._audio.stop();
+        this._oneShoting = true;
         this._audio.loop = false;
         this._audio.volume = volume;
         this._audio.play();
