@@ -34,7 +34,7 @@ if (window.__globalAdapter) {
         let audio = my.createInnerAudioContext();
         audio.onCanplay = audio.onCanPlay.bind(audio);
         return audio;
-    }
+    };
 
     // FrameRate
     utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
