@@ -1,12 +1,12 @@
 const AudioPlayer = cc.internal.AudioPlayer;
+const { PlayingState, AudioType } = cc.AudioClip;
 
-const PlayingState = {
-    INITIALIZING: 0,
-    PLAYING: 1,
-    STOPPED: 2,
+cc.AudioClip.prototype._getPlayer = function (clip) {
+    this._loadMode = AudioType.JSB_AUDIO;
+    return AudioPlayerWX;
 };
 
-class AudioPlayerMini extends AudioPlayer {
+export class AudioPlayerWX extends AudioPlayer {
     _startTime = 0;
     _offset = 0;
     _volume = 1;
@@ -69,11 +69,12 @@ class AudioPlayerMini extends AudioPlayer {
         if (volume === undefined) { volume = 1; }
         if (!this._audio) { return; }
         this._offset = 0;
-        this._audio.stop();
         this._oneShoting = true;
         this._audio.loop = false;
         this._audio.volume = volume;
-        this._audio.play();
+        // stop and play immediately could run into issues on iOS
+        if (this._state === PlayingState.PLAYING) { this._audio.seek(0); }
+        else { this._audio.play(); }
     }
 
     getCurrentTime () {
@@ -113,5 +114,3 @@ class AudioPlayerMini extends AudioPlayer {
         super.destroy();
     }
 }
-
-export default AudioPlayerMini;
