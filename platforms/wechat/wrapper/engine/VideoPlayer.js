@@ -31,21 +31,31 @@
     const Mat4 = cc.Mat4;
     var _worldMat = cc.mat4();
     var _cameraMat = cc.mat4();
-    const PLAY_INTERVAL = 10;
-    var playTimer = null;
 
     var _impl = cc.VideoPlayer.Impl;
     var _p = cc.VideoPlayer.Impl.prototype;
 
     cc.VideoPlayer.prototype._updateVideoSource = function _updateVideoSource() {
-        let url = '';
+        let clip = this._clip;
         if (this.resourceType === cc.VideoPlayer.ResourceType.REMOTE) {
-            url = this.remoteURL;
+            this._impl.setURL(this.remoteURL, this._mute || this._volume === 0);
         }
-        else if (this._clip) {
-            url = this._clip._nativeAsset || '';
+        else if (clip) {
+            if (clip._nativeAsset) {
+                this._impl.setURL(clip._nativeAsset, this._mute || this._volume === 0);
+            }
+            else {
+                // deferred loading video clip
+                cc.loader.load(clip.nativeUrl, (err, nativeAsset) => {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                    clip._nativeAsset = nativeAsset;
+                    this._impl.setURL(nativeAsset, this._mute || this._volume === 0);
+                });
+            }
         }
-        this._impl.setURL(url, this._mute || this._volume === 0);
     };
 
     _p._bindEvent = function () {
@@ -130,40 +140,25 @@
         if (!video || video.src === path) {
             return;
         }
-        if (wx.getSystemInfoSync().platform === 'devtools') {
-            video.src = path;
-        }
-        else {
+        video.stop();
+        this._unbindEvent();
+        video.autoplay = true;  // HACK: to implement onCanplay callback
+        video.src = path;
+        video.muted = true;
+        let self = this;
+        this._loaded = false;
+        function loadedCallback () {
+            video.offPlay();
+            self._bindEvent();
             video.stop();
-            this._unbindEvent();
-            video.src = path;
-            video.muted = true;
-            let self = this;
-            this._loaded = false;
-            function loadedCallback () {
-                video.offPlay();
-                self._bindEvent();
-                video.stop();
-                video.muted = false;
-                self._loaded = true;
-                self._playing = false;
-                self._currentTime = 0;
-                self._dispatchEvent(_impl.EventType.READY_TO_PLAY);
-                if (playTimer) {
-                    clearInterval(playTimer);
-                    playTimer = null;
-                }
-            }
-            video.onPlay(loadedCallback);
-
-            // HACK: keep playing till video loaded
-            video.play();
-            if (!playTimer) {
-                playTimer = setInterval(function () {
-                    video.play();
-                }, PLAY_INTERVAL);
-            }
+            video.muted = false;
+            self._loaded = true;
+            self._playing = false;
+            self._currentTime = 0;
+            self._dispatchEvent(_impl.EventType.READY_TO_PLAY);
+            video.autoplay = false;
         }
+        video.onPlay(loadedCallback);
     };
 
     _p.getURL = function() {
