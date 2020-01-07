@@ -470,6 +470,7 @@ var map = {
     // Binary
     'binary' : FileType.BIN,
     'dbbin' : FileType.BIN,
+    'skel' : FileType.BIN,
     'bin': FileType.BIN,
     'pvr': FileType.BIN,
     'pkm': FileType.BIN
