@@ -29,7 +29,7 @@ function downloadAudio (item, callback) {
 }
 
 // FIX audio downlaod error on Alipay iOS 10.1.78
-if (cc.sys.os === cc.sys.OS_IOS) {
+if (!__globalAdapter.isDevTool && cc.sys.os === cc.sys.OS_IOS) {
     cc.loader.downloader.addHandlers({
         // Audio
         mp3 : downloadAudio,
