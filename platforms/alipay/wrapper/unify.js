@@ -2,6 +2,7 @@ const utils = require('../../../common/utils');
 
 if (window.__globalAdapter) {
     let globalAdapter = window.__globalAdapter;
+    globalAdapter.isDevTool = window.navigator && (/AlipayIDE/.test(window.navigator.userAgent));
     // SystemInfo
     utils.cloneMethod(globalAdapter, my, 'getSystemInfoSync');
 

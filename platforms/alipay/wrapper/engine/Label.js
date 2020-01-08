@@ -1,7 +1,6 @@
 if (cc && cc.Label) {
     const gfx = cc.gfx;
     const Label = cc.Label;
-    const isDevTool = window.navigator && (/AlipayIDE/.test(window.navigator.userAgent));
 
     // shared label canvas
     let _sharedLabelCanvas = document.createElement('canvas');
@@ -30,7 +29,7 @@ if (cc && cc.Label) {
             // init blend factor
             let dstBlendFactor = cc.macro.BlendFactor.ONE_MINUS_SRC_ALPHA;
             let srcBlendFactor;
-            if (!(isDevTool || this.font instanceof cc.BitmapFont)) {
+            if (!(__globalAdapter.isDevTool || this.font instanceof cc.BitmapFont)) {
                 // Premultiplied alpha on runtime
                 srcBlendFactor = cc.macro.BlendFactor.ONE;
             }
