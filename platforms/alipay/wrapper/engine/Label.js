@@ -24,31 +24,26 @@ if (cc && cc.LabelComponent) {
     });
 
     // fix ttf font black border
-    // Object.assign(Label.prototype, {
-    //     setMaterial(index, material) {
-    //         cc.RenderComponent.prototype.setMaterial.call(this, index, material);
-
-    //         // init blend factor
-    //         let dstBlendFactor = cc.macro.BlendFactor.ONE_MINUS_SRC_ALPHA;
-    //         let srcBlendFactor;
-    //         if (!(isDevTool || this.font instanceof cc.BitmapFont)) {
-    //             // Premultiplied alpha on runtime
-    //             srcBlendFactor = cc.macro.BlendFactor.ONE;
-    //         }
-    //         else {
-    //             srcBlendFactor = cc.macro.BlendFactor.SRC_ALPHA;
-    //         }
-
-    //         // set blend func
-    //         material.effect.setBlend(
-    //             true,
-    //             gfx.BLEND_FUNC_ADD,
-    //             srcBlendFactor, dstBlendFactor,
-    //             gfx.BLEND_FUNC_ADD,
-    //             srcBlendFactor, dstBlendFactor,
-    //         );
-
-    //         material.setDirty(true);
-    //     },
-    // });
+    Object.assign(Label.prototype, {
+        _updateBlendFunc () {
+            if(this._material) {
+                let dstBlendFactor = cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA;
+                let srcBlendFactor;
+                if (!(isDevTool || this.font instanceof cc.BitmapFont)) {
+                    srcBlendFactor = cc.GFXBlendFactor.ONE;
+                }
+                else {
+                    srcBlendFactor = cc.GFXBlendFactor.SRC_ALPHA;
+                }
+                const target = this._blendTemplate.blendState.targets[0];
+                if (target.blendDst !== dstBlendFactor || target.blendSrc !== srcBlendFactor) {
+                    target.blendDst = dstBlendFactor;
+                    target.blendSrc = srcBlendFactor;
+                    this._blendTemplate.depthStencilState = this._material.passes[0].depthStencilState;
+                    this._blendTemplate.rasterizerState = this._material.passes[0].rasterizerState;
+                    this._material.overridePipelineStates(this._blendTemplate, 0);
+                }
+            }
+        }
+    });
 }
