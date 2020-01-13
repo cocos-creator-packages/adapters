@@ -11,12 +11,10 @@ function downloadAudio (item, callback) {
     callback(null, dom);
 }
 
-if (cc.sys.os === cc.sys.OS_ANDROID) {
-    cc.loader.downloader.addHandlers({
-        // Audio
-        mp3 : downloadAudio,
-        ogg : downloadAudio,
-        wav : downloadAudio,
-        m4a : downloadAudio,
-    });
-}
+cc.loader.downloader.addHandlers({
+    // Audio
+    mp3 : downloadAudio,
+    ogg : downloadAudio,
+    wav : downloadAudio,
+    m4a : downloadAudio,
+});
