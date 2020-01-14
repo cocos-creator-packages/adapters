@@ -86,10 +86,7 @@
             let delegate = this._delegate;
             let cbs = this._eventListeners;
 
-            cbs.onKeyboardInput = function (res) {        
-                if (res.value.length > delegate.maxLength) {
-                    res.value = res.value.slice(0, delegate.maxLength);
-                }
+            cbs.onKeyboardInput = function (res) {
                 if (delegate._string !== res.value) {
                     delegate.editBoxTextChanged(res.value);
                 }
