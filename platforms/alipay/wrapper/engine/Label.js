@@ -21,12 +21,17 @@ if (cc && cc.Label) {
         });
     });
 
+    let _originUpdateMaterial = Label.prototype._updateMaterialWebgl;
     // fix ttf font black border
     Object.assign(Label.prototype, {
-        setMaterial(index, material) {
-            cc.RenderComponent.prototype.setMaterial.call(this, index, material);
+        _updateMaterialWebgl () {
+            _originUpdateMaterial.call(this);
 
             // init blend factor
+            let material = this._materials[0];
+            if (!this._frame || !material) {
+                return;
+            }
             let dstBlendFactor = cc.macro.BlendFactor.ONE_MINUS_SRC_ALPHA;
             let srcBlendFactor;
             if (!(__globalAdapter.isDevTool || this.font instanceof cc.BitmapFont)) {
@@ -45,8 +50,6 @@ if (cc && cc.Label) {
                 gfx.BLEND_FUNC_ADD,
                 srcBlendFactor, dstBlendFactor,
             );
-
-            material.setDirty(true);
         },
     });
 }
