@@ -265,6 +265,9 @@
     };
 
     _p.disable = function () {
+        if (this._playing) {
+            this._video.pause();
+        }
         this.setVisible(false);
     };
 
