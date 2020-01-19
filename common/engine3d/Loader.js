@@ -1,9 +1,10 @@
 cc.loader.downloader.loadSubpackage = function(name, completeCallback) {
-    wx.loadSubpackage({
+    __globalAdapter.loadSubpackage({
         name: name,
         success: function() {
-            Promise.all(packageModuleIds.map((id) => {
-                return ccEnv.imp(id);
+            Promise.all(
+            packageModuleIds[name].map((id) => {
+                System.import(id);
             })).then(() => {
                 if (completeCallback) { completeCallback(); }
             }).catch((error) => {
