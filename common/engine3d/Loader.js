@@ -1,15 +1,11 @@
 cc.loader.downloader.loadSubpackage = function(name, completeCallback) {
-    wx.loadSubpackage({
+    __globalAdapter.loadSubpackage({
         name: name,
         success: function() {
-            Promise.all(packageModuleIds.map((id) => {
-                return ccEnv.imp(id);
-            })).then(() => {
-                if (completeCallback) { completeCallback(); }
-            }).catch((error) => {
-                console.error(error);
-                if (completeCallback) { completeCallback(new Error(`Failed to load subpackage ${name}`)); }
+            packageModuleIds[name].forEach(id => {
+                System.import(id);
             });
+            completeCallback && completeCallback();
         },
         fail: function() {
             if (completeCallback) { completeCallback(new Error(`Failed to load subpackage ${name}`)); }
