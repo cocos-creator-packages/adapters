@@ -1,15 +1,16 @@
-require('./libs/wrapper/builtin/index');
-window.DOMParser = require('./libs/common/xmldom/dom-parser').DOMParser;
-require('./libs/common/engine/globalAdapter');
-require('./libs/wrapper/unify');
-require('./libs/wrapper/systemInfo');
+require('adapter-js-path');
+__globalAdapter.init();
+
 // Ensure getting the system info in open data context
-window.__globalAdapter.init(function () {
+__globalAdapter.handleSystemInfo(() => {
+    require('cocos2d-js-path');
+    require('physics-js-path');
+    __globalAdapter.adaptEngine();
+    require('./ccRequire');
+
     require('./src/settings');
-    require(window._CCSettings.debug ? 'cocos2d-js' : 'cocos2d-js-min');
-    require('./libs/common/engine');
     // Introduce Cocos Service here
-    require('./main');
+    require('./main');  // TODO: move to common
 
     // Adjust devicePixelRatio
     cc.view._maxPixelRatio = 4;
@@ -18,10 +19,7 @@ window.__globalAdapter.init(function () {
     window.REMOTE_SERVER_ROOT = "";
     window.SUBCONTEXT_ROOT = "";
     
-    if (cc.sys.platform === cc.sys.BAIDU_GAME_SUB) {
-        require('./libs/wrapper/sub-context-adapter');
-    }
-    else {
+    if (cc.sys.platform !== cc.sys.BAIDU_GAME_SUB) {
         // Release Image objects after uploaded gl texture
         cc.macro.CLEANUP_IMAGE_CACHE = true;
     }

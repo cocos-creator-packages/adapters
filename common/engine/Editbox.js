@@ -6,6 +6,7 @@
     const EditBox = cc.EditBox;
     const js = cc.js;
     const KeyboardReturnType = EditBox.KeyboardReturnType;
+    const MAX_VALUE = 65535;
     let _currentEditBoxImpl = null;
 
     function getKeyboardReturnType (type) {
@@ -25,9 +26,9 @@
         return 'done';
     }
 
+    const BaseClass = EditBox._ImplClass;
     function MiniGameEditBoxImpl () {
-        this._delegate = null;
-        this._editing = false;
+        BaseClass.call(this);
 
         this._eventListeners = {
             onKeyboardInput: null,
@@ -36,7 +37,7 @@
         };
     }
 
-    js.extend(MiniGameEditBoxImpl, EditBox._ImplClass);
+    js.extend(MiniGameEditBoxImpl, BaseClass);
     EditBox._ImplClass = MiniGameEditBoxImpl;
 
     Object.assign(MiniGameEditBoxImpl.prototype, {
@@ -47,20 +48,7 @@
             }
             this._delegate = delegate;
         },
-    
-        setFocus (value) {
-            if (value) {
-                this.beginEditing();
-            }
-            else {
-                this.endEditing();
-            }
-        },
-    
-        isFocused () {
-            return this._editing;
-        },
-    
+
         beginEditing () {
             // In case multiply register events
             if (_currentEditBoxImpl === this) {
@@ -86,7 +74,7 @@
             _currentEditBoxImpl = this;
             delegate.editBoxEditingDidBegan();
         },
-        
+
         endEditing () {
             this._hideKeyboard();
             let cbs = this._eventListeners;
@@ -98,10 +86,7 @@
             let delegate = this._delegate;
             let cbs = this._eventListeners;
 
-            cbs.onKeyboardInput = function (res) {        
-                if (res.value.length > delegate.maxLength) {
-                    res.value = res.value.slice(0, delegate.maxLength);
-                }
+            cbs.onKeyboardInput = function (res) {
                 if (delegate._string !== res.value) {
                     delegate.editBoxTextChanged(res.value);
                 }
@@ -145,10 +130,11 @@
         _showKeyboard () {
             let delegate = this._delegate;
             let multiline = (delegate.inputMode === EditBox.InputMode.ANY);
+            let maxLength = (delegate.maxLength < 0 ? MAX_VALUE : delegate.maxLength);
 
             __globalAdapter.showKeyboard({
                 defaultValue: delegate._string,
-                maxLength: delegate.maxLength,
+                maxLength: maxLength,
                 multiple: multiline,
                 confirmHold: false,
                 confirmType: getKeyboardReturnType(delegate.returnType),

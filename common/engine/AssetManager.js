@@ -17,7 +17,7 @@ function downloadScript (url, options, onComplete) {
         onComplete && onComplete(new Error('Can not load remote scripts'));
     }
     else {
-        require('../../../' + url);
+        __cocos_require__(url);
         onComplete && onComplete(null);
     }
 }
@@ -27,14 +27,12 @@ function downloadDomAudio (url, options, onComplete) {
         onComplete = options;
         options = null;
     }
+    
     var dom = document.createElement('audio');
-    dom.addEventListener('load', function () {
-        onComplete && onComplete(null, dom);
-    });
-    dom.addEventListener('error', function () {
-        onComplete && onComplete(new Error('load audio failed ' + url), null);
-    });
     dom.src = url;
+    
+    // HACK: wechat does not callback when load large number of assets
+    onComplete && onComplete(null, dom);
 }
 
 function readFile(filePath, options, onComplete) {
@@ -194,6 +192,7 @@ downloader.register({
     '.binary' : downloadArrayBuffer,
     '.bin': downloadArrayBuffer,
     '.dbbin': downloadArrayBuffer,
+    '.skel': downloadArrayBuffer,
 
     '.mp4': downloadVideo,
     '.avi': downloadVideo,
