@@ -2,10 +2,13 @@ cc.loader.downloader.loadSubpackage = function(name, completeCallback) {
     __globalAdapter.loadSubpackage({
         name: name,
         success: function() {
-            packageModuleIds[name].forEach(id => {
-                System.import(id);
+            Promise.all(packageModuleIds[name].map((id) => {
+                return System.import(id);
+            })).then(() => {
+                if (completeCallback) { completeCallback(); }
+            }).catch((err) => {
+                if (completeCallback) { completeCallback(err); }
             });
-            completeCallback && completeCallback();
         },
         fail: function() {
             if (completeCallback) { completeCallback(new Error(`Failed to load subpackage ${name}`)); }
