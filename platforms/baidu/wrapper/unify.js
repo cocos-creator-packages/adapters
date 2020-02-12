@@ -1,4 +1,4 @@
-const utils = require('./utils');
+const utils = require('../../../common/utils');
 
 if (window.__globalAdapter) {
     let globalAdapter = window.__globalAdapter;

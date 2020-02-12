@@ -1,11 +1,10 @@
 const inputManager = _cc.inputManager;
 const renderer = cc.renderer;
 const game = cc.game;
-let _frameRate = 60;
 
 Object.assign(game, {
     setFrameRate (frameRate) {
-        _frameRate = frameRate;
+        this.config.frameRate = frameRate;
         if (__globalAdapter.setPreferredFramesPerSecond) {
             __globalAdapter.setPreferredFramesPerSecond(frameRate);
         }
@@ -20,24 +19,6 @@ Object.assign(game, {
         }
     },
 
-    _setAnimFrame () {
-        this._lastTime = performance.now();
-        this._frameTime = 1000 / _frameRate;
-    
-        if (_frameRate !== 60 && _frameRate !== 30) {
-            window.requestAnimFrame = this._stTime;
-            window.cancelAnimFrame = this._ctTime;
-        }
-        else {
-            window.requestAnimFrame = window.requestAnimationFrame || this._stTime;
-            window.cancelAnimFrame = window.cancelAnimationFrame || this._ctTime;
-        }
-    },
-
-    getFrameRate () {
-        return _frameRate;
-    },
-
     _runMainLoop () {
         var self = this, callback, config = self.config,
             director = cc.director,
@@ -48,7 +29,7 @@ Object.assign(game, {
         callback = function () {
             if (!self._paused) {
                 self._intervalId = window.requestAnimFrame(callback);
-                if (_frameRate === 30  && !__globalAdapter.setPreferredFramesPerSecond) {
+                if (frameRate === 30  && !__globalAdapter.setPreferredFramesPerSecond) {
                     if (skip = !skip) {
                         return;
                     }

@@ -1,14 +1,11 @@
-const systemInfo = require('../common/engine/globalAdapter/BaseSystemInfo');
-let adaptSysFunc = systemInfo.adaptSys;
+const adapter = window.__globalAdapter;
+let adaptSysFunc = adapter.adaptSys;
 
-Object.assign(systemInfo, {
+Object.assign(adapter, {
     // Extend adaptSys interface
     adaptSys (sys) {
         adaptSysFunc.call(this, sys);
         sys.platform = sys.XIAOMI_GAME;
         sys.browserType = sys.BROWSER_TYPE_XIAOMI_GAME;
-    }
+    },
 });
-
-__globalAdapter.init = systemInfo.init;
-__globalAdapter.adaptSys = systemInfo.adaptSys;

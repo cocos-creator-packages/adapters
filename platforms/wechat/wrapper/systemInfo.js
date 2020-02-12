@@ -1,11 +1,11 @@
-const systemInfo = require('../common/engine/globalAdapter/BaseSystemInfo');
-let adaptSysFunc = systemInfo.adaptSys;
+const adapter = window.__globalAdapter;
+let adaptSysFunc = adapter.adaptSys;
 
-Object.assign(systemInfo, {
+Object.assign(adapter, {
     // Extend adaptSys interface
     adaptSys (sys) {
         adaptSysFunc.call(this, sys);
-        // baidugame subdomain
+        // wechatgame subdomain
         if (!wx.getOpenDataContext) {
             sys.platform = sys.WECHAT_GAME_SUB;
           sys.browserType = sys.BROWSER_TYPE_WECHAT_GAME_SUB;
@@ -21,8 +21,5 @@ Object.assign(systemInfo, {
             }
             return !!cc.renderer.device.ext(name);
         };
-    }
+    },
 });
-
-__globalAdapter.init = systemInfo.init;
-__globalAdapter.adaptSys = systemInfo.adaptSys;
