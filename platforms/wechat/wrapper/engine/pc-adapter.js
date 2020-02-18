@@ -118,25 +118,25 @@ function adaptMouseEvent () {
         wx[funcName](res => {
             let mouseEvent = inputMgr.getMouseEvent(res, canvasRect, engineEventType);
             mouseEvent.setButton(res.button || 0);
-            handler(res, mouseEvent, canvasRect);
+            handler(res, mouseEvent);
             eventMgr.dispatchEvent(mouseEvent);
         });
     }
-    registerMouseEvent('onMouseDown', EventMouse.DOWN, function () {
+    registerMouseEvent('onMouseDown', EventMouse.DOWN, function (res, mouseEvent) {
         inputMgr._mousePressed = true;
         inputMgr.handleTouchesBegin([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
     });
-    registerMouseEvent('onMouseUp', EventMouse.UP, function () {
+    registerMouseEvent('onMouseUp', EventMouse.UP, function (res, mouseEvent) {
         inputMgr._mousePressed = false;
         inputMgr.handleTouchesEnd([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
     });
-    registerMouseEvent('onMouseMove', EventMouse.MOVE, function () {
+    registerMouseEvent('onMouseMove', EventMouse.MOVE, function (res, mouseEvent) {
         inputMgr.handleTouchesMove([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
         if (!inputMgr._mousePressed) {
             mouseEvent.setButton(null);
         }
     });
-    registerMouseEvent('onWheel', EventMouse.SCROLL, function () {
+    registerMouseEvent('onWheel', EventMouse.SCROLL, function (res, mouseEvent) {
         mouseEvent.setScrollData(0, -res.deltaY);
     });
 }
