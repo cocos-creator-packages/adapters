@@ -7,7 +7,7 @@ Object.assign(adapter, {
     adaptSys (sys) {
         adaptSysFunc.call(this, sys);
         // TODO: add mac platform
-        if (env.platform !== 'windows') {
+        if (env.platform === 'windows') {
             sys.isMobile = false;
             sys.os = sys.OS_WINDOWS;
         }

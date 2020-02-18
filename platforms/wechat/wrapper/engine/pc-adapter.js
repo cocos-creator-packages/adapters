@@ -5,6 +5,7 @@ const EventKeyboard = cc.Event.EventKeyboard;
 const EventMouse = cc.Event.EventMouse;
 
 function adaptKeyboadEvent () {
+    // map from CCMacro
     const key2keyCode = {
         Backspace: 8,
         Tab: 9,
@@ -113,37 +114,30 @@ function adaptMouseEvent () {
         width: window.innerWidth,
         height: window.innerHeight,
     };
-    
-    let mouseEventDatas = [
-        ["onMouseDown", EventMouse.DOWN, function (res, mouseEvent, canvasRect) {
-            inputMgr._mousePressed = true;
-            inputMgr.handleTouchesBegin([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
-        }],
-        ["onMouseUp", EventMouse.UP, function (res, mouseEvent, canvasRect) {
-            inputMgr._mousePressed = false;
-            inputMgr.handleTouchesEnd([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
-        }],
-        ["onMouseMove", EventMouse.MOVE, function (res, mouseEvent, canvasRect) {
-            inputMgr.handleTouchesMove([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
-            if (!inputMgr._mousePressed) {
-                mouseEvent.setButton(null);
-            }
-        }],
-        ["onWheel", EventMouse.SCROLL, function (res, mouseEvent) {
-            mouseEvent.setScrollData(0, -res.deltaY);
-        }],
-    ];
-
-    mouseEventDatas.forEach(eventData => {
-        let funcName = eventData[0];
-        let type = eventData[1];
-        let handler = eventData[2];
+    function registerMouseEvent (funcName, engineEventType, handler) {
         wx[funcName](res => {
-            let mouseEvent = inputMgr.getMouseEvent(res, canvasRect, type);
+            let mouseEvent = inputMgr.getMouseEvent(res, canvasRect, engineEventType);
             mouseEvent.setButton(res.button || 0);
             handler(res, mouseEvent, canvasRect);
             eventMgr.dispatchEvent(mouseEvent);
         });
+    }
+    registerMouseEvent('onMouseDown', EventMouse.DOWN, function () {
+        inputMgr._mousePressed = true;
+        inputMgr.handleTouchesBegin([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
+    });
+    registerMouseEvent('onMouseUp', EventMouse.UP, function () {
+        inputMgr._mousePressed = false;
+        inputMgr.handleTouchesEnd([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
+    });
+    registerMouseEvent('onMouseMove', EventMouse.MOVE, function () {
+        inputMgr.handleTouchesMove([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
+        if (!inputMgr._mousePressed) {
+            mouseEvent.setButton(null);
+        }
+    });
+    registerMouseEvent('onWheel', EventMouse.SCROLL, function () {
+        mouseEvent.setScrollData(0, -res.deltaY);
     });
 }
 
@@ -153,12 +147,12 @@ function adaptMouseEvent () {
         return;
     }
     inputMgr.registerSystemEvent = function () {
-        if (inputMgr._isRegisterEvent) {
+        if (this._isRegisterEvent) {
             return;
         }
         this._glView = cc.view;
         adaptKeyboadEvent();
         adaptMouseEvent();
-        inputMgr._isRegisterEvent = true;
+        this._isRegisterEvent = true;
     };
 })();

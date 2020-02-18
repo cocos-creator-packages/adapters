@@ -1,3 +1,3 @@
 require('./Loader');
 require('./VideoPlayer');
-require('./pcAdapter');
+require('./pc-adapter');
