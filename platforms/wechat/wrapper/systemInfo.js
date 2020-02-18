@@ -1,10 +1,16 @@
 const adapter = window.__globalAdapter;
+const env = wx.getSystemInfoSync();
 let adaptSysFunc = adapter.adaptSys;
 
 Object.assign(adapter, {
     // Extend adaptSys interface
     adaptSys (sys) {
         adaptSysFunc.call(this, sys);
+        // TODO: add mac platform
+        if (env.platform !== 'windows') {
+            sys.isMobile = false;
+            sys.os = sys.OS_WINDOWS;
+        }
         // wechatgame subdomain
         if (!wx.getOpenDataContext) {
             sys.platform = sys.WECHAT_GAME_SUB;
