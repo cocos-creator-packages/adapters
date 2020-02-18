@@ -1,6 +1,6 @@
 const env = wx.getSystemInfoSync();
-const inputMgr = _cc.inputManager;
-const eventMgr = _cc.eventManager;
+const inputMgr = cc.internal.inputManager;
+const eventMgr = cc.internal.eventManager;
 const EventKeyboard = cc.Event.EventKeyboard;
 const EventMouse = cc.Event.EventMouse;
 
