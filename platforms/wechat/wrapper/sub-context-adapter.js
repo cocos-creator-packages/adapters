@@ -1,3 +1,9 @@
+// Ensure recieving message from main context before engine being inited
+let isEngineReady = false;
+cc.game.once(cc.game.EVENT_ENGINE_INITED, function () {
+    isEngineReady = true;
+});
+
 var viewportInMain = {
     x: 0,
     y: 0,
@@ -50,19 +56,21 @@ wx.onMessage(function (data) {
             viewportInMain.width = data.width;
             viewportInMain.height = data.height;
         }
-        else if (data.event === 'mainLoop') {
-            if (data.value) {
-                cc.game.resume();
+        else if (isEngineReady) {
+            if (data.event === 'mainLoop') {
+                if (data.value) {
+                    cc.game.resume();
+                }
+                else {
+                    cc.game.pause();
+                }
             }
-            else {
-                cc.game.pause();
+            else if (data.event === 'frameRate') {
+                cc.game.setFrameRate(data.value);
             }
-        }
-        else if (data.event === 'frameRate') {
-            cc.game.setFrameRate(data.value);
-        }
-        else if (data.event === 'step') {
-            cc.game.step();
+            else if (data.event === 'step') {
+                cc.game.step();
+            }
         }
     }
 });
