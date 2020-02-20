@@ -20,15 +20,6 @@ let systemInfo = {
         else if (env.platform === "ios") {
             sys.os = sys.OS_IOS;
         }
-        else if (env.platform === 'devtools') {
-            sys.isMobile = false;
-            if (system.indexOf('android') > -1) {
-                sys.os = sys.OS_ANDROID;
-            }
-            else if (system.indexOf('ios') > -1) {
-                sys.os = sys.OS_IOS;
-            }
-        }
 
         // Adaptation to Android P
         if (system === 'android p') {
