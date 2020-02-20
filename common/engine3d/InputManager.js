@@ -1,4 +1,4 @@
-const mgr = cc && cc.internal.inputManager;
+const mgr = cc.internal.inputManager;
 const canvasPosition = {
     left: 0,
     top: 0,
