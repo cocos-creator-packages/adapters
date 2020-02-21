@@ -30,7 +30,7 @@ cc.game._prepareFinished = function (cb) {
 
     // Init engine
     this._initEngine();
-    cc.AssetLibrary._loadBuiltins(() => {
+    cc.assetManager.builtins.init(() => {
         // Log engine version
         console.log('Cocos Creator v' + cc.ENGINE_VERSION);
 

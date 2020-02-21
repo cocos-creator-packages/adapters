@@ -9,15 +9,12 @@ window.boot = function () {
 
         var launchScene = settings.launchScene;
 
-        var mainRoot = REMOTE_SERVER_ROOT + '/assets/main';
-        cc.assetManager.loadBundle(mainRoot, function () {
-            // load scene
-            cc.director.loadScene(launchScene, null,
-                function () {
-                    console.log('Success to load scene: ' + launchScene);
-                }
-            );
-        });
+        // load scene
+        cc.director.loadScene(launchScene, null,
+            function () {
+                console.log('Success to load scene: ' + launchScene);
+            }
+        );
     };
 
     // jsList
@@ -43,13 +40,15 @@ window.boot = function () {
 
     var resourcesRoot = REMOTE_SERVER_ROOT + '/assets/resources';
     var internalRoot = REMOTE_SERVER_ROOT + '/assets/internal';
+    var mainRoot = REMOTE_SERVER_ROOT + '/assets/main';
     var count = 0;
     function cb (err) {
         if (!err) count++;
-        if (count === 2) {
+        if (count === 3) {
             cc.game.run(option, onStart);
         }
     }
     cc.assetManager.loadBundle(internalRoot,  cb);
     cc.assetManager.loadBundle(resourcesRoot, cb);
+    cc.assetManager.loadBundle(mainRoot, cb);
 };

@@ -46,7 +46,7 @@
             }
             else {
                 // deferred loading video clip
-                cc.loader.load(clip.nativeUrl, (err, nativeAsset) => {
+                cc.assetManager.loadNativeFile(clip, (err, nativeAsset) => {
                     if (err) {
                         console.error(err);
                         return;
