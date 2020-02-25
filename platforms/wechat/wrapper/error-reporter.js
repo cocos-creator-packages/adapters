@@ -6,7 +6,7 @@ function onErrorMessageHandler (info) {
     wx.offError && wx.offError(onErrorMessageHandler);
 
     var allowTrigger = Math.random() < 0.01;
-    if (wx.isSubContext || !allowTrigger) {
+    if (__globalAdapter.isSubContext || !allowTrigger) {
         return;
     }
 
