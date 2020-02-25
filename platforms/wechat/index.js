@@ -13,6 +13,8 @@ Object.assign(adapter, {
     },
 
     adaptEngine () {
+        require('./wrapper/error-reporter');
+
         require('../../common/engine');
         require('./wrapper/engine');
         require('./wrapper/sub-context-adapter');
