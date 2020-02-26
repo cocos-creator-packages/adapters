@@ -1,5 +1,5 @@
 
-const inputManager = _cc.inputManager;
+const inputManager = cc.internal.inputManager;
 const globalAdapter = window.__globalAdapter;
 
 Object.assign(inputManager, {

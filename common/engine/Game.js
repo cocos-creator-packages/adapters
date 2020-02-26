@@ -1,4 +1,4 @@
-const inputManager = _cc.inputManager;
+const inputManager = cc.internal.inputManager;
 const renderer = cc.renderer;
 const game = cc.game;
 
