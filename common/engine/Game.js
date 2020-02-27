@@ -1,6 +1,7 @@
 const inputManager = cc.internal.inputManager;
 const renderer = cc.renderer;
 const game = cc.game;
+const dynamicAtlasManager = cc.dynamicAtlasManager;
 
 Object.assign(game, {
     setFrameRate (frameRate) {
