@@ -37,17 +37,21 @@ window.boot = function () {
 
     cc.assetManager.init({ bundleVers: settings.bundleVers });
 
-    var resourcesRoot = REMOTE_SERVER_ROOT + '/assets/resources';
-    var internalRoot = REMOTE_SERVER_ROOT + '/assets/internal';
-    var mainRoot = REMOTE_SERVER_ROOT + '/assets/main';
+    let { RESOURCES, INTERNAL, MAIN } = cc.AssetManager.BuiltinBundle;
+    let bundleRoot = [RESOURCES, INTERNAL, MAIN];
+    
     var count = 0;
     function cb (err) {
-        if (!err) count++;
-        if (count === 3) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        count++;
+        if (count === bundleRoot.length) {
             cc.game.run(option, onStart);
         }
     }
-    cc.assetManager.loadBundle(internalRoot,  cb);
-    cc.assetManager.loadBundle(resourcesRoot, cb);
-    cc.assetManager.loadBundle(mainRoot, cb);
+    for (let i = 0; i < bundleRoot.length; i++) {
+        cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + '/assets/' + bundleRoot[i], cb);
+    }
 };
