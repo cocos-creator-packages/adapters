@@ -16,15 +16,6 @@ window.boot = function () {
         );
     };
 
-    // jsList
-    var jsList = settings.jsList;
-
-    if (jsList) {
-        jsList = jsList.map(function (x) {
-            return 'src/' + x;
-        });
-    }
-
     var isSubContext = (cc.sys.platform === cc.sys.BAIDU_GAME_SUB);
 
     var option = {
@@ -32,7 +23,6 @@ window.boot = function () {
         debugMode: settings.debug ? cc.debug.DebugMode.INFO : cc.debug.DebugMode.ERROR,
         showFPS: !isSubContext && settings.debug,
         frameRate: 60,
-        jsList: jsList,
         groupList: settings.groupList,
         collisionMatrix: settings.collisionMatrix,
     }
@@ -44,15 +34,16 @@ window.boot = function () {
     
     var count = 0;
     function cb (err) {
-        if (err) {
-            console.error(err);
-            return;
-        }
+        if (err) return console.error(err);
         count++;
-        if (count === bundleRoot.length) {
+        if (count === bundleRoot.length + 1) {
             cc.game.run(option, onStart);
         }
     }
+
+    // load plugins
+    cc.assetManager.loadScript(settings.jsList.map(function (x) { return 'src/' + x;}), cb);
+
     for (let i = 0; i < bundleRoot.length; i++) {
         cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + '/assets/' + bundleRoot[i], cb);
     }
