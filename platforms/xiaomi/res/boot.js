@@ -42,8 +42,10 @@ window.boot = function () {
     // load plugins
     cc.assetManager.loadScript(settings.jsList.map(function (x) { return 'src/' + x;}), cb);
 
+    if (REMOTE_SERVER_ROOT && !REMOTE_SERVER_ROOT.endsWith('/')) REMOTE_SERVER_ROOT += '/';
+
     // load bundles
     for (let i = 0; i < bundleRoot.length; i++) {
-        cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + '/assets/' + bundleRoot[i], cb);
+        cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + 'assets/' + bundleRoot[i], cb);
     }
 };
