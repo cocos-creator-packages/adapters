@@ -97,13 +97,6 @@ window.boot = function () {
                     cc.sys.BROWSER_TYPE_MIUI,
                 ].indexOf(cc.sys.browserType) < 0);
             }
-
-            // Limit downloading max concurrent task to 2,
-            // more tasks simultaneously may cause performance draw back on some android system / browsers.
-            // You can adjust the number based on your own test result, you have to set it before any loading process to take effect.
-            if (cc.sys.isBrowser && cc.sys.os === cc.sys.OS_ANDROID) {
-                cc.macro.DOWNLOAD_MAX_CONCURRENT = 2;
-            }
         }
 
         var launchScene = settings.launchScene;
