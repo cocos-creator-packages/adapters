@@ -5,7 +5,8 @@ const REGEX = /^\w+:\/\/.*/;
 
 const downloader = cc.assetManager.downloader;
 const isSubDomain = __globalAdapter.isSubContext;
-downloader.limitations[cc.AssetManager.LoadStrategy.NORMAL] = { maxConcurrent: 10, maxRequestsPerFrame: 10 };
+downloader.maxConcurrent = 10;
+downloader.maxRequestsPerFrame = 10;
 var subpackages = new cc.AssetManager.Cache();
 
 function downloadScript (url, options, onComplete) {
