@@ -19,13 +19,8 @@ function downloadAudio (item, callback) {
     }
 
     let audio = my.createInnerAudioContext();
-    audio.onCanPlay(() => {
-      callback(null, audio);
-    });
-    audio.onError(() => {
-      callback(new Error('load audio failed ' + item.url), null);
-    });
     audio.src = item.url;
+    callback(null, audio);
 }
 
 // FIX audio downlaod error on Alipay iOS 10.1.78
