@@ -5,3 +5,4 @@ require('./Game');
 require('./InputManager');
 require('./Loader');
 require('./Screen');
+require('./misc');
