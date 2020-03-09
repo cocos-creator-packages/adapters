@@ -29,7 +29,7 @@ window.boot = function () {
 
     cc.assetManager.init({ bundleVers: settings.bundleVers });
 
-    let { RESOURCES, INTERNAL, MAIN } = cc.AssetManager.BuiltinBundle;
+    let { RESOURCES, INTERNAL, MAIN } = cc.AssetManager.BuiltinBundleName;
     let bundleRoot = [RESOURCES, INTERNAL, MAIN];
     
     var count = 0;
