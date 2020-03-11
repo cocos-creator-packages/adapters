@@ -27,8 +27,7 @@ window.boot = function () {
 
     cc.assetManager.init({ bundleVers: settings.bundleVers });
 
-    let { RESOURCES, INTERNAL, MAIN } = cc.AssetManager.BuiltinBundleName;
-    let bundleRoot = [RESOURCES, INTERNAL, MAIN];
+    let bundleRoot = Object.keys(cc.AssetManager.BuiltinBundleName);
     
     var count = 0;
     function cb (err) {
@@ -46,6 +45,6 @@ window.boot = function () {
 
     // load bundles
     for (let i = 0; i < bundleRoot.length; i++) {
-        cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + 'assets/' + bundleRoot[i], cb);
+        cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + 'assets/' + cc.AssetManager.BuiltinBundleName[bundleRoot[i]], cb);
     }
 };
