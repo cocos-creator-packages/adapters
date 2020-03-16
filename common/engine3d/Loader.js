@@ -2,11 +2,9 @@ cc.loader.downloader.loadSubpackage = function(name, completeCallback) {
     __globalAdapter.loadSubpackage({
         name: name,
         success: function() {
-            Promise.all(packageModuleIds[name].map((id) => {
-                return System.import(id);
-            })).then(() => {
+            return System.import('virtual:///prerequisite-imports/' + name).then(function() {
                 if (completeCallback) { completeCallback(); }
-            }).catch((err) => {
+            }).catch(function(err) {
                 if (completeCallback) { completeCallback(err); }
             });
         },
