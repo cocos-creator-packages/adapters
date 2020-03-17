@@ -31,6 +31,7 @@ var nextCallbacks = [];
 var callbacks = [];
 var cleaning = false;
 var errTest = /the maximum size of the file storage/;
+var suffix = 0;
 
 var cacheManager = {
 
@@ -115,8 +116,8 @@ var cacheManager = {
         var self = cacheManager;
         for (var id in self.cacheQueue) {
             var { srcUrl, isCopy } = self.cacheQueue[id];
-            var time = Date.now();
-            var localPath = self.cacheDir + '/' + time + cc.path.extname(id);
+            var time = Date.now().toString();
+            var localPath = self.cacheDir + '/' + time + String(suffix++) + cc.path.extname(id);
              
             function callback (err) {
                 checkNextPeriod = false;
