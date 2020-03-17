@@ -202,6 +202,8 @@ downloader.register({
     '.mpeg': downloadVideo,
     '.rm': downloadVideo,
     '.rmvb': downloadVideo,
+
+    'default': downloadText,
 });
 
 var transformUrl = !isSubDomain ? function (url, options) {

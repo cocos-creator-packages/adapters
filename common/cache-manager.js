@@ -116,7 +116,7 @@ var cacheManager = {
         for (var id in self.cacheQueue) {
             var { srcUrl, isCopy } = self.cacheQueue[id];
             var time = Date.now();
-            var localPath = self.cacheDir + '/' + time + cc.path.extname(srcUrl);
+            var localPath = self.cacheDir + '/' + time + cc.path.extname(id);
              
             function callback (err) {
                 checkNextPeriod = false;
