@@ -246,5 +246,5 @@ var fsUtils = {
     }
 };
 
-cc.assetManager.fsUtils = module.exports = fsUtils;
+window.fsUtils = module.exports = fsUtils;
 

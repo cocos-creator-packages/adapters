@@ -1,11 +1,12 @@
 const cacheManager = require('../cache-manager');
-const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, readJsonSync, manifestPath } = require('../../wrapper/fs-utils');
+const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, readJsonSync, manifestPath } = window.fsUtils;
 
 const REGEX = /^\w+:\/\/.*/;
 
 const downloader = cc.assetManager.downloader;
 const isSubDomain = __globalAdapter.isSubContext;
-downloader.limitations[cc.AssetManager.LoadStrategy.NORMAL] = { maxConcurrent: 10, maxRequestsPerFrame: 10 };
+downloader.maxConcurrent = 10;
+downloader.maxRequestsPerFrame = 10;
 var subpackages = new cc.AssetManager.Cache();
 
 function downloadScript (url, options, onComplete) {
@@ -201,6 +202,8 @@ downloader.register({
     '.mpeg': downloadVideo,
     '.rm': downloadVideo,
     '.rmvb': downloadVideo,
+
+    'default': downloadText,
 });
 
 var transformUrl = !isSubDomain ? function (url, options) {

@@ -16,15 +16,6 @@ window.boot = function () {
         );
     };
 
-    // jsList
-    var jsList = settings.jsList;
-
-    if (jsList) {
-        jsList = jsList.map(function (x) {
-            return 'src/' + x;
-        });
-    }
-
     var isSubContext = (cc.sys.platform === cc.sys.BAIDU_GAME_SUB);
 
     var option = {
@@ -32,25 +23,30 @@ window.boot = function () {
         debugMode: settings.debug ? cc.debug.DebugMode.INFO : cc.debug.DebugMode.ERROR,
         showFPS: !isSubContext && settings.debug,
         frameRate: 60,
-        jsList: jsList,
         groupList: settings.groupList,
         collisionMatrix: settings.collisionMatrix,
     }
 
     cc.assetManager.init({ bundleVers: settings.bundleVers });
 
-    var resourcesRoot = REMOTE_SERVER_ROOT + '/assets/resources';
-    var internalRoot = REMOTE_SERVER_ROOT + '/assets/internal';
-    var mainRoot = REMOTE_SERVER_ROOT + '/assets/main';
+    let bundleRoot = Object.keys(cc.AssetManager.BuiltinBundleName);
     
     var count = 0;
     function cb (err) {
-        if (!err) count++;
-        if (count === 3) {
+        if (err) return console.error(err);
+        count++;
+        if (count === bundleRoot.length + 1) {
             cc.game.run(option, onStart);
         }
     }
-    cc.assetManager.loadBundle(internalRoot,  cb);
-    cc.assetManager.loadBundle(resourcesRoot, cb);
-    cc.assetManager.loadBundle(mainRoot, cb);
+
+    // load plugins
+    cc.assetManager.loadScript(settings.jsList.map(function (x) { return 'src/' + x;}), cb);
+
+    if (REMOTE_SERVER_ROOT && !REMOTE_SERVER_ROOT.endsWith('/')) REMOTE_SERVER_ROOT += '/';
+
+    // load bundles
+    for (let i = 0; i < bundleRoot.length; i++) {
+        cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + 'assets/' + cc.AssetManager.BuiltinBundleName[bundleRoot[i]], cb);
+    }
 };

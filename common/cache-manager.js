@@ -22,7 +22,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, readDir, deleteFile, rmdirSync } = require('../wrapper/fs-utils');
+const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, readDir, deleteFile, rmdirSync } = window.fsUtils;
 
 var checkNextPeriod = false;
 var writeCacheFileList = null;
@@ -31,6 +31,7 @@ var nextCallbacks = [];
 var callbacks = [];
 var cleaning = false;
 var errTest = /the maximum size of the file storage/;
+var suffix = 0;
 
 var cacheManager = {
 
@@ -115,8 +116,8 @@ var cacheManager = {
         var self = cacheManager;
         for (var id in self.cacheQueue) {
             var { srcUrl, isCopy } = self.cacheQueue[id];
-            var time = Date.now();
-            var localPath = self.cacheDir + '/' + time + cc.path.extname(srcUrl);
+            var time = Date.now().toString();
+            var localPath = self.cacheDir + '/' + time + String(suffix++) + cc.path.extname(id);
              
             function callback (err) {
                 checkNextPeriod = false;

@@ -7,7 +7,6 @@ Object.assign(adapter, {
         _global.DOMParser = require('../../common/xmldom/dom-parser').DOMParser;
         require('./wrapper/unify');
         require('./wrapper/fs-utils');
-        require('../../common/remote-downloader');
         require('../../common/engine/globalAdapter');
         require('./wrapper/systemInfo');
     },
