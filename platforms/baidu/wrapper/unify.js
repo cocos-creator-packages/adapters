@@ -39,7 +39,7 @@ if (window.__globalAdapter) {
         swan.loadSubpackage({
             name: res.name,
             success: function() {
-                return System.import('virtual:///prerequisite-imports/' + name).then(function() {
+                cc$System.import('virtual:///prerequisite-imports/' + name).then(function() {
                     if (res.completeCallback) { res.completeCallback(); }
                 }).catch(function(err) {
                     if (res.completeCallback) { res.completeCallback(err); }
