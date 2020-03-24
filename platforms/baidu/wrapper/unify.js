@@ -34,7 +34,23 @@ if (window.__globalAdapter) {
     globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
 
     // Subpackage
-    utils.cloneMethod(globalAdapter, swan, 'loadSubpackage');
+    // baidu can`t use system So need special treatment
+    globalAdapter.loadSubpackage = function(res) {
+        swan.loadSubpackage({
+            name: res.name,
+            success: function() {
+                return System.import('virtual:///prerequisite-imports/' + name).then(function() {
+                    if (res.completeCallback) { res.completeCallback(); }
+                }).catch(function(err) {
+                    if (res.completeCallback) { res.completeCallback(err); }
+                });
+            },
+            fail: function() {
+                if (res.completeCallback) { res.completeCallback(new Error(`Failed to load subpackage ${res.name}`)); }
+            },
+        });
+    };
+    // utils.cloneMethod(globalAdapter, swan, 'loadSubpackage');
 
     // SharedCanvas
     utils.cloneMethod(globalAdapter, swan, 'getSharedCanvas');
