@@ -35,18 +35,18 @@ if (window.__globalAdapter) {
 
     // Subpackage
     // baidu can`t use system So need special treatment
-    globalAdapter.loadSubpackage = function(res) {
+    cc.loader.downloader.loadSubpackage = function(name, completeCallback) {
         swan.loadSubpackage({
-            name: res.name,
+            name: name,
             success: function() {
                 cc$System.import('virtual:///prerequisite-imports/' + name).then(function() {
-                    if (res.completeCallback) { res.completeCallback(); }
+                    if (completeCallback) { completeCallback(); }
                 }).catch(function(err) {
-                    if (res.completeCallback) { res.completeCallback(err); }
+                    if (completeCallback) { completeCallback(err); }
                 });
             },
             fail: function() {
-                if (res.completeCallback) { res.completeCallback(new Error(`Failed to load subpackage ${res.name}`)); }
+                if (completeCallback) { completeCallback(new Error(`Failed to load subpackage ${name}`)); }
             },
         });
     };
