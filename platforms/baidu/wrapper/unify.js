@@ -34,7 +34,8 @@ if (window.__globalAdapter) {
     globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
 
     // Subpackage
-    utils.cloneMethod(globalAdapter, swan, 'loadSubpackage');
+    // baidu can`t use system So need special treatment
+    // utils.cloneMethod(globalAdapter, swan, 'loadSubpackage');
 
     // SharedCanvas
     utils.cloneMethod(globalAdapter, swan, 'getSharedCanvas');

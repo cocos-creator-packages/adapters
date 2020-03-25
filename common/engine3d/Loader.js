@@ -2,7 +2,7 @@ cc.loader.downloader.loadSubpackage = function(name, completeCallback) {
     __globalAdapter.loadSubpackage({
         name: name,
         success: function() {
-            return System.import('virtual:///prerequisite-imports/' + name).then(function() {
+            System.import('virtual:///prerequisite-imports/' + name).then(function() {
                 if (completeCallback) { completeCallback(); }
             }).catch(function(err) {
                 if (completeCallback) { completeCallback(err); }
