@@ -229,6 +229,6 @@ var cacheManager = {
         if (!err) cacheManager.outOfStorage = false;
     }
     
-}
+};
 
 cc.assetManager.cacheManager = module.exports = cacheManager;
