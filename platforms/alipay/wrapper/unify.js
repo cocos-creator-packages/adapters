@@ -37,7 +37,8 @@ if (window.__globalAdapter) {
     };
 
     // FrameRate
-    utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
+    // Alipay not supported
+    // utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
 
     // Keyboard
     utils.cloneMethod(globalAdapter, my, 'showKeyboard');
