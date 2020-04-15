@@ -34,8 +34,7 @@ if (window.__globalAdapter) {
     utils.cloneMethod(globalAdapter, my, 'createInnerAudioContext');
 
     // FrameRate
-    // Alipay not supported
-    // utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
+    utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
 
     // Keyboard
     utils.cloneMethod(globalAdapter, my, 'showKeyboard');
