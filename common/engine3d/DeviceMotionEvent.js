@@ -22,7 +22,7 @@ Object.assign(inputManager, {
     _registerAccelerometerEvent () {
         this._accelCurTime = 0;
         let self = this;
-        this._acceleration = new cc.Acceleration();
+        this._acceleration = new cc.internal.Acceleration();
         globalAdapter.startAccelerometer(function (res) {
             self._acceleration.x = res.x;
             self._acceleration.y = res.y;
