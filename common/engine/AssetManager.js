@@ -269,6 +269,13 @@ cc.assetManager.loadBundle = function (root, options, onComplete) {
     }
 };
 
+cc.assetManager._getScriptPath = function (bundleRoot, bundleVersion) {
+    let path = cc.path;
+    let bundleName = path.basename(bundleRoot);
+    let indexFile = bundleVersion ? `index.${bundleVersion}.js` : 'index.js';
+    return `src/scripts/${bundleName}/${indexFile}`;
+}
+
 if (!isSubDomain) {
     cc.assetManager.transformPipeline.append(function (task) {
         var input = task.output = task.input;
