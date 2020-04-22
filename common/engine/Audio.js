@@ -19,29 +19,28 @@ if (Audio) {
         },
 
         setCurrentTime (num) {
-            if (!this._element) {
-                this._nextTime = num;
-                return;
-            }
-            this._nextTime = 0;
-            this._element.seek(num);
+            let self = this;
+            this._src && this._src._ensureLoaded(function () {
+                self._element.seek(num);
+            });
         },
 
         stop () {
-            if (!this._element) return;
-            // HACK: some platforms won't set currentTime to 0 when stop audio
-            this._element.seek(0);
-            this._element.stop();
-            this._unbindEnded();
-            this.emit('stop');
-            this._state = Audio.State.STOPPED;
+            let self = this;
+            this._src && this._src._ensureLoaded(function () {
+                // HACK: some platforms won't set currentTime to 0 when stop audio
+                self._element.seek(0);
+                self._element.stop();
+                self._unbindEnded();
+                self.emit('stop');
+                self._state = Audio.State.STOPPED;
+            });
         },
 
-        _bindEnded (callback) {
-            callback = callback || this._onended;
+        _bindEnded () {
             let elem = this._element;
             if (elem) {
-              elem.onEnded && elem.onEnded(callback);
+              elem.onEnded && elem.onEnded(this._onended);
             }
         },
 
