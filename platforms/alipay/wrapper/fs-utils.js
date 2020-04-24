@@ -28,6 +28,8 @@ var fsUtils = {
 
     fs,
 
+    subpackages: Object.create(null),
+
     manifestPath: 'game.json',
 
     getUserDataPath () {

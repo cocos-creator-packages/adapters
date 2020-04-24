@@ -30,7 +30,10 @@ window.boot = function () {
 
     cc.assetManager.init({ bundleVers: settings.bundleVers });
 
-    let bundleRoot = Object.keys(cc.AssetManager.BuiltinBundleName);
+    let { RESOURCES, INTERNAL, MAIN, START_SCENE } = cc.AssetManager.BuiltinBundleName;
+    let bundleRoot = [INTERNAL, MAIN];
+    settings.hasStartSceneBundle && bundleRoot.push(START_SCENE);
+    settings.hasResourcesBundle && bundleRoot.push(RESOURCES);
     
     var count = 0;
     function cb (err) {
@@ -48,6 +51,7 @@ window.boot = function () {
 
     // load bundles
     for (let i = 0; i < bundleRoot.length; i++) {
-        cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + 'assets/' + cc.AssetManager.BuiltinBundleName[bundleRoot[i]], cb);
+        let bundleName = bundleRoot[i];
+        cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + (fsUtils.subpackages[bundleName] ? 'subpackages/' : 'assets/') + bundleName, cb);
     }
 };

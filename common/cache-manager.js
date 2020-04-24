@@ -22,7 +22,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, readDir, deleteFile, rmdirSync } = window.fsUtils;
+const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, deleteFile, rmdirSync } = window.fsUtils;
 
 var checkNextPeriod = false;
 var writeCacheFileList = null;
@@ -40,14 +40,14 @@ var cacheManager = {
     cachedFileName: 'cacheList.json',
 
     // whether or not cache asset into user's storage space
-    saveFile: true,
+    cacheEnabled: true,
 
     // cache one per cycle
-    cachePeriod: 500,
+    cacheInterval: 500,
 
-    deletePeriod: 500,
+    deleteInterval: 500,
 
-    writeFilePeriod: 2000,
+    writeFileInterval: 2000,
 
     // whether or not storage space has run out
     outOfStorage: false,
@@ -59,6 +59,14 @@ var cacheManager = {
     cacheQueue: {},
 
     version: '1.0',
+
+    getCache (url) {
+        return this.cachedFiles.has(url) ? this.cachedFiles.get(url).url : '';
+    },
+
+    getTemp (url) {
+        return this.tempFiles.has(url) ? this.tempFiles.get(url) : '';
+    },
 
     init () {
         this.cacheDir = getUserDataPath() + '/' + this.cacheDir;
@@ -100,7 +108,7 @@ var cacheManager = {
 
     writeCacheFile (cb) {
         if (!writeCacheFileList) {
-            writeCacheFileList = setTimeout(cacheManager._write, cacheManager.writeFilePeriod);
+            writeCacheFileList = setTimeout(cacheManager._write, cacheManager.writeFileInterval);
             if (startWrite === true) {
                 cb && nextCallbacks.push(cb);
             }
@@ -115,9 +123,17 @@ var cacheManager = {
     _cache () {
         var self = cacheManager;
         for (var id in self.cacheQueue) {
-            var { srcUrl, isCopy } = self.cacheQueue[id];
+            var { srcUrl, isCopy, cacheBundleRoot } = self.cacheQueue[id];
             var time = Date.now().toString();
-            var localPath = self.cacheDir + '/' + time + String(suffix++) + cc.path.extname(id);
+
+            var localPath = '';
+
+            if (cacheBundleRoot) {
+                var localPath = `${self.cacheDir}/${cacheBundleRoot}/${time}${suffix++}${cc.path.extname(id)}`;
+            }
+            else {
+                var localPath = `${self.cacheDir}/${time}${suffix++}${cc.path.extname(id)}`;
+            }
              
             function callback (err) {
                 checkNextPeriod = false;
@@ -128,13 +144,13 @@ var cacheManager = {
                         return;
                     }
                 } else {
-                    self.cachedFiles.add(id, { url: localPath, lastTime: time });
+                    self.cachedFiles.add(id, { bundle: cacheBundleRoot, url: localPath, lastTime: time });
                     delete self.cacheQueue[id];
                     self.writeCacheFile();
                 }
                 if (!cc.js.isEmptyObject(self.cacheQueue)) {
                     checkNextPeriod = true;
-                    setTimeout(self._cache, self.cachePeriod);
+                    setTimeout(self._cache, self.cacheInterval);
                 }
             }
             if (!isCopy) {
@@ -148,15 +164,15 @@ var cacheManager = {
         checkNextPeriod = false;
     },
 
-    cacheFile (id, srcUrl, saveFile, isCopy) {
-        saveFile = saveFile !== undefined ? saveFile : this.saveFile;
-        if (!saveFile) return;
+    cacheFile (id, srcUrl, cacheEnabled, cacheBundleRoot, isCopy) {
+        cacheEnabled = cacheEnabled !== undefined ? cacheEnabled : this.cacheEnabled;
+        if (!cacheEnabled || this.cacheQueue[id] || this.cachedFiles.has(id)) return;
 
-        this.cacheQueue[id] = { srcUrl, isCopy };
+        this.cacheQueue[id] = { srcUrl, cacheBundleRoot, isCopy };
         if (!checkNextPeriod) {
             checkNextPeriod = true;
             if (!this.outOfStorage) {
-                setTimeout(this._cache, this.cachePeriod);
+                setTimeout(this._cache, this.cacheInterval);
             }
             else {
                 checkNextPeriod = false;
@@ -164,28 +180,16 @@ var cacheManager = {
         }
     },
 
-    cleanAllCaches () {
-        var self = this;
-        readDir(this.cacheDir, function (err, list) {
-            if (err) return;
-            var toDelete = self.cachedFiles._map;
-            self.cachedFiles.clear();
-            self.writeCacheFile(function () {
-                for (var srcUrl in toDelete) {
-                    var url = toDelete[srcUrl].url;
-                    if (url.startsWith(self.cacheDir)) continue;
-                    deleteFile(url, self._deleteFileCB);
-                }
-                for (var i = 0, l = list.length; i < l; i ++) {
-                    var path = list[i];
-                    if (path === self.cachedFileName) continue;
-                    deleteFile(self.cacheDir + '/' + list[i], self._deleteFileCB);
-                }
-            });
-        });
+    clearCache () {
+        rmdirSync(this.cacheDir, true);
+        this.cachedFiles = new cc.AssetManager.Cache();
+        makeDirSync(this.cacheDir, true);
+        var cacheFilePath = this.cacheDir + '/' + this.cachedFileName;
+        this.outOfStorage = false;
+        writeFileSync(cacheFilePath, JSON.stringify({ files: this.cachedFiles._map, outOfStorage: false, version: this.version }), 'utf8');
     },
 
-    cleanLRU () {
+    clearLRU () {
         if (cleaning) return;
         cleaning = true;
         var caches = [];
@@ -204,18 +208,18 @@ var cacheManager = {
                 var item = caches.pop();
                 deleteFile(item.url, self._deleteFileCB);
                 if (caches.length > 0) { 
-                    setTimeout(deferredDelete, self.deletePeriod); 
+                    setTimeout(deferredDelete, self.deleteInterval); 
                 }
                 else {
                     cleaning = false;
                 }
             }
-            setTimeout(deferredDelete, self.deletePeriod);
+            setTimeout(deferredDelete, self.deleteInterval);
         });
 
     },
 
-    cleanCache (url) {
+    removeCache (url) {
         if (this.cachedFiles.has(url)) {
             var self = this;
             var path = this.cachedFiles.remove(url).url;
@@ -227,6 +231,10 @@ var cacheManager = {
 
     _deleteFileCB (err) {
         if (!err) cacheManager.outOfStorage = false;
+    },
+
+    makeBundleFolder (bundleName) {
+        makeDirSync(this.cacheDir + '/' + bundleName, true);
     }
     
 };

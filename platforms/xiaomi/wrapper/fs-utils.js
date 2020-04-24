@@ -30,6 +30,8 @@ var fsUtils = {
 
     manifestPath: 'manifest.json',
 
+    subpackages: Object.create(null),
+
     getUserDataPath () {
         return qg.env.USER_DATA_PATH;
     },
@@ -245,5 +247,14 @@ var fsUtils = {
         return task;
     }
 };
+
+if (__globalAdapter.isSubContext) {
+    var content = fsUtils.readJsonSync(fsUtils.manifestPath);
+    if (content.subpackages) {
+        for (var i = 0, l = content.subpackages.length; i < l; i++) {
+            fsUtils.subpackages[content.subpackages[i].name] = true;
+        }
+    }
+}
 
 window.fsUtils = module.exports = fsUtils;

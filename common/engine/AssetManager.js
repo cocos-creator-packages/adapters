@@ -1,5 +1,5 @@
 const cacheManager = require('../cache-manager');
-const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, readJsonSync, manifestPath } = window.fsUtils;
+const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages } = window.fsUtils;
 
 const REGEX = /^\w+:\/\/.*/;
 
@@ -7,7 +7,6 @@ const downloader = cc.assetManager.downloader;
 const isSubDomain = __globalAdapter.isSubContext;
 downloader.maxConcurrent = 10;
 downloader.maxRequestsPerFrame = 10;
-var subpackages = new cc.AssetManager.Cache();
 
 function downloadScript (url, options, onComplete) {
     if (typeof options === 'function') {
@@ -50,17 +49,22 @@ function readFile(filePath, options, onComplete) {
     }
 }
 
-function download (url, func, options, onProgress, onComplete) {
+function download (url, func, options, onFileProgress, onComplete) {
     var result = transformUrl(url, options);
     if (result.inLocal) {
         func(result.url, options, onComplete);
     }
     else if (result.inCache) {
         cacheManager.updateLastTime(url)
-        func(result.url, options, onComplete);
+        func(result.url, options, function (err, data) {
+            if (err) {
+                cacheManager.removeCache(url);
+            }
+            onComplete(err, data);
+        });
     }
     else {
-        downloadFile(url, null, options.header, onProgress, function (err, path) {
+        downloadFile(url, null, options.header, onFileProgress, function (err, path) {
             if (err) {
                 onComplete(err, null);
                 return;
@@ -68,7 +72,7 @@ function download (url, func, options, onProgress, onComplete) {
             func(path, options, function (err, data) {
                 if (!err) {
                     cacheManager.tempFiles.add(url, path);
-                    cacheManager.cacheFile(url, path, options.saveFile, true);
+                    cacheManager.cacheFile(url, path, options.cacheEnabled, options.__cacheBundleRoot__, true);
                 }
                 onComplete(err, data);
             });
@@ -78,7 +82,7 @@ function download (url, func, options, onProgress, onComplete) {
 
 var downloadJson = !isSubDomain ? function (url, options, onComplete) {
     options.responseType = "json";
-    download(url, readFile, options, options.onProgress, onComplete);
+    download(url, readFile, options, options.onFileProgress, onComplete);
 } : function (url, options, onComplete) {
     var content = require('../../../' + cc.path.changeExtname(url, '.js'));
     onComplete && onComplete(null, content);
@@ -93,28 +97,28 @@ var loadFont = !isSubDomain ? function (url, options, onComplete) {
 
 function downloadArrayBuffer (url, options, onComplete) {
     options.responseType = "arraybuffer";
-    download(url, readFile, options, options.onProgress, onComplete);
+    download(url, readFile, options, options.onFileProgress, onComplete);
 }
 
 function downloadText (url, options, onComplete) {
     options.responseType = "text";
-    download(url, readFile, options, options.onProgress, onComplete);
+    download(url, readFile, options, options.onFileProgress, onComplete);
 }
 
 function downloadAudio (url, options, onComplete) {
-    download(url, downloadDomAudio, options, options.onProgress, onComplete);
+    download(url, downloadDomAudio, options, options.onFileProgress, onComplete);
 }
 
 function downloadVideo (url, options, onComplete) {
-    download(url, function (url, options, onComplete) { onComplete(null, url); }, options, options.onProgress, onComplete);
+    download(url, function (url, options, onComplete) { onComplete(null, url); }, options, options.onFileProgress, onComplete);
 }
 
 function downloadFont (url, options, onComplete) {
-    download(url, loadFont, options, options.onProgress, onComplete);
+    download(url, loadFont, options, options.onFileProgress, onComplete);
 }
 
 function downloadImage (url, options, onComplete) {
-    download(url, downloader.downloadDomImage, options, options.onProgress, onComplete);
+    download(url, downloader.downloadDomImage, options, options.onFileProgress, onComplete);
 }
 
 function subdomainDownloadImage (url, options, onComplete) {
@@ -134,12 +138,34 @@ function downloadImageInAndroid (url, options, onComplete) {
     else {
         downloader.downloadDomImage(url, options, function (err, img) {
             if (!err) {
-                cacheManager.cacheFile(url, url, options.saveFile, false);
+                cacheManager.cacheFile(url, url, options.cacheEnabled, options.__cacheBundleRoot__, false);
             }
             onComplete(err, img);
         });
     }
 }
+
+function downloadBundle (url, options, onComplete) {
+    let bundleName = cc.path.basename(url);
+    var version = options.version || cc.assetManager.downloader.bundleVers[bundleName];
+    var config = version ?  `${url}/config.${version}.json` : `${url}/config.json`;
+
+    if (subpackages[bundleName]) {
+        loadSubpackage(bundleName, options.onFileProgress, function (err) {
+            if (err) {
+                onComplete(err, null);
+                return;
+            }
+            downloadJson(config, options, onComplete);
+        });
+    }
+    else {
+        var js = version ?  `src/scripts/${bundleName}/index.${version}.js` : `src/scripts/${bundleName}/index.js`;
+        __cocos_require__(js);
+        cacheManager.makeBundleFolder(bundleName);
+        downloadJson(config, options, onComplete);
+    }
+};
 
 downloadImage = isSubDomain ? subdomainDownloadImage : (cc.sys.os === cc.sys.OS_ANDROID ? downloadImageInAndroid : downloadImage);
 downloader.downloadDomAudio = downloadDomAudio;
@@ -203,6 +229,8 @@ downloader.register({
     '.rm': downloadVideo,
     '.rmvb': downloadVideo,
 
+    'bundle': downloadBundle,
+
     'default': downloadText,
 });
 
@@ -236,46 +264,18 @@ var transformUrl = !isSubDomain ? function (url, options) {
     return { url };
 }
 
-var originLoadBundle = cc.assetManager.loadBundle;
-cc.assetManager.loadBundle = function (root, options, onComplete) {
-    if (subpackages.has(root)) {
-        if (typeof options === 'function') {
-            onComplete = options;
-            options = null;
-        }
-        options = options || {};
-        
-        loadSubpackage(subpackages.get(root), options.onProgress, function (err) {
-            if (err) {
-                onComplete && onComplete(err, null);
-                return;
-            }
-            options.priority = options.priority || 2;
-            var ver = options.ver || cc.assetManager.bundleVers[cc.path.basename(root)];
-            var config = ver ?  `${root}/config.${ver}.json`: `${root}/config.json`;
-            downloader.download(root, config, '.json', options, function (err, json) {
-                var bundle = null;
-                if (!err) {
-                    bundle = new cc.AssetManager.Bundle();
-                    json.base = root + '/';
-                    bundle.init(json);
-                }
-                onComplete && onComplete(err, bundle);
-            });
-        });
-    }
-    else {
-        return originLoadBundle.call(cc.assetManager, root, options, onComplete);
-    }
-};
-
 if (!isSubDomain) {
     cc.assetManager.transformPipeline.append(function (task) {
         var input = task.output = task.input;
         for (var i = 0, l = input.length; i < l; i++) {
             var item = input[i];
             var options = item.options;
-            if (!item.config) options.saveFile = options.saveFile !== undefined ? options.saveFile : false;
+            if (!item.config) {
+                options.cacheEnabled = options.cacheEnabled !== undefined ? options.cacheEnabled : false;
+            }
+            else {
+                options.__cacheBundleRoot__ = item.config.name;
+            }
         }
     });
 
@@ -284,13 +284,11 @@ if (!isSubDomain) {
         originInit.call(cc.assetManager, options);
         cacheManager.init();
     };
-    var content = readJsonSync(manifestPath);
-    if (content.subpackages) {
-        for (var i = 0, l = content.subpackages.length; i < l; i++) {
-            subpackages.add(content.subpackages[i].root, content.subpackages[i].name);
-        }
-    }
 }
 
-
+if (cc.js.isEmptyObject(subpackages)) {
+    cc.loader.downloader.loadSubpackage = function (name, completeCallback) {
+        cc.assetManager.loadBundle('subpackage/' + name, null, completeCallback);
+    };
+}
 
