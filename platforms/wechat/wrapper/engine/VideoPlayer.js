@@ -46,13 +46,12 @@
             }
             else {
                 // deferred loading video clip
-                cc.assetManager.loadNativeFile(clip, (err, nativeAsset) => {
+                cc.assetManager.postLoadNative(clip, (err) => {
                     if (err) {
-                        console.error(err);
+                        console.error(err.message, err.stack);
                         return;
                     }
-                    clip._nativeAsset = nativeAsset;
-                    this._impl.setURL(nativeAsset, this._mute || this._volume === 0);
+                    this._impl.setURL(clip._nativeAsset, this._mute || this._volume === 0);
                 });
             }
         }
