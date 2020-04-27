@@ -49,6 +49,6 @@ window.boot = function () {
     // load bundles
     for (let i = 0; i < bundleRoot.length; i++) {
         let bundleName = bundleRoot[i];
-        cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + (fsUtils.subpackages[bundleName] ? 'subpackages/' : 'assets/') + bundleName, cb);
+        cc.assetManager.loadBundle(`${fsUtils.subpackages[bundleName] ? 'subpackages/' : (REMOTE_SERVER_ROOT + 'assets/')}${bundleName}`, cb);
     }
 };

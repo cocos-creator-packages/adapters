@@ -248,7 +248,7 @@ var fsUtils = {
     }
 };
 
-if (__globalAdapter.isSubContext) {
+if (!__globalAdapter.isSubContext) {
     var content = fsUtils.readJsonSync(fsUtils.manifestPath);
     if (content.subpackages) {
         for (var i = 0, l = content.subpackages.length; i < l; i++) {
