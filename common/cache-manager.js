@@ -32,6 +32,7 @@ var callbacks = [];
 var cleaning = false;
 var errTest = /the maximum size of the file storage/;
 var suffix = 0;
+const REGEX = /^\w+:\/\/.*/;
 
 var cacheManager = {
 
@@ -41,6 +42,9 @@ var cacheManager = {
 
     // whether or not cache asset into user's storage space
     cacheEnabled: true,
+
+    // whether or not auto clear cache when storage ran out
+    autoClear: true,
 
     // cache one per cycle
     cacheInterval: 500,
@@ -140,7 +144,7 @@ var cacheManager = {
                 if (err)  {
                     if (errTest.test(err.message)) {
                         self.outOfStorage = true;
-                        self.clearLRU();
+                        self.autoClear && self.clearLRU();
                         return;
                     }
                 } else {
@@ -187,6 +191,9 @@ var cacheManager = {
         var cacheFilePath = this.cacheDir + '/' + this.cachedFileName;
         this.outOfStorage = false;
         writeFileSync(cacheFilePath, JSON.stringify({ files: this.cachedFiles._map, outOfStorage: false, version: this.version }), 'utf8');
+        cc.assetManager.bundles.forEach(bundle => {
+            if (REGEX.test(bundle.base)) this.makeBundleFolder(bundle.name);
+        });
     },
 
     clearLRU () {
@@ -194,6 +201,7 @@ var cacheManager = {
         cleaning = true;
         var caches = [];
         this.cachedFiles.forEach(function (val, key) {
+            if (val.bundle === 'internal') continue;
             caches.push({ originUrl: key, url: val.url, lastTime: val.lastTime });
         });
         caches.sort(function (a, b) {
@@ -207,7 +215,7 @@ var cacheManager = {
         this.writeCacheFile(function () {
             function deferredDelete () {
                 var item = caches.pop();
-                deleteFile(item.url, self._deleteFileCB);
+                deleteFile(item.url, self._deleteFileCB.bind(self));
                 if (caches.length > 0) { 
                     setTimeout(deferredDelete, self.deleteInterval); 
                 }
@@ -225,7 +233,7 @@ var cacheManager = {
             var self = this;
             var path = this.cachedFiles.remove(url).url;
             this.writeCacheFile(function () {
-                deleteFile(path, self._deleteFileCB);
+                deleteFile(path, self._deleteFileCB.bind(self));
             });
         }
     },

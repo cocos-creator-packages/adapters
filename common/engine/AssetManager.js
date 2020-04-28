@@ -4,9 +4,12 @@ const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpa
 const REGEX = /^\w+:\/\/.*/;
 
 const downloader = cc.assetManager.downloader;
+const presets = cc.assetManager.presets;
 const isSubDomain = __globalAdapter.isSubContext;
-downloader.maxConcurrent = 10;
-downloader.maxRequestsPerFrame = 10;
+downloader.maxConcurrent = 8;
+downloader.maxRequestsPerFrame = 8;
+presets['scene'].maxConcurrent = 10;
+presets['scene'].maxRequestsPerFrame = 10;
 
 function downloadScript (url, options, onComplete) {
     if (typeof options === 'function') {
@@ -163,6 +166,8 @@ function downloadBundle (url, options, onComplete) {
         var js = version ?  `src/scripts/${bundleName}/index.${version}.js` : `src/scripts/${bundleName}/index.js`;
         __cocos_require__(js);
         cacheManager.makeBundleFolder(bundleName);
+        options.cacheEnabled = true;
+        options.__cacheBundleRoot__ = bundleName;
         downloadJson(config, options, onComplete);
     }
 };
