@@ -201,7 +201,7 @@ var cacheManager = {
         cleaning = true;
         var caches = [];
         this.cachedFiles.forEach(function (val, key) {
-            if (val.bundle === 'internal') continue;
+            if (val.bundle === 'internal') return;
             caches.push({ originUrl: key, url: val.url, lastTime: val.lastTime });
         });
         caches.sort(function (a, b) {
