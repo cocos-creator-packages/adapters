@@ -291,7 +291,7 @@ if (!isSubDomain) {
     };
 }
 
-if (cc.js.isEmptyObject(subpackages)) {
+if (!cc.js.isEmptyObject(subpackages)) {
     cc.loader.downloader.loadSubpackage = function (name, completeCallback) {
         cc.assetManager.loadBundle('subpackages/' + name, null, completeCallback);
     };
