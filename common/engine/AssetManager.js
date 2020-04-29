@@ -87,7 +87,8 @@ var downloadJson = !isSubDomain ? function (url, options, onComplete) {
     options.responseType = "json";
     download(url, readFile, options, options.onFileProgress, onComplete);
 } : function (url, options, onComplete) {
-    var content = require('../../../' + cc.path.changeExtname(url, '.js'));
+    var { url } = transformUrl(url, options);
+    var content = require('../' + cc.path.changeExtname(url, '.js'));
     onComplete && onComplete(null, content);
 }
 
@@ -165,7 +166,7 @@ function downloadBundle (url, options, onComplete) {
     else {
         var js = version ?  `src/scripts/${bundleName}/index.${version}.js` : `src/scripts/${bundleName}/index.js`;
         __cocos_require__(js);
-        cacheManager.makeBundleFolder(bundleName);
+        REGEX.test(url) && cacheManager.makeBundleFolder(bundleName);
         options.cacheEnabled = true;
         options.__cacheBundleRoot__ = bundleName;
         downloadJson(config, options, onComplete);
@@ -291,9 +292,7 @@ if (!isSubDomain) {
     };
 }
 
-if (!cc.js.isEmptyObject(subpackages)) {
-    cc.loader.downloader.loadSubpackage = function (name, completeCallback) {
-        cc.assetManager.loadBundle('subpackages/' + name, null, completeCallback);
-    };
-}
+cc.loader.downloader.loadSubpackage = function (name, completeCallback) {
+    cc.assetManager.loadBundle((subpackages[name] ? 'subpackages/' : 'assets/') + name, null, completeCallback);
+};
 

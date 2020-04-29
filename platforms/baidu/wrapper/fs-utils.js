@@ -30,8 +30,6 @@ var fsUtils = {
 
     subpackages: Object.create(null),
 
-    manifestPath: 'game.json',
-
     getUserDataPath () {
         return swan.env.USER_DATA_PATH;
     },
@@ -51,7 +49,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail: function (res) {
-                cc.warn('Delete file failed: ' + res.errMsg);
+                console.warn('Delete file failed: ' + res.errMsg);
                 onComplete && onComplete(new Error(res.errMsg));
             }
         });
@@ -68,12 +66,12 @@ var fsUtils = {
                     if (res.filePath) {
                         fsUtils.deleteFile(res.filePath);
                     }
-                    cc.warn('Download file failed: ' + res.statusCode);
+                    console.warn('Download file failed: ' + res.statusCode);
                     onComplete && onComplete(new Error(res.statusCode), null);
                 }
             },
             fail: function (res) {
-                cc.warn('Download file failed: ' + res.errMsg);
+                console.warn('Download file failed: ' + res.errMsg);
                 onComplete && onComplete(new Error(res.errMsg), null);
             }
         }
@@ -91,7 +89,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail: function (res) {
-                cc.warn('Save file failed: ' + res.errMsg);
+                console.warn('Save file failed: ' + res.errMsg);
                 onComplete && onComplete(new Error(res.errMsg));
             }
         });
@@ -105,7 +103,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail: function (res) {
-                cc.warn('Copy file failed: ' + res.errMsg);
+                console.warn('Copy file failed: ' + res.errMsg);
                 onComplete && onComplete(new Error(res.errMsg));
             }
         });
@@ -120,7 +118,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail: function (res) {
-                cc.warn('Write file failed: ' + res.errMsg);
+                console.warn('Write file failed: ' + res.errMsg);
                 onComplete && onComplete(new Error(res.errMsg));
             }
         });
@@ -132,7 +130,7 @@ var fsUtils = {
             return null;
         }
         catch (e) {
-            cc.warn('Write file failed: ' + e.message);
+            console.warn('Write file failed: ' + e.message);
             return new Error(e.message);
         }
     },
@@ -145,7 +143,7 @@ var fsUtils = {
                 onComplete && onComplete(null, res.data);
             },
             fail: function (res) {
-                cc.warn('Read file failed: ' + res.errMsg);
+                console.warn('Read file failed: ' + res.errMsg);
                 onComplete && onComplete (new Error(res.errMsg), null);
             }
         });
@@ -158,7 +156,7 @@ var fsUtils = {
                 onComplete && onComplete(null, res.files);
             },
             fail: function (res) {
-                cc.warn('Read directory failed: ' + res.errMsg);
+                console.warn('Read directory failed: ' + res.errMsg);
                 onComplete && onComplete(new Error(res.errMsg), null);
             }
         });
@@ -180,7 +178,7 @@ var fsUtils = {
                     out = JSON.parse(text);
                 }
                 catch (e) {
-                    cc.warn('Read json failed: ' + e.message);
+                    console.warn('Read json failed: ' + e.message);
                     err = new Error(e.message);
                 }
             }
@@ -194,7 +192,7 @@ var fsUtils = {
             return JSON.parse(str);
         }
         catch (e) {
-            cc.warn('Read json failed: ' + e.message);
+            console.warn('Read json failed: ' + e.message);
             return new Error(e.message);
         }
     },
@@ -205,7 +203,7 @@ var fsUtils = {
             return null;
         }
         catch (e) {
-            cc.warn('Make directory failed: ' + e.message);
+            console.warn('Make directory failed: ' + e.message);
             return new Error(e.message);
         }
     },
@@ -215,7 +213,7 @@ var fsUtils = {
             fs.rmdirSync(dirPath, recursive);
         }
         catch (e) {
-            cc.warn('rm directory failed: ' + e.message);
+            console.warn('rm directory failed: ' + e.message);
             return new Error(e.message);
         }
     },
@@ -239,7 +237,7 @@ var fsUtils = {
                 onComplete && onComplete();
             },
             fail: function (res) {
-                cc.warn('Load Subpackage failed: ' + res.errMsg);
+                console.warn('Load Subpackage failed: ' + res.errMsg);
                 onComplete && onComplete(new Error(`Failed to load subpackage ${name}: ${res.errMsg}`));
             }
         });
@@ -247,15 +245,6 @@ var fsUtils = {
         return task;
     }
 };
-
-if (!__globalAdapter.isSubContext) {
-    var content = fsUtils.readJsonSync(fsUtils.manifestPath);
-    if (content.subpackages) {
-        for (var i = 0, l = content.subpackages.length; i < l; i++) {
-            fsUtils.subpackages[content.subpackages[i].name] = true;
-        }
-    }
-}
 
 window.fsUtils = module.exports = fsUtils;
 

@@ -15,6 +15,8 @@ window.boot = function () {
             }
         );
     };
+    
+    settings.subpackages.forEach(x => fsUtils.subpackages[x] = true);
 
     var option = {
         id: 'GameCanvas',
@@ -24,7 +26,7 @@ window.boot = function () {
         groupList: settings.groupList,
         collisionMatrix: settings.collisionMatrix,
     }
-
+    
     cc.assetManager.init({ bundleVers: settings.bundleVers });
 
     let { RESOURCES, INTERNAL, MAIN, START_SCENE } = cc.AssetManager.BuiltinBundleName;
