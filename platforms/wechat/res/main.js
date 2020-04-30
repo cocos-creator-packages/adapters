@@ -17,6 +17,8 @@ window.boot = function () {
 
     };
 
+    settings.subpackages.forEach(x => fsUtils.subpackages[x] = true);
+    
     var isSubContext = (cc.sys.platform === cc.sys.WECHAT_GAME_SUB);
 
     var option = {
@@ -30,11 +32,14 @@ window.boot = function () {
 
     cc.assetManager.init({ bundleVers: settings.bundleVers });
 
-    let bundleRoot = Object.keys(cc.AssetManager.BuiltinBundleName);
+    let { RESOURCES, INTERNAL, MAIN, START_SCENE } = cc.AssetManager.BuiltinBundleName;
+    let bundleRoot = [INTERNAL, MAIN];
+    settings.hasStartSceneBundle && bundleRoot.push(START_SCENE);
+    settings.hasResourcesBundle && bundleRoot.push(RESOURCES);
     
     var count = 0;
     function cb (err) {
-        if (err) return console.error(err);
+        if (err) return console.error(err.message, err.stack);
         count++;
         if (count === bundleRoot.length + 1) {
             cc.game.run(option, onStart);
@@ -48,6 +53,7 @@ window.boot = function () {
 
     // load bundles
     for (let i = 0; i < bundleRoot.length; i++) {
-        cc.assetManager.loadBundle(REMOTE_SERVER_ROOT + 'assets/' + cc.AssetManager.BuiltinBundleName[bundleRoot[i]], cb);
+        let bundleName = bundleRoot[i];
+        cc.assetManager.loadBundle(`${fsUtils.subpackages[bundleName] ? 'subpackages/' : (REMOTE_SERVER_ROOT + 'assets/')}${bundleName}`, cb);
     }
 };

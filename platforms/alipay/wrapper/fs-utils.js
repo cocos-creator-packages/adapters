@@ -28,7 +28,7 @@ var fsUtils = {
 
     fs,
 
-    manifestPath: 'game.json',
+    subpackages: Object.create(null),
 
     getUserDataPath () {
         return my.env.USER_DATA_PATH;
@@ -49,7 +49,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail: function (res) {
-                cc.warn('Delete file failed: ' + res.errorMessage);
+                console.warn('Delete file failed: ' + res.errorMessage);
                 onComplete && onComplete(new Error(res.errorMessage));
             }
         });
@@ -67,7 +67,7 @@ var fsUtils = {
                 }
             },
             fail: function (res) {
-                cc.warn('Download file failed: ' + res.errorMessage);
+                console.warn('Download file failed: ' + res.errorMessage);
                 onComplete && onComplete(new Error(res.errorMessage), null);
             }
         }
@@ -84,7 +84,7 @@ var fsUtils = {
                 onComplete && onComplete(null, res.savedFilePath);
             },
             fail: function (res) {
-                cc.warn('Save file failed: ' + res.errorMessage);
+                console.warn('Save file failed: ' + res.errorMessage);
                 onComplete && onComplete(new Error(res.errorMessage), null);
             }
         });
@@ -98,7 +98,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail: function (res) {
-                cc.warn('Copy file failed: ' + res.errorMessage);
+                console.warn('Copy file failed: ' + res.errorMessage);
                 onComplete && onComplete(new Error(res.errorMessage));
             }
         });
@@ -113,7 +113,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail: function (res) {
-                cc.warn('Write file failed: ' + res.errorMessage);
+                console.warn('Write file failed: ' + res.errorMessage);
                 onComplete && onComplete(new Error(res.errorMessage));
             }
         });
@@ -129,7 +129,7 @@ var fsUtils = {
             return null;
         }
         catch (e) {
-            cc.warn('Write file failed: ' + e.message);
+            console.warn('Write file failed: ' + e.message);
             return new Error(e.message);
         }
     },
@@ -142,7 +142,7 @@ var fsUtils = {
                 onComplete && onComplete(null, res.data);
             },
             fail: function (res) {
-                cc.warn('Read file failed: ' + res.errorMessage);
+                console.warn('Read file failed: ' + res.errorMessage);
                 onComplete && onComplete (new Error(res.errorMessage), null);
             }
         });
@@ -155,7 +155,7 @@ var fsUtils = {
                 onComplete && onComplete(null, res.files);
             },
             fail: function (res) {
-                cc.warn('Read directory failed: ' + res.errorMessage);
+                console.warn('Read directory failed: ' + res.errorMessage);
                 onComplete && onComplete(new Error(res.errorMessage), null);
             }
         });
@@ -177,7 +177,7 @@ var fsUtils = {
                     out = JSON.parse(text);
                 }
                 catch (e) {
-                    cc.warn('Read json failed: ' + e.message);
+                    console.warn('Read json failed: ' + e.message);
                     err = new Error(e.message);
                 }
             }
@@ -194,7 +194,7 @@ var fsUtils = {
             return JSON.parse(res.data);
         }
         catch (e) {
-            cc.warn('Read json failed: ' + e.message);
+            console.warn('Read json failed: ' + e.message);
             return new Error(e.message);
         }
     },
@@ -208,7 +208,7 @@ var fsUtils = {
             return null;
         }
         catch (e) {
-            cc.warn('Make directory failed: ' + e.message);
+            console.warn('Make directory failed: ' + e.message);
             return new Error(e.message);
         }
     },
@@ -218,7 +218,7 @@ var fsUtils = {
             fs.rmdirSync({ dirPath, recursive });
         }
         catch (e) {
-            cc.warn('rm directory failed: ' + e.message);
+            console.warn('rm directory failed: ' + e.message);
             return new Error(e.message);
         }
     },
