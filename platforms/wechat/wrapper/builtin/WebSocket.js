@@ -74,7 +74,7 @@ export default class WebSocket {
   }
 
   send(data) {
-    if (typeof data !== 'string' && !(data instanceof ArrayBuffer)) {
+    if (typeof data !== 'string' && !(data instanceof ArrayBuffer) && !ArrayBuffer.isView(data)) {
       throw new TypeError(`Failed to send message: The data ${data} is invalid`)
     }
 
