@@ -16,7 +16,7 @@ window.boot = function () {
         );
     };
     
-    settings.subpackages.forEach(x => fsUtils.subpackages[x] = true);
+    settings.subpackages.forEach(x => fsUtils.subpackages[x] = 'subpackages/' + x);
 
     var option = {
         id: 'GameCanvas',
