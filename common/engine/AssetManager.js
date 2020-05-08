@@ -6,9 +6,9 @@ const REGEX = /^\w+:\/\/.*/;
 const downloader = cc.assetManager.downloader;
 const presets = cc.assetManager.presets;
 const isSubDomain = __globalAdapter.isSubContext;
-downloader.maxConcurrent = 8;
+downloader.maxConcurrency = 8;
 downloader.maxRequestsPerFrame = 64;
-presets['scene'].maxConcurrent = 10;
+presets['scene'].maxConcurrency = 10;
 presets['scene'].maxRequestsPerFrame = 64;
 
 function downloadScript (url, options, onComplete) {
