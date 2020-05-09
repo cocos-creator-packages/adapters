@@ -15,7 +15,7 @@ window.boot = function () {
             }
         );
     };
-    settings.subpackages.forEach(x => fsUtils.subpackages[x] = true);
+    settings.subpackages.forEach(x => fsUtils.subpackages[x] = 'subpackages/' + x);
     
     var isSubContext = (cc.sys.platform === cc.sys.BAIDU_GAME_SUB);
 

@@ -293,6 +293,6 @@ if (!isSubDomain) {
 }
 
 cc.loader.downloader.loadSubpackage = function (name, completeCallback) {
-    cc.assetManager.loadBundle((subpackages[name] ? 'subpackages/' : 'assets/') + name, null, completeCallback);
+    cc.assetManager.loadBundle(subpackages[name] ? subpackages[name] : ('assets/' + name), null, completeCallback);
 };
 
