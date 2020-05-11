@@ -1,8 +1,8 @@
 /*!
- *
+ * 
  * 			adpater.js
- * 			create time "1.0.1_1912261500"
- *
+ * 			create time "1.0.1_2004071100"
+ * 			
  */
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -161,7 +161,6 @@ var Audio = function (_HTMLAudioElement) {
         });
 
         innerAudioContext.onPlay(function () {
-            // this._paused = _innerAudioContextMap.get(this).paused
             _this._paused = false;
             _this.dispatchEvent({ type: 'play' });
             if (typeof _this.onplay === "function") {
@@ -178,7 +177,6 @@ var Audio = function (_HTMLAudioElement) {
         });
 
         innerAudioContext.onEnded(function () {
-            // this._paused = _innerAudioContextMap.get(this).paused
             _this._paused = false;
             _this.dispatchEvent({ type: 'ended' });
             _this.readyState = HAVE_ENOUGH_DATA;
@@ -189,7 +187,6 @@ var Audio = function (_HTMLAudioElement) {
         });
 
         innerAudioContext.onError(function () {
-            // this._paused = _innerAudioContextMap.get(this).paused
             _this._paused = true;
             _this.dispatchEvent({ type: 'error' });
             if (typeof _this.onerror === "function") {
@@ -371,6 +368,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
 function InvalidCharacterError(message) {
     this.message = message;
 }
@@ -786,7 +784,8 @@ var EventTarget = function () {
             var listeners = _events.get(this)[event.type];
             if (listeners) {
                 for (var i = 0; i < listeners.length; i++) {
-                    listeners[i].call(this, event);
+                    var listener = listeners[i];
+                    listener.call(this, event);
                 }
             }
         }
@@ -1377,7 +1376,12 @@ var WebSocket = function () {
         var task = my.connectSocket({
             url: url,
             multiple: true,
-            protocols: Array.isArray(protocols) ? protocols : [protocols]
+            protocols: Array.isArray(protocols) ? protocols : [protocols],
+            fail: function fail(res) {
+                if (typeof _this.onerror === 'function') {
+                    _this.onerror(new Error(res.errorMessage));
+                }
+            }
         });
         _taskMap.set(this, task);
 
@@ -1420,6 +1424,8 @@ var WebSocket = function () {
     _createClass(WebSocket, [{
         key: 'send',
         value: function send(data) {
+            var _this2 = this;
+
             if (typeof data !== 'string' && !(data instanceof ArrayBuffer)) {
                 throw new TypeError('Failed to send message: The data ' + data + ' is invalid');
             }
@@ -1429,6 +1435,11 @@ var WebSocket = function () {
                 p.isBuffer = true;
             }
             p.data = data;
+            p.fail = function (res) {
+                if (typeof _this2.onerror === 'function') {
+                    _this2.onerror(new Error(res.errorMessage));
+                }
+            };
             var task = _taskMap.get(this);
             task.send(p);
         }
@@ -1626,7 +1637,7 @@ var XMLHttpRequest = function (_EventTarget) {
           data: data,
           url: _url.get(this),
           method: _method.get(this),
-          header: _requestHeader.get(this),
+          headers: _requestHeader.get(this),
           timeout: this.timeout,
           dataType: this.dataType,
           responseType: this.responseType,
@@ -1669,7 +1680,8 @@ var XMLHttpRequest = function (_EventTarget) {
           },
 
           fail: function fail(res) {
-            var errorMessage = res.errorMessage;
+            var _res$errorMessage = res.errorMessage,
+                errorMessage = _res$errorMessage === undefined ? "" : _res$errorMessage;
 
             var data = res.data || "";
             if (data.includes("超时") || errorMessage.includes("超时")) {
