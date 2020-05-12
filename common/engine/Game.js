@@ -110,6 +110,9 @@ Object.assign(game, {
             }
         }
 
+        wx.onAudioInterruptionEnd && wx.onAudioInterruptionEnd(onShown);
+        wx.onAudioInterruptionBegin && wx.onAudioInterruptionBegin(onHidden);
+
         // Maybe not support in open data context
         __globalAdapter.onShow && __globalAdapter.onShow(onShown);
         __globalAdapter.onHide && __globalAdapter.onHide(onHidden);
