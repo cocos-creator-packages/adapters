@@ -109,9 +109,9 @@ Object.assign(game, {
                 game.emit(game.EVENT_SHOW, res);
             }
         }
-
-        wx.onAudioInterruptionEnd && wx.onAudioInterruptionEnd(onShown);
-        wx.onAudioInterruptionBegin && wx.onAudioInterruptionBegin(onHidden);
+        
+        __globalAdapter.onAudioInterruptionEnd && __globalAdapter.onAudioInterruptionEnd(onShown);
+        __globalAdapter.onAudioInterruptionBegin && __globalAdapter.onAudioInterruptionBegin(onHidden);
 
         // Maybe not support in open data context
         __globalAdapter.onShow && __globalAdapter.onShow(onShown);

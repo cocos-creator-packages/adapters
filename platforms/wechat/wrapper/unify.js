@@ -14,6 +14,10 @@ if (window.__globalAdapter) {
     // Audio
     utils.cloneMethod(globalAdapter, wx, 'createInnerAudioContext');
 
+    // AudioInterruption Evnet
+    utils.cloneMethod(globalAdapter, wx, 'onAudioInterruptionEnd');
+    utils.cloneMethod(globalAdapter, wx, 'onAudioInterruptionBegin');
+
     // Video
     utils.cloneMethod(globalAdapter, wx, 'createVideo');
 
