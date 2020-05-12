@@ -1,5 +1,5 @@
 const cacheManager = require('../cache-manager');
-const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages } = window.fsUtils;
+const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages, remoteBundles } = window.fsUtils;
 
 const REGEX = /^\w+:\/\/.*/;
 
@@ -164,7 +164,14 @@ function downloadBundle (url, options, onComplete) {
         });
     }
     else {
-        var js = version ?  `src/scripts/${bundleName}/index.${version}.js` : `src/scripts/${bundleName}/index.js`;
+        let prefix = '';
+        if (REGEX.test(url) || remoteBundles[bundleName]) {
+            prefix = `src/scripts/`;
+        }
+        else {
+            prefix = `assets/`;
+        }
+        var js = version ?  `${prefix}${bundleName}/index.${version}.js` : `${prefix}${bundleName}/index.js`;
         __cocos_require__(js);
         REGEX.test(url) && cacheManager.makeBundleFolder(bundleName);
         options.cacheEnabled = true;
@@ -288,6 +295,8 @@ if (!isSubDomain) {
     var originInit = cc.assetManager.init;
     cc.assetManager.init = function (options) {
         originInit.call(cc.assetManager, options);
+        options.subpackages && options.subpackages.forEach(x => subpackages[x] = 'subpackages/' + x);
+        options.remoteBundles && options.remoteBundles.forEach(x => remoteBundles[x] = true);
         cacheManager.init();
     };
 }

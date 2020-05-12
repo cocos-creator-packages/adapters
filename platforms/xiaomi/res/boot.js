@@ -15,8 +15,6 @@ window.boot = function () {
             }
         );
     };
-    
-    settings.subpackages.forEach(x => fsUtils.subpackages[x] = 'subpackages/' + x);
 
     var option = {
         id: 'GameCanvas',
@@ -27,7 +25,11 @@ window.boot = function () {
         collisionMatrix: settings.collisionMatrix,
     }
     
-    cc.assetManager.init({ bundleVers: settings.bundleVers });
+    cc.assetManager.init({ 
+        bundleVers: settings.bundleVers,
+        subpackages: settings.subpackages,
+        remoteBundles: settings.remoteBundles
+     });
 
     let { RESOURCES, INTERNAL, MAIN, START_SCENE } = cc.AssetManager.BuiltinBundleName;
     let bundleRoot = [INTERNAL, MAIN];
@@ -51,6 +53,6 @@ window.boot = function () {
     // load bundles
     for (let i = 0; i < bundleRoot.length; i++) {
         let bundleName = bundleRoot[i];
-        cc.assetManager.loadBundle(`${fsUtils.subpackages[bundleName] ? 'subpackages/' : (REMOTE_SERVER_ROOT + 'assets/')}${bundleName}`, cb);
+        cc.assetManager.loadBundle(`${fsUtils.subpackages[bundleName] ? 'subpackages/' : (fsUtils.remoteBundles[bundleName] ? REMOTE_SERVER_ROOT + 'remote/' : 'assets/')}${bundleName}`, cb);
     }
 };

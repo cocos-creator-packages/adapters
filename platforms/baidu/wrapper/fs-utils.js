@@ -30,6 +30,8 @@ var fsUtils = {
 
     subpackages: Object.create(null),
 
+    remoteBundles: Object.create(null),
+
     getUserDataPath () {
         return swan.env.USER_DATA_PATH;
     },
