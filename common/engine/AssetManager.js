@@ -1,5 +1,5 @@
 const cacheManager = require('../cache-manager');
-const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages, remoteBundles } = window.fsUtils;
+const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages, remoteBundles, getUserDataPath } = window.fsUtils;
 
 const REGEX = /^\w+:\/\/.*/;
 
@@ -208,7 +208,7 @@ function downloadBundle (url, options, onComplete) {
                         onComplete && onComplete(err);
                         return;
                     }
-                    data.base = unzipPath + '/';
+                    data.base = unzipPath + '/res/';
                     onComplete && onComplete(null, data);
                 });
             }
@@ -289,8 +289,8 @@ downloader.register({
 var transformUrl = !isSubDomain ? function (url, options) {
     var inLocal = false;
     var inCache = false;
-    var isInCacheDir = url.startsWith(cacheManager.cacheDir);
-    if (isInCacheDir) {
+    var isInUserDataPath = url.startsWith(getUserDataPath());
+    if (isInUserDataPath) {
         inLocal = true;
     }
     else if (REGEX.test(url)) {
