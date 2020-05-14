@@ -261,6 +261,10 @@ var fsUtils = {
             },
         })
     },
+
+    isDir (path) {
+        return fs.statSync(path).isDirectory();
+    },
 };
 
 window.fsUtils = module.exports = fsUtils;

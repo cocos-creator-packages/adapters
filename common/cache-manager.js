@@ -22,7 +22,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, deleteFile, rmdirSync, unzip } = window.fsUtils;
+const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, deleteFile, rmdirSync, unzip, isDir } = window.fsUtils;
 
 var checkNextPeriod = false;
 var writeCacheFileList = null;
@@ -233,7 +233,13 @@ var cacheManager = {
             var self = this;
             var path = this.cachedFiles.remove(url).url;
             this.writeCacheFile(function () {
-                deleteFile(path, self._deleteFileCB.bind(self));
+                if (isDir(path)) {
+                    rmdirSync(path, true);
+                    self._deleteFileCB();
+                }
+                else {
+                    deleteFile(path, self._deleteFileCB.bind(self));
+                }
             });
         }
     },
