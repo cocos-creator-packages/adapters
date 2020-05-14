@@ -209,8 +209,6 @@ function downloadBundle (url, options, onComplete) {
                         return;
                     }
                     data.base = unzipPath + '/';
-                    data.importBase = 'res/import';
-                    data.nativeBase = 'res/native';
                     onComplete && onComplete(null, data);
                 });
             }
