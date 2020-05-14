@@ -22,7 +22,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, deleteFile, rmdirSync } = window.fsUtils;
+const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, deleteFile, rmdirSync, unzip } = window.fsUtils;
 
 var checkNextPeriod = false;
 var writeCacheFileList = null;
@@ -161,7 +161,7 @@ var cacheManager = {
                 downloadFile(srcUrl, localPath, null, callback);
             }
             else {
-                copyFile( srcUrl, localPath, callback );
+                copyFile(srcUrl, localPath, callback);
             }
             return;
         }
@@ -244,8 +244,22 @@ var cacheManager = {
 
     makeBundleFolder (bundleName) {
         makeDirSync(this.cacheDir + '/' + bundleName, true);
-    }
-    
+    },
+
+    unzipAndCacheBundle (id, zipFilePath, cacheBundleRoot, onComplete) {
+        let time = Date.now().toString();
+        let targetPath = `${this.cacheDir}/${time}${suffix++}`;
+        let self = this;
+        unzip(zipFilePath, targetPath, function (err) {
+            if (err) {
+                onComplete && onComplete(err);
+                return;
+            }
+            self.cachedFiles.add(id, { bundle: cacheBundleRoot, url: targetPath, lastTime: time });
+            self.writeCacheFile();
+            onComplete && onComplete(null, targetPath);
+        });
+    },    
 };
 
 cc.assetManager.cacheManager = module.exports = cacheManager;
