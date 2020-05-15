@@ -255,7 +255,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail (res) {
-                onComplete && onComplete(new Error(res.errMsg));
+                onComplete && onComplete(new Error('unzip failed: ' + res.errMsg));
             },
         })
     },

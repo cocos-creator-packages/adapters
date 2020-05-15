@@ -256,6 +256,7 @@ var cacheManager = {
         let time = Date.now().toString();
         let targetPath = `${this.cacheDir}/${time}${suffix++}`;
         let self = this;
+        makeDirSync(targetPath, true);
         unzip(zipFilePath, targetPath, function (err) {
             if (err) {
                 rmdirSync(targetPath, true);
