@@ -164,14 +164,13 @@ function downloadBundle (url, options, onComplete) {
         });
     }
     else {
-        let prefix = '';
+        let js;
         if (REGEX.test(url) || remoteBundles[bundleName]) {
-            prefix = `src/scripts/`;
+            js = `src/scripts/${bundleName}/index.js`;
         }
         else {
-            prefix = `assets/`;
+            js = `assets/${bundleName}/index.js`;
         }
-        var js = version ?  `${prefix}${bundleName}/index.${version}.js` : `${prefix}${bundleName}/index.js`;
         __cocos_require__(js);
         REGEX.test(url) && cacheManager.makeBundleFolder(bundleName);
         options.cacheEnabled = true;
