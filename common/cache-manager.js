@@ -258,6 +258,7 @@ var cacheManager = {
         let self = this;
         unzip(zipFilePath, targetPath, function (err) {
             if (err) {
+                rmdirSync(targetPath, true);
                 onComplete && onComplete(err);
                 return;
             }

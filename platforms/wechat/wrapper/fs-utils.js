@@ -248,7 +248,6 @@ var fsUtils = {
     },
 
     unzip (zipFilePath, targetPath, onComplete) {
-        let self = this;
         fs.unzip({
             zipFilePath,
             targetPath,
@@ -256,7 +255,6 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail (res) {
-                self.rmdirSync(targetPath, true);
                 onComplete && onComplete(new Error(res.errMsg));
             },
         })
