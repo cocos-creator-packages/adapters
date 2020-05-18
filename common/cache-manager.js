@@ -22,7 +22,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, deleteFile, rmdirSync } = window.fsUtils;
+const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, deleteFile, rmdirSync, unzip } = window.fsUtils;
 
 var checkNextPeriod = false;
 var writeCacheFileList = null;
@@ -161,7 +161,7 @@ var cacheManager = {
                 downloadFile(srcUrl, localPath, null, callback);
             }
             else {
-                copyFile( srcUrl, localPath, callback );
+                copyFile(srcUrl, localPath, callback);
             }
             return;
         }
@@ -215,7 +215,13 @@ var cacheManager = {
         this.writeCacheFile(function () {
             function deferredDelete () {
                 var item = caches.pop();
-                deleteFile(item.url, self._deleteFileCB.bind(self));
+                if (self._isZipFile(item.originUrl)) {
+                    rmdirSync(item.url, true);
+                    self._deleteFileCB();
+                }
+                else {
+                    deleteFile(item.url, self._deleteFileCB.bind(self));
+                }
                 if (caches.length > 0) { 
                     setTimeout(deferredDelete, self.deleteInterval); 
                 }
@@ -233,7 +239,13 @@ var cacheManager = {
             var self = this;
             var path = this.cachedFiles.remove(url).url;
             this.writeCacheFile(function () {
-                deleteFile(path, self._deleteFileCB.bind(self));
+                if (self._isZipFile(url)) {
+                    rmdirSync(path, true);
+                    self._deleteFileCB();
+                }
+                else {
+                    deleteFile(path, self._deleteFileCB.bind(self));
+                }
             });
         }
     },
@@ -244,8 +256,28 @@ var cacheManager = {
 
     makeBundleFolder (bundleName) {
         makeDirSync(this.cacheDir + '/' + bundleName, true);
-    }
-    
+    },
+
+    unzipAndCacheBundle (id, zipFilePath, cacheBundleRoot, onComplete) {
+        let time = Date.now().toString();
+        let targetPath = `${this.cacheDir}/${time}${suffix++}`;
+        let self = this;
+        makeDirSync(targetPath, true);
+        unzip(zipFilePath, targetPath, function (err) {
+            if (err) {
+                rmdirSync(targetPath, true);
+                onComplete && onComplete(err);
+                return;
+            }
+            self.cachedFiles.add(id, { bundle: cacheBundleRoot, url: targetPath, lastTime: time });
+            self.writeCacheFile();
+            onComplete && onComplete(null, targetPath);
+        });
+    },
+
+    _isZipFile (url) {
+        return url.slice(-4) === '.zip';
+    },
 };
 
 cc.assetManager.cacheManager = module.exports = cacheManager;

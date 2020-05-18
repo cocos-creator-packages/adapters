@@ -1,5 +1,5 @@
 const cacheManager = require('../cache-manager');
-const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages, remoteBundles } = window.fsUtils;
+const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages, remoteBundles, getUserDataPath } = window.fsUtils;
 
 const REGEX = /^\w+:\/\/.*/;
 
@@ -22,6 +22,25 @@ function downloadScript (url, options, onComplete) {
     else {
         __cocos_require__(url);
         onComplete && onComplete(null);
+    }
+}
+
+function handleZip (url, options, onComplete) {
+    let cachedUnzip = cacheManager.cachedFiles.get(url);
+    if (cachedUnzip) {
+        onComplete && onComplete(null, cachedUnzip.url);
+    }
+    else if (REGEX.test(url)) {
+        downloadFile(url, null, options.header, options.onFileProgress, function (err, downloadedZipPath) {
+            if (err) {
+                onComplete && onComplete(err);
+                return;
+            }
+            cacheManager.unzipAndCacheBundle(url, downloadedZipPath, options.__cacheBundleRoot__, onComplete);
+        });
+    }
+    else {
+        cacheManager.unzipAndCacheBundle(url, url, options.__cacheBundleRoot__, onComplete);
     }
 }
 
@@ -58,7 +77,7 @@ function download (url, func, options, onFileProgress, onComplete) {
         func(result.url, options, onComplete);
     }
     else if (result.inCache) {
-        cacheManager.updateLastTime(url)
+        cacheManager.updateLastTime(url);
         func(result.url, options, function (err, data) {
             if (err) {
                 cacheManager.removeCache(url);
@@ -175,7 +194,27 @@ function downloadBundle (url, options, onComplete) {
         REGEX.test(url) && cacheManager.makeBundleFolder(bundleName);
         options.cacheEnabled = true;
         options.__cacheBundleRoot__ = bundleName;
-        downloadJson(config, options, onComplete);
+        downloadJson(config, options, function (err, data) {
+            if (err) {
+                onComplete && onComplete(err);
+                return;
+            }
+            if (data.isZip) {
+                let zipVersion = data.zipVersion;
+                let zipUrl = zipVersion ?  `${url}/res.${zipVersion}.zip` : `${url}/res.zip`;
+                handleZip(zipUrl, options, function (err, unzipPath) {
+                    if (err) {
+                        onComplete && onComplete(err);
+                        return;
+                    }
+                    data.base = unzipPath + '/res/';
+                    onComplete && onComplete(null, data);
+                });
+            }
+            else {
+                onComplete && onComplete(null, data);
+            }
+        });
     }
 };
 
@@ -249,7 +288,11 @@ downloader.register({
 var transformUrl = !isSubDomain ? function (url, options) {
     var inLocal = false;
     var inCache = false;
-    if (REGEX.test(url)) {
+    var isInUserDataPath = url.startsWith(getUserDataPath());
+    if (isInUserDataPath) {
+        inLocal = true;
+    }
+    else if (REGEX.test(url)) {
         if (!options.reload) {
             var cache = cacheManager.cachedFiles.get(url);
             if (cache) {

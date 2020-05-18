@@ -239,7 +239,20 @@ var fsUtils = {
 
     loadSubpackage (name, onProgress, onComplete) {
         throw new Error('Not Implemented');
-    }
+    },
+
+    unzip (zipFilePath, targetPath, onComplete) {
+        fs.unzip({
+            zipFilePath,
+            targetPath,
+            success () {
+                onComplete && onComplete(null);
+            },
+            fail (res) {
+                onComplete && onComplete(new Error('unzip failed: ' + res.errorMessage));
+            },
+        })
+    },
 };
 
 window.fsUtils = module.exports = fsUtils;

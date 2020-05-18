@@ -245,7 +245,20 @@ var fsUtils = {
         });
         onProgress && task.onProgressUpdate(onProgress);
         return task;
-    }
+    },
+
+    unzip (zipFilePath, targetPath, onComplete) {
+        fs.unzip({
+            zipFilePath,
+            targetPath,
+            success () {
+                onComplete && onComplete(null);
+            },
+            fail (res) {
+                onComplete && onComplete(new Error('unzip failed: ' + res.errMsg));
+            },
+        })
+    },
 };
 
 window.fsUtils = module.exports = fsUtils;
