@@ -155,7 +155,7 @@ function adaptMouseEvent () {
 
 (function () {
     // TODO: add mac
-    if (env.platform !== 'windows') {
+    if (__globalAdapter.isSubContext || env.platform !== 'windows') {
         return;
     }
     inputMgr.registerSystemEvent = function () {
