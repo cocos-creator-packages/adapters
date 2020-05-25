@@ -1,5 +1,5 @@
 const cacheManager = require('../cache-manager');
-const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages, remoteBundles, getUserDataPath } = window.fsUtils;
+const { fs, downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages, remoteBundles, getUserDataPath } = window.fsUtils;
 
 const REGEX = /^\w+:\/\/.*/;
 
@@ -208,6 +208,15 @@ function downloadBundle (url, options, onComplete) {
                         return;
                     }
                     data.base = unzipPath + '/res/';
+                    // PATCH: for android alipay version before v10.1.95 (v10.1.95 included)
+                    // to remove in the future
+                    let sys = cc.sys;
+                    if (sys.platform === sys.ALIPAY_GAME && sys.os === sys.OS_ANDROID) {
+                        let resPath = unzipPath + 'res/';
+                        if (fs.accessSync({path: resPath})) {
+                            data.base = resPath;
+                        }
+                    }
                     onComplete && onComplete(null, data);
                 });
             }
