@@ -260,7 +260,7 @@ var cacheManager = {
 
     unzipAndCacheBundle (id, zipFilePath, cacheBundleRoot, onComplete) {
         let time = Date.now().toString();
-        let targetPath = `${this.cacheDir}/${time}${suffix++}`;
+        let targetPath = `${this.cacheDir}/${cacheBundleRoot}/${time}${suffix++}`;
         let self = this;
         makeDirSync(targetPath, true);
         unzip(zipFilePath, targetPath, function (err) {
