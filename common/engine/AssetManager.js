@@ -212,11 +212,10 @@ function downloadBundle (url, options, onComplete) {
                     // to remove in the future
                     let sys = cc.sys;
                     if (sys.platform === sys.ALIPAY_GAME && sys.os === sys.OS_ANDROID) {
-                        let appVersion = my.getSystemInfoSync().version;
-                        let result = /10\.1\.(\d+)/.exec(appVersion);
-                        result = result && result[1] && Number.parseInt(result[1]);
-                        if (result && result <= 95) {
-                            data.base = unzipPath + 'res/';
+                        let resPath = unzipPath + 'res/';
+                        let fs = my.getFileSystemManager();
+                        if (fs.accessSync({path: resPath})) {
+                            data.base = resPath;
                         }
                     }
                     onComplete && onComplete(null, data);
