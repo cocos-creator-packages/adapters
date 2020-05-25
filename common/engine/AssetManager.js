@@ -1,5 +1,5 @@
 const cacheManager = require('../cache-manager');
-const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages, remoteBundles, getUserDataPath } = window.fsUtils;
+const { fs, downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages, remoteBundles, getUserDataPath } = window.fsUtils;
 
 const REGEX = /^\w+:\/\/.*/;
 
@@ -213,7 +213,6 @@ function downloadBundle (url, options, onComplete) {
                     let sys = cc.sys;
                     if (sys.platform === sys.ALIPAY_GAME && sys.os === sys.OS_ANDROID) {
                         let resPath = unzipPath + 'res/';
-                        let fs = my.getFileSystemManager();
                         if (fs.accessSync({path: resPath})) {
                             data.base = resPath;
                         }
