@@ -208,6 +208,17 @@ function downloadBundle (url, options, onComplete) {
                         return;
                     }
                     data.base = unzipPath + '/res/';
+                    // PATCH: for android alipay version before v10.1.95 (v10.1.95 included)
+                    // to remove in the future
+                    let sys = cc.sys;
+                    if (sys.platform === sys.ALIPAY_GAME && sys.os === sys.OS_ANDROID) {
+                        let appVersion = my.getSystemInfoSync().version;
+                        let result = /10\.1\.(\d+)/.exec(appVersion);
+                        result = result && result[1] && Number.parseInt(result[1]);
+                        if (result && result <= 95) {
+                            data.base = unzipPath + 'res/';
+                        }
+                    }
                     onComplete && onComplete(null, data);
                 });
             }
