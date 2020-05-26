@@ -15,7 +15,6 @@ window.boot = function () {
             }
         );
     };
-    settings.subpackages.forEach(x => fsUtils.subpackages[x] = 'subpackages/' + x);
     
     var isSubContext = (cc.sys.platform === cc.sys.BAIDU_GAME_SUB);
 
@@ -31,7 +30,9 @@ window.boot = function () {
     cc.assetManager.init({ 
         bundleVers: settings.bundleVers, 
         subpackages: settings.subpackages, 
-        remoteBundles: settings.remoteBundles
+        remoteBundles: settings.remoteBundles,
+        server: settings.server,
+        subContextRoot: settings.subContextRoot
     });
 
     let { RESOURCES, INTERNAL, MAIN, START_SCENE } = cc.AssetManager.BuiltinBundleName;
@@ -51,11 +52,8 @@ window.boot = function () {
     // load plugins
     cc.assetManager.loadScript(settings.jsList.map(function (x) { return 'src/' + x;}), cb);
 
-    if (REMOTE_SERVER_ROOT && !REMOTE_SERVER_ROOT.endsWith('/')) REMOTE_SERVER_ROOT += '/';
-
     // load bundles
     for (let i = 0; i < bundleRoot.length; i++) {
-        let bundleName = bundleRoot[i];
-        cc.assetManager.loadBundle(`${fsUtils.subpackages[bundleName] ? 'subpackages/' : (fsUtils.remoteBundles[bundleName] ? REMOTE_SERVER_ROOT + 'remote/' : 'assets/')}${bundleName}`, cb);
+        cc.assetManager.loadBundle(bundleRoot[i], cb);
     }
 };

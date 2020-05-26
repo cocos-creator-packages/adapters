@@ -12,10 +12,6 @@ require('./boot');  // TODO: move to common
 // Adjust devicePixelRatio
 cc.view._maxPixelRatio = 4;
 
-// handle remote downloader
-window.REMOTE_SERVER_ROOT = "";
-window.SUBCONTEXT_ROOT = "";
-
 // Release Image objects after uploaded gl texture
 cc.macro.CLEANUP_IMAGE_CACHE = true;
 
