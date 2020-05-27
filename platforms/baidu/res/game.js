@@ -14,10 +14,6 @@ __globalAdapter.handleSystemInfo(() => {
 
     // Adjust devicePixelRatio
     cc.view._maxPixelRatio = 4;
-
-    // handle remote downloader
-    window.REMOTE_SERVER_ROOT = "";
-    window.SUBCONTEXT_ROOT = "";
     
     if (cc.sys.platform !== cc.sys.BAIDU_GAME_SUB) {
         // Release Image objects after uploaded gl texture

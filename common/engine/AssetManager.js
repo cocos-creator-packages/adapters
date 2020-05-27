@@ -1,5 +1,5 @@
 const cacheManager = require('../cache-manager');
-const { fs, downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, subpackages, remoteBundles, getUserDataPath } = window.fsUtils;
+const { fs, downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, getUserDataPath } = window.fsUtils;
 
 const REGEX = /^\w+:\/\/.*/;
 
@@ -10,6 +10,9 @@ downloader.maxConcurrency = 8;
 downloader.maxRequestsPerFrame = 64;
 presets['scene'].maxConcurrency = 10;
 presets['scene'].maxRequestsPerFrame = 64;
+
+let SUBCONTEXT_ROOT, REMOTE_SERVER_ROOT;
+let subpackages = {}, remoteBundles = {};
 
 function downloadScript (url, options, onComplete) {
     if (typeof options === 'function') {
@@ -168,32 +171,45 @@ function downloadImageInAndroid (url, options, onComplete) {
     }
 }
 
-function downloadBundle (url, options, onComplete) {
-    let bundleName = cc.path.basename(url);
+function downloadBundle (nameOrUrl, options, onComplete) {
+    let bundleName = cc.path.basename(nameOrUrl);
     var version = options.version || cc.assetManager.downloader.bundleVers[bundleName];
-    var config = version ?  `${url}/config.${version}.json` : `${url}/config.json`;
 
     if (subpackages[bundleName]) {
+        var config = `subpackages/${bundleName}/config.${version ? version + '.' : ''}json`;
         loadSubpackage(bundleName, options.onFileProgress, function (err) {
             if (err) {
                 onComplete(err, null);
                 return;
             }
-            downloadJson(config, options, onComplete);
+            downloadJson(config, options, function (err, data) {
+                data && (data.base = `subpackages/${bundleName}/`);
+                onComplete(err, data);
+            });
         });
     }
     else {
-        let js;
-        if (REGEX.test(url) || remoteBundles[bundleName]) {
+        let js, url;
+        if (REGEX.test(nameOrUrl)) {
+            url = nameOrUrl;
             js = `src/scripts/${bundleName}/index.js`;
+            cacheManager.makeBundleFolder(bundleName);
         }
         else {
-            js = `assets/${bundleName}/index.js`;
+            if (remoteBundles[bundleName]) {
+                url = `${REMOTE_SERVER_ROOT}remote/${bundleName}`;
+                js = `src/scripts/${bundleName}/index.js`;
+                cacheManager.makeBundleFolder(bundleName);
+            }
+            else {
+                url = `assets/${bundleName}`;
+                js = `assets/${bundleName}/index.js`;
+            }
         }
         __cocos_require__(js);
-        REGEX.test(url) && cacheManager.makeBundleFolder(bundleName);
         options.cacheEnabled = true;
         options.__cacheBundleRoot__ = bundleName;
+        var config = `${url}/config.${version ? version + '.' : ''}json`;
         downloadJson(config, options, function (err, data) {
             if (err) {
                 onComplete && onComplete(err);
@@ -201,7 +217,7 @@ function downloadBundle (url, options, onComplete) {
             }
             if (data.isZip) {
                 let zipVersion = data.zipVersion;
-                let zipUrl = zipVersion ?  `${url}/res.${zipVersion}.zip` : `${url}/res.zip`;
+                let zipUrl = `${url}/res.${zipVersion ? zipVersion + '.' : ''}zip`;
                 handleZip(zipUrl, options, function (err, unzipPath) {
                     if (err) {
                         onComplete && onComplete(err);
@@ -221,6 +237,7 @@ function downloadBundle (url, options, onComplete) {
                 });
             }
             else {
+                data.base = url + '/';
                 onComplete && onComplete(null, data);
             }
         });
@@ -348,11 +365,16 @@ if (!isSubDomain) {
         originInit.call(cc.assetManager, options);
         options.subpackages && options.subpackages.forEach(x => subpackages[x] = 'subpackages/' + x);
         options.remoteBundles && options.remoteBundles.forEach(x => remoteBundles[x] = true);
+        REMOTE_SERVER_ROOT = options.server || '';
+        if (REMOTE_SERVER_ROOT && !REMOTE_SERVER_ROOT.endsWith('/')) REMOTE_SERVER_ROOT += '/';
         cacheManager.init();
     };
 }
-
-cc.loader.downloader.loadSubpackage = function (name, completeCallback) {
-    cc.assetManager.loadBundle(subpackages[name] ? subpackages[name] : ('assets/' + name), null, completeCallback);
-};
+else {
+    var originInit = cc.assetManager.init;
+    cc.assetManager.init = function (options) {
+        originInit.call(cc.assetManager, options);
+        SUBCONTEXT_ROOT = options.subContextRoot || '';
+    };
+}
 
