@@ -105,6 +105,6 @@ window.boot = function () {
         md5AssetsMap: settings.md5AssetsMap,
         subpackages: settings.subpackages
     });
-
-    cc.game.run(option, onStart);
+    cc.game.init(option);
+    cc.game.run(onStart);
 };
