@@ -203,7 +203,6 @@
                 return;
             }
             self._currentTime = 0;
-            video.seek(0);  // ensure to set currentTime by 0 when video is stopped
             self._playing = false;
             self._dispatchEvent(_impl.EventType.STOPPED);
         });
