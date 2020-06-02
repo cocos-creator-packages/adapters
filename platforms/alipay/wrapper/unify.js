@@ -57,13 +57,8 @@ if (window.__globalAdapter) {
 
     // Font
     globalAdapter.loadFont = function (url) {
-        if (my.loadFont) {
-            return my.loadFont(url);
-        }
-        else {
-            console.warn('loadFont not support yet');
-            return null;
-        }
+        // my.loadFont crash when url is not in user data path
+        return "Arial";
     };
 
     // hide show Event
