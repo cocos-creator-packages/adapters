@@ -200,8 +200,10 @@ var cacheManager = {
         if (cleaning) return;
         cleaning = true;
         var caches = [];
+        var self = this;
         this.cachedFiles.forEach(function (val, key) {
             if (val.bundle === 'internal') return;
+            if (self._isZipFile(key) && cc.assetManager.bundles.has(val.bundle)) return;
             caches.push({ originUrl: key, url: val.url, lastTime: val.lastTime });
         });
         caches.sort(function (a, b) {
@@ -211,7 +213,7 @@ var cacheManager = {
         for (var i = 0, l = caches.length; i < l; i++) {
             this.cachedFiles.remove(caches[i].originUrl);
         }
-        var self = this;
+        
         this.writeCacheFile(function () {
             function deferredDelete () {
                 var item = caches.pop();
