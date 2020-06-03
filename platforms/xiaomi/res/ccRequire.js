@@ -1,5 +1,4 @@
 let moduleMap = {
-// head
 // tail
 };
 
