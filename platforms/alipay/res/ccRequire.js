@@ -7,5 +7,5 @@ window.__cocos_require__ = function (moduleName) {
     if (!func) {
         throw new Error(`cannot find module ${moduleName}`);
     }
-    func();
+    return func();
 };
