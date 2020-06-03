@@ -31,6 +31,7 @@ function downloadScript (url, options, onComplete) {
 function handleZip (url, options, onComplete) {
     let cachedUnzip = cacheManager.cachedFiles.get(url);
     if (cachedUnzip) {
+        cacheManager.updateLastTime(url);
         onComplete && onComplete(null, cachedUnzip.url);
     }
     else if (REGEX.test(url)) {
