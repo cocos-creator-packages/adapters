@@ -1,5 +1,6 @@
 let moduleMap = {
-    // build modules
+// head
+// tail
 };
 
 window.__cocos_require__ = function (moduleName) {
