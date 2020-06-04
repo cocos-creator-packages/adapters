@@ -111,7 +111,8 @@ var downloadJson = !isSubDomain ? function (url, options, onComplete) {
     download(url, readFile, options, options.onFileProgress, onComplete);
 } : function (url, options, onComplete) {
     var { url } = transformUrl(url, options);
-    var content = require('../' + cc.path.changeExtname(url, '.js'));
+    url = url.slice(SUBCONTEXT_ROOT.length + 1);  // remove subcontext root in url
+    var content = __cocos_require__(cc.path.changeExtname(url, '.js'));
     onComplete && onComplete(null, content);
 }
 
