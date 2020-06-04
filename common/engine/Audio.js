@@ -1,6 +1,7 @@
 const Audio = cc.Audio;
 
 if (Audio) {
+    let originGetDuration = Audio.prototype.getDuration;
     Object.assign(Audio.prototype, {
         _createElement () {
             let elem = this._src._nativeAsset;
@@ -49,6 +50,14 @@ if (Audio) {
             if (elem) {
               elem.offEnded && elem.offEnded();
             }
+        },
+
+        getDuration () {
+            let duration = originGetDuration.call(this);
+            // HACK: in mini game, if dynamicly load audio, can't get duration from audioClip
+            // because duration is not coming from audio deserialization
+            duration = duration || (this._element ? this._element.duration : 0);
+            return duration;
         },
 
         // adapt some special operations on web platform
