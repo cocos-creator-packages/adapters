@@ -1,4 +1,4 @@
-const Audio = cc.Audio;
+const Audio = cc._Audio;
 
 if (Audio) {
     let originGetDuration = Audio.prototype.getDuration;
