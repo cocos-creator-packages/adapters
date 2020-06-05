@@ -12,7 +12,7 @@ Object.assign(game, {
         }
         else {
             if (this._intervalId) {
-                window.cancelAnimFrame(this._intervalId);
+                window.cAF(this._intervalId);
             }
             this._intervalId = 0;
             this._paused = true;
