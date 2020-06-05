@@ -12,26 +12,12 @@ Object.assign(game, {
         }
         else {
             if (this._intervalId) {
-                window.cancelAnimFrame(this._intervalId);
+                window.cAF(this._intervalId);
             }
             this._intervalId = 0;
             this._paused = true;
             this._setAnimFrame();
             this._runMainLoop();
-        }
-    },
-
-    _setAnimFrame () {
-        this._lastTime = performance.now();
-        this._frameTime = 1000 / _frameRate;
-
-        if (_frameRate !== 60 && _frameRate !== 30) {
-            window.requestAnimFrame = this._stTime;
-            window.cancelAnimFrame = this._ctTime;
-        }
-        else {
-            window.requestAnimFrame = window.requestAnimationFrame || this._stTime;
-            window.cancelAnimFrame = window.cancelAnimationFrame || this._ctTime;
         }
     },
 
@@ -46,19 +32,24 @@ Object.assign(game, {
 
         cc.debug.setDisplayStats(config.showFPS);
 
-        callback = function () {
+        callback = function (time) {
             if (!self._paused) {
-                self._intervalId = window.requestAnimFrame(callback);
+                self._intervalId = window.rAF(callback);
                 if (_frameRate === 30  && !__globalAdapter.setPreferredFramesPerSecond) {
                     if (skip = !skip) {
                         return;
                     }
                 }
-                director.mainLoop();
+                director.mainLoop(time);
             }
         };
 
-        self._intervalId = window.requestAnimFrame(callback);
+        if (self._intervalId) {
+            window.cAF(self._intervalId);
+            self._intervalId = 0;
+        }
+
+        self._intervalId = window.rAF(callback);
         self._paused = false;
     },
 
