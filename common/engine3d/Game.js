@@ -21,29 +21,6 @@ Object.assign(game, {
         }
     },
 
-    _setAnimFrame () {
-        this._lastTime = performance.now();
-        const frameRate = cc.game.config.frameRate;
-        this._frameTime = 1000 / frameRate;
-
-        if (this._intervalId) {
-            window.cAF(this._intervalId);
-            this._intervalId = 0;
-        }
-
-        if (_frameRate !== 60 && _frameRate !== 30) {
-            window.requestAnimFrame = this._stTime;
-            window.cancelAnimFrame = this._ctTime;
-        }
-        else {
-            window.requestAnimFrame = window.requestAnimationFrame || this._stTime;
-            window.cancelAnimFrame = window.cancelAnimationFrame || this._ctTime;
-        }
-
-        window.rAF = window.requestAnimFrame;
-        window.cAF = window.cancelAnimFrame;
-    },
-
     getFrameRate () {
         return _frameRate;
     },
@@ -57,7 +34,7 @@ Object.assign(game, {
 
         callback = function (time) {
             if (!self._paused) {
-                self._intervalId = window.requestAnimFrame(callback);
+                self._intervalId = window.rAF(callback);
                 if (_frameRate === 30  && !__globalAdapter.setPreferredFramesPerSecond) {
                     if (skip = !skip) {
                         return;
