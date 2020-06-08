@@ -27,7 +27,7 @@ Object.assign(adapter, {
         else {
             sys.platform = sys.BYTEDANCE_GAME;
         }
-        sys.browserType = sys.BROWSER_TYPE_MINIGAME;
+        sys.browserType = sys.BROWSER_TYPE_UNKNOWN;
 
         sys.glExtension = function (name) {
             if (name === 'OES_texture_float') {

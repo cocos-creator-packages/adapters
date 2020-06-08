@@ -10,12 +10,11 @@ Object.assign(adapter, {
         // baidugame subdomain
         if (!swan.getOpenDataContext) {
             sys.platform = sys.BAIDU_GAME_SUB;
-            sys.browserType = sys.BROWSER_TYPE_BAIDU_GAME_SUB;
         }
         else {
             sys.platform = sys.BAIDU_GAME;
-            sys.browserType = sys.BROWSER_TYPE_BAIDU_GAME;
         }
+        sys.browserType = sys.BROWSER_TYPE_UNKNOWN;
 
         sys.glExtension = function (name) {
             if (name === 'OES_texture_float') {
