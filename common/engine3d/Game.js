@@ -11,10 +11,6 @@ Object.assign(game, {
             __globalAdapter.setPreferredFramesPerSecond(frameRate);
         }
         else {
-            if (this._intervalId) {
-                window.cAF(this._intervalId);
-            }
-            this._intervalId = 0;
             this._paused = true;
             this._setAnimFrame();
             this._runMainLoop();
