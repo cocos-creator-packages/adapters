@@ -126,8 +126,8 @@
             this._video = __globalAdapter.createVideo();
             this._video.showCenterPlayBtn = false;
             this._video.controls = false;
-            this._duration = -1;
-            this._currentTime = -1;
+            this._duration = 0;
+            this._currentTime = 0;
             this._loaded = false;
             this.setVisible(false);
             this._bindEvent();
