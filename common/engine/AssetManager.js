@@ -4,6 +4,7 @@ const { fs, downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, g
 const REGEX = /^\w+:\/\/.*/;
 
 const downloader = cc.assetManager.downloader;
+const parser = cc.assetManager.parser;
 const presets = cc.assetManager.presets;
 const isSubDomain = __globalAdapter.isSubContext;
 downloader.maxConcurrency = 8;
@@ -61,20 +62,6 @@ function downloadDomAudio (url, options, onComplete) {
     onComplete && onComplete(null, dom);
 }
 
-function readFile(filePath, options, onComplete) {
-    switch (options.responseType) {
-        case 'json': 
-            readJson(filePath, onComplete);
-            break;
-        case 'arraybuffer':
-            readArrayBuffer(filePath, onComplete);
-            break;
-        default:
-            readText(filePath, onComplete);
-            break;
-    }
-}
-
 function download (url, func, options, onFileProgress, onComplete) {
     var result = transformUrl(url, options);
     if (result.inLocal) {
@@ -106,9 +93,24 @@ function download (url, func, options, onFileProgress, onComplete) {
     }
 }
 
+function parseArrayBuffer (url, options, onComplete) {
+    readArrayBuffer(url, onComplete);
+}
+
+function parseText (url, options, onComplete) {
+    readText(url, onComplete);
+}
+
+function parseJson (url, options, onComplete) {
+    readJson(url, onComplete);
+}
+
+function downloadText (url, options, onComplete) {
+    download(url, parseText, options, options.onFileProgress, onComplete);
+}
+
 var downloadJson = !isSubDomain ? function (url, options, onComplete) {
-    options.responseType = "json";
-    download(url, readFile, options, options.onFileProgress, onComplete);
+    download(url, parseJson, options, options.onFileProgress, onComplete);
 } : function (url, options, onComplete) {
     var { url } = transformUrl(url, options);
     url = url.slice(SUBCONTEXT_ROOT.length + 1);  // remove subcontext root in url
@@ -123,54 +125,15 @@ var loadFont = !isSubDomain ? function (url, options, onComplete) {
     onComplete(null, 'Arial');
 }
 
-function downloadArrayBuffer (url, options, onComplete) {
-    options.responseType = "arraybuffer";
-    download(url, readFile, options, options.onFileProgress, onComplete);
+function doNothing (content, options, onComplete) { onComplete(null, content); }
+
+function downloadAsset (url, options, onComplete) {
+    download(url, doNothing, options, options.onFileProgress, onComplete);
 }
 
-function downloadText (url, options, onComplete) {
-    options.responseType = "text";
-    download(url, readFile, options, options.onFileProgress, onComplete);
-}
-
-function downloadAudio (url, options, onComplete) {
-    download(url, downloadDomAudio, options, options.onFileProgress, onComplete);
-}
-
-function downloadVideo (url, options, onComplete) {
-    download(url, function (url, options, onComplete) { onComplete(null, url); }, options, options.onFileProgress, onComplete);
-}
-
-function downloadFont (url, options, onComplete) {
-    download(url, loadFont, options, options.onFileProgress, onComplete);
-}
-
-function downloadImage (url, options, onComplete) {
-    download(url, downloader.downloadDomImage, options, options.onFileProgress, onComplete);
-}
-
-function subdomainDownloadImage (url, options, onComplete) {
+function subdomainTransformUrl (url, options, onComplete) {
     var { url } = transformUrl(url, options);
-    downloader.downloadDomImage(url, options, onComplete);
-}
-
-function downloadImageInAndroid (url, options, onComplete) {
-    var result = transformUrl(url, options);
-    if (result.inLocal) {
-        downloader.downloadDomImage(result.url, options, onComplete);
-    }
-    else if (result.inCache) {
-        cacheManager.updateLastTime(url)
-        downloader.downloadDomImage(result.url, options, onComplete);
-    }
-    else {
-        downloader.downloadDomImage(url, options, function (err, img) {
-            if (!err) {
-                cacheManager.cacheFile(url, url, options.cacheEnabled, options.__cacheBundleRoot__, false);
-            }
-            onComplete(err, img);
-        });
-    }
+    onComplete(null, url);
 }
 
 function downloadBundle (nameOrUrl, options, onComplete) {
@@ -246,18 +209,47 @@ function downloadBundle (nameOrUrl, options, onComplete) {
     }
 };
 
-downloadImage = isSubDomain ? subdomainDownloadImage : (cc.sys.os === cc.sys.OS_ANDROID ? downloadImageInAndroid : downloadImage);
+const originParsePVRTex = parser.parsePVRTex;
+let parsePVRTex = function (file, options, onComplete) {
+    readArrayBuffer(file, function (err, data) {
+        if (err) return onComplete(err);
+        originParsePVRTex(data, options, onComplete);
+    });
+};
+
+const originParsePKMTex = parser.parsePKMTex;
+let parsePKMTex = function (file, options, onComplete) {
+    readArrayBuffer(file, function (err, data) {
+        if (err) return onComplete(err);
+        originParsePKMTex(data, options, onComplete);
+    });
+};
+
+function parsePlist (url, options, onComplete) {
+    readText(url, function (err, file) {
+        var result = null;
+        if (!err) {
+            result = cc.plistParser.parse(file);
+            if (!result) err = new Error('parse failed');
+        }
+        onComplete && onComplete(err, result);
+    });
+}
+
+let downloadImage = isSubDomain ? subdomainTransformUrl : downloadAsset;
 downloader.downloadDomAudio = downloadDomAudio;
 downloader.downloadScript = downloadScript;
+parser.parsePVRTex = parsePVRTex;
+parser.parsePKMTex = parsePKMTex;
 
 downloader.register({
     '.js' : downloadScript,
 
     // Audio
-    '.mp3' : downloadAudio,
-    '.ogg' : downloadAudio,
-    '.wav' : downloadAudio,
-    '.m4a' : downloadAudio,
+    '.mp3' : downloadAsset,
+    '.ogg' : downloadAsset,
+    '.wav' : downloadAsset,
+    '.m4a' : downloadAsset,
 
     // Image
     '.png' : downloadImage,
@@ -269,48 +261,93 @@ downloader.register({
     '.tiff' : downloadImage,
     '.image' : downloadImage,
     '.webp' : downloadImage,
-    '.pvr': downloadArrayBuffer,
-    '.pkm': downloadArrayBuffer,
+    '.pvr': downloadAsset,
+    '.pkm': downloadAsset,
 
-    '.font': downloadFont,
-    '.eot': downloadFont,
-    '.ttf': downloadFont,
-    '.woff': downloadFont,
-    '.svg': downloadFont,
-    '.ttc': downloadFont,
+    '.font': downloadAsset,
+    '.eot': downloadAsset,
+    '.ttf': downloadAsset,
+    '.woff': downloadAsset,
+    '.svg': downloadAsset,
+    '.ttc': downloadAsset,
 
     // Txt
-    '.txt' : downloadText,
-    '.xml' : downloadText,
-    '.vsh' : downloadText,
-    '.fsh' : downloadText,
-    '.atlas' : downloadText,
+    '.txt' : downloadAsset,
+    '.xml' : downloadAsset,
+    '.vsh' : downloadAsset,
+    '.fsh' : downloadAsset,
+    '.atlas' : downloadAsset,
 
-    '.tmx' : downloadText,
-    '.tsx' : downloadText,
+    '.tmx' : downloadAsset,
+    '.tsx' : downloadAsset,
+    '.plist' : downloadAsset,
+    '.fnt' : downloadAsset,
 
     '.json' : downloadJson,
-    '.ExportJson' : downloadJson,
-    '.plist' : downloadText,
+    '.ExportJson' : downloadAsset,
 
-    '.fnt' : downloadText,
+    '.binary' : downloadAsset,
+    '.bin': downloadAsset,
+    '.dbbin': downloadAsset,
+    '.skel': downloadAsset,
 
-    '.binary' : downloadArrayBuffer,
-    '.bin': downloadArrayBuffer,
-    '.dbbin': downloadArrayBuffer,
-    '.skel': downloadArrayBuffer,
-
-    '.mp4': downloadVideo,
-    '.avi': downloadVideo,
-    '.mov': downloadVideo,
-    '.mpg': downloadVideo,
-    '.mpeg': downloadVideo,
-    '.rm': downloadVideo,
-    '.rmvb': downloadVideo,
+    '.mp4': downloadAsset,
+    '.avi': downloadAsset,
+    '.mov': downloadAsset,
+    '.mpg': downloadAsset,
+    '.mpeg': downloadAsset,
+    '.rm': downloadAsset,
+    '.rmvb': downloadAsset,
 
     'bundle': downloadBundle,
 
     'default': downloadText,
+});
+
+parser.register({
+    '.png' : downloader.downloadDomImage,
+    '.jpg' : downloader.downloadDomImage,
+    '.bmp' : downloader.downloadDomImage,
+    '.jpeg' : downloader.downloadDomImage,
+    '.gif' : downloader.downloadDomImage,
+    '.ico' : downloader.downloadDomImage,
+    '.tiff' : downloader.downloadDomImage,
+    '.image' : downloader.downloadDomImage,
+    '.webp' : downloader.downloadDomImage,
+    '.pvr': parsePVRTex,
+    '.pkm': parsePKMTex,
+
+    '.font': loadFont,
+    '.eot': loadFont,
+    '.ttf': loadFont,
+    '.woff': loadFont,
+    '.svg': loadFont,
+    '.ttc': loadFont,
+
+    // Audio
+    '.mp3' : downloadDomAudio,
+    '.ogg' : downloadDomAudio,
+    '.wav' : downloadDomAudio,
+    '.m4a' : downloadDomAudio,
+
+    // Txt
+    '.txt' : parseText,
+    '.xml' : parseText,
+    '.vsh' : parseText,
+    '.fsh' : parseText,
+    '.atlas' : parseText,
+
+    '.tmx' : parseText,
+    '.tsx' : parseText,
+    '.fnt' : parseText,
+    '.plist' : parsePlist,
+
+    '.binary' : parseArrayBuffer,
+    '.bin': parseArrayBuffer,
+    '.dbbin': parseArrayBuffer,
+    '.skel': parseArrayBuffer,
+
+    '.ExportJson' : parseJson,
 });
 
 var transformUrl = !isSubDomain ? function (url, options) {
