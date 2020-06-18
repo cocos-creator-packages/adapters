@@ -11,7 +11,7 @@ Object.assign(adapter, {
             sys.isMobile = false;
             sys.os = sys.OS_WINDOWS;
         }
-        else if (env.platform === 'devtools') {
+        else if (adapter.isDevTool) {
             let system = env.system.toLowerCase();
             if (system.indexOf('android') > -1) {
                 sys.os = sys.OS_ANDROID;
@@ -34,6 +34,26 @@ Object.assign(adapter, {
                 return false;
             }
             return !!cc.renderer.device.ext(name);
+        };
+
+        // move to common if other platforms support
+        sys.getSafeAreaRect = function () {
+            let view = cc.view;
+            let safeArea = adapter.getSafeArea();
+            let screenSize = view.getFrameSize(); // Get leftBottom and rightTop point in UI coordinates
+            let leftBottom = new cc.Vec2(safeArea.left, safeArea.bottom);
+            let rightTop = new cc.Vec2(safeArea.right, safeArea.top); // Returns the real location in view.
+            let relatedPos = {
+                left: 0,
+                top: 0,
+                width: screenSize.width,
+                height: screenSize.height
+            };
+            view.convertToLocationInView(leftBottom.x, leftBottom.y, relatedPos, leftBottom);
+            view.convertToLocationInView(rightTop.x, rightTop.y, relatedPos, rightTop); // convert view point to design resolution size
+            view._convertPointWithScale(leftBottom);
+            view._convertPointWithScale(rightTop);
+            return cc.rect(leftBottom.x, leftBottom.y, rightTop.x - leftBottom.x, rightTop.y - leftBottom.y);
         };
     },
 });
