@@ -28,6 +28,8 @@ Object.assign(game, {
 
         cc.debug.setDisplayStats(config.showFPS);
 
+        director._lastUpdate = performance.now();
+
         callback = function (time) {
             if (!self._paused) {
                 self._intervalId = window.rAF(callback);
