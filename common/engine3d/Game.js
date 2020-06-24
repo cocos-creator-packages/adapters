@@ -28,7 +28,7 @@ Object.assign(game, {
 
         cc.debug.setDisplayStats(config.showFPS);
 
-        director._lastUpdate = performance.now();
+        director.startAnimation();
 
         callback = function (time) {
             if (!self._paused) {
