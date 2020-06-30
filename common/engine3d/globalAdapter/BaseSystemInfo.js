@@ -13,11 +13,12 @@ let systemInfo = {
         sys.language = env.language.substr(0, 2);
         sys.languageCode = env.language.toLowerCase();
         var system = env.system.toLowerCase();
+        var platform = env.platform.toLowerCase();
 
-        if (env.platform === "android") {
+        if (platform === "android") {
             sys.os = sys.OS_ANDROID;
         }
-        else if (env.platform === "ios") {
+        else if (platform === "ios") {
             sys.os = sys.OS_IOS;
         }
 
