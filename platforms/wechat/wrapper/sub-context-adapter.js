@@ -50,7 +50,10 @@ cc.game._prepareFinished = function (cb) {
 
 wx.onMessage(function (data) {
     if (data.fromEngine) {
-        if (data.event === 'viewport') {
+        if (data.event === 'init') {
+            window.boot();
+        }
+        else if (data.event === 'viewport') {
             viewportInMain.x = data.x;
             viewportInMain.y = data.y;
             viewportInMain.width = data.width;

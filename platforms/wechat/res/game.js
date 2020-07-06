@@ -17,4 +17,7 @@ if (cc.sys.platform !== cc.sys.WECHAT_GAME_SUB) {
     cc.macro.CLEANUP_IMAGE_CACHE = true;
 }
 
-window.boot();
+// sub context need to boot after SubContextView component enabled in main context
+if (!__globalAdapter.isSubContext) {
+    window.boot();
+}
