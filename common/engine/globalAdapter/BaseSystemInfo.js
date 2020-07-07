@@ -39,11 +39,10 @@ function adaptSys (sys, env) {
 
     sys.localStorage = window.localStorage;
 
-    var _supportWebGL = false;
+    var _supportWebGL = __globalAdapter.isSubContext ? false : true;;
     var _supportWebp = false;
     try {
         var _canvas = document.createElement("canvas");
-        _supportWebGL = _canvas.getContext("webgl");
         _supportWebp = _canvas.toDataURL('image/webp').startsWith('data:image/webp');
     }
     catch (err) { }
