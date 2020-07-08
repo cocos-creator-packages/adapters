@@ -50,10 +50,7 @@ cc.game._prepareFinished = function (cb) {
 
 swan.onMessage(function (data) {
     if (data.fromEngine) {
-        if (data.event === 'boot') {
-            window.boot();
-        }
-        else if (data.event === 'viewport') {
+        if (data.event === 'viewport') {
             viewportInMain.x = data.x;
             viewportInMain.y = data.y;
             viewportInMain.width = data.width;
