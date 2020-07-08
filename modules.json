@@ -53,7 +53,6 @@
   "WebGL Renderer": [],
   "3D": [],
   "3D Primitive": [],
-  "WechatSubContext": [],
-  "SwanSubContext": [],
+  "SubContext": [],
   "TypeScript Polyfill": []
 }
