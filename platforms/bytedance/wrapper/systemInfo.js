@@ -1,5 +1,5 @@
 const adapter = window.__globalAdapter;
-const env = wx.getSystemInfoSync();
+const env = tt.getSystemInfoSync();
 let adaptSysFunc = adapter.adaptSys;
 
 Object.assign(adapter, {
@@ -16,16 +16,16 @@ Object.assign(adapter, {
             if (system.indexOf('android') > -1) {
                 sys.os = sys.OS_ANDROID;
             }
+
             else if (system.indexOf('ios') > -1) {
                 sys.os = sys.OS_IOS;
             }
         }
-        // wechatgame subdomain
-        if (!wx.getOpenDataContext) {
-            sys.platform = sys.WECHAT_GAME_SUB;
+        if (!tt.getOpenDataContext) {
+            sys.platform = sys.BYTEDANCE_GAME_SUB;
         }
         else {
-          sys.platform = sys.WECHAT_GAME;
+            sys.platform = sys.BYTEDANCE_GAME;
         }
 
         sys.glExtension = function (name) {
