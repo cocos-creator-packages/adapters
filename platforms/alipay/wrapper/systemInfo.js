@@ -6,6 +6,5 @@ Object.assign(adapter, {
     adaptSys (sys) {
         adaptSysFunc.call(this, sys);
         sys.platform = sys.ALIPAY_GAME;
-        sys.browserType = sys.BROWSER_TYPE_UNKNOWN;
     },
 });
