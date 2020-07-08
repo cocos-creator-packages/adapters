@@ -229,18 +229,7 @@ var fsUtils = {
     },
 
     loadSubpackage (name, onProgress, onComplete) {
-        var task = tt.loadSubpackage({
-            name: name,
-            success: function () {
-                onComplete && onComplete();
-            },
-            fail: function (res) {
-                console.warn('Load Subpackage failed: ' + res.errMsg);
-                onComplete && onComplete(new Error(`Failed to load subpackage ${name}: ${res.errMsg}`));
-            }
-        });
-        onProgress && task.onProgressUpdate(onProgress);
-        return task;
+        throw new Error('Not Implemented');
     },
 
     unzip (zipFilePath, targetPath, onComplete) {
