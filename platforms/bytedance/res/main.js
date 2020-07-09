@@ -85,13 +85,11 @@ window.boot = function () {
         jsList = [bundledScript];
     }
 
-    var isSubContext = (cc.sys.platform === cc.sys.BYTEDANCE_GAME_SUB);
-
     var option = {
         id: 'GameCanvas',
         scenes: settings.scenes,
         debugMode: settings.debug ? cc.debug.DebugMode.INFO : cc.debug.DebugMode.ERROR,
-        showFPS: !isSubContext && settings.debug,
+        showFPS: !__globalAdapter.isSubContext && settings.debug,
         frameRate: 60,
         jsList: jsList,
         groupList: settings.groupList,
