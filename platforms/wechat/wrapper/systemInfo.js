@@ -23,11 +23,9 @@ Object.assign(systemInfo, {
         // wechatgame subdomain
         if (!wx.getOpenDataContext) {
             sys.platform = sys.WECHAT_GAME_SUB;
-          sys.browserType = sys.BROWSER_TYPE_WECHAT_GAME_SUB;
         }
         else {
           sys.platform = sys.WECHAT_GAME;
-          sys.browserType = sys.BROWSER_TYPE_WECHAT_GAME;
         }
 
         sys.glExtension = function (name) {
