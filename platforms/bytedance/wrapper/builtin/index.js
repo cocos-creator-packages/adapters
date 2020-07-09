@@ -49,6 +49,7 @@ function inject () {
     global.window = _window
     window = global
     window.top = window.parent = window
+    GameGlobal.global = GameGlobal.global || GameGlobal;
   }
 }
 
