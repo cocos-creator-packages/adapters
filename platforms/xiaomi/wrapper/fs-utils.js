@@ -229,6 +229,7 @@ var fsUtils = {
     },
 
     loadSubpackage (name, onProgress, onComplete) {
+        name = 'cc_' + name;  // prevention of name conflicts 
         var task = qg.loadSubpackage({
             name: name,
             success: function () {
