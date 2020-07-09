@@ -3,6 +3,12 @@ const utils = require('./utils');
 if (window.__globalAdapter) {
     let globalAdapter = window.__globalAdapter;
     // SystemInfo
+    let systemInfo = wx.getSystemInfoSync();
+    let windowWidth = systemInfo.windowWidth;
+    let windowHeight = systemInfo.windowHeight;
+    let isLandscape = windowWidth > windowHeight;
+    globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
+    globalAdapter.isDevTool = (systemInfo.platform === 'devtools');
     utils.cloneMethod(globalAdapter, wx, 'getSystemInfoSync');
 
     // TouchEvent
@@ -34,7 +40,6 @@ if (window.__globalAdapter) {
     // Message
     utils.cloneMethod(globalAdapter, wx, 'getOpenDataContext');
     utils.cloneMethod(globalAdapter, wx, 'onMessage');
-    globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
 
     // Subpackage
     utils.cloneMethod(globalAdapter, wx, 'loadSubpackage');
@@ -57,10 +62,6 @@ if (window.__globalAdapter) {
     // Accelerometer
     let isAccelerometerInit = false;
     let deviceOrientation = 1;
-    let systemInfo = wx.getSystemInfoSync();
-    let windowWidth = systemInfo.windowWidth;
-    let windowHeight = systemInfo.windowHeight;
-    let isLandscape = windowWidth > windowHeight;
     if (wx.onDeviceOrientationChange) {
         wx.onDeviceOrientationChange(function (res) {
             if (res.value === 'landscape') {

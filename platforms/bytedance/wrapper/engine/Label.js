@@ -1,7 +1,7 @@
 if (cc && cc.LabelComponent) {
     // const gfx = cc.gfx;
     const Label = cc.LabelComponent;
-    const isDevTool = window.navigator && (/AlipayIDE/.test(window.navigator.userAgent));
+    const isDevTool = __globalAdapter.isDevTool;
 
     // shared label canvas
     let _sharedLabelCanvas = document.createElement('canvas');

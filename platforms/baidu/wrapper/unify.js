@@ -2,7 +2,22 @@ const utils = require('./utils');
 
 if (window.__globalAdapter) {
     let globalAdapter = window.__globalAdapter;
+    let isLandscape = false;  // getSystemInfoSync not supported in sub context
     // SystemInfo
+    if (swan.getSystemInfoSync) {
+        let systemInfo = swan.getSystemInfoSync();
+        let windowWidth = systemInfo.windowWidth;
+        let windowHeight = systemInfo.windowHeight;
+        isLandscape = windowWidth > windowHeight;
+        globalAdapter.isDevTool = systemInfo.platform === 'devtools';
+    }
+    else {
+        // can't define window in devtool
+        let descriptor = Object.getOwnPropertyDescriptor(global, 'window');
+        globalAdapter.isDevTool = !(!descriptor || descriptor.configurable === true);
+
+    }
+    globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
     utils.cloneMethod(globalAdapter, swan, 'getSystemInfoSync');
 
     // TouchEvent
@@ -31,7 +46,6 @@ if (window.__globalAdapter) {
     // Message
     utils.cloneMethod(globalAdapter, swan, 'getOpenDataContext');
     utils.cloneMethod(globalAdapter, swan, 'onMessage');
-    globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
 
     // Subpackage
     // baidu can`t use system So need special treatment
@@ -50,13 +64,6 @@ if (window.__globalAdapter) {
     // Accelerometer
     let isAccelerometerInit = false;
     let deviceOrientation = 1;
-    let isLandscape = false;  // getSystemInfoSync not supported in sub context
-    if (swan.getSystemInfoSync) {
-        let systemInfo = swan.getSystemInfoSync();
-        let windowWidth = systemInfo.windowWidth;
-        let windowHeight = systemInfo.windowHeight;
-        isLandscape = windowWidth > windowHeight;
-    }
     if (swan.onDeviceOrientationChange) {
         swan.onDeviceOrientationChange(function (res) {
             if (res.value === 'landscape') {
