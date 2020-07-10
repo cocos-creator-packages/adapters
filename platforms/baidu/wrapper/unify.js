@@ -17,7 +17,7 @@ if (window.__globalAdapter) {
         globalAdapter.isDevTool = !(!descriptor || descriptor.configurable === true);
 
     }
-    globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
+    globalAdapter.isSubContext = (swan.getOpenDataContext === undefined);
     utils.cloneMethod(globalAdapter, swan, 'getSystemInfoSync');
 
     // TouchEvent

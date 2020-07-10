@@ -7,7 +7,7 @@ if (window.__globalAdapter) {
     let windowWidth = systemInfo.windowWidth;
     let windowHeight = systemInfo.windowHeight;
     let isLandscape = windowWidth > windowHeight;
-    globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
+    globalAdapter.isSubContext = (tt.getOpenDataContext === undefined);
     globalAdapter.isDevTool = (systemInfo.platform === 'devtools');
     utils.cloneMethod(globalAdapter, tt, 'getSystemInfoSync');
 
