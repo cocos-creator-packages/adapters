@@ -2,11 +2,12 @@ const utils = require('../../../common/utils');
 
 if (window.__globalAdapter) {
     let globalAdapter = window.__globalAdapter;
+    // SystemInfo
     let systemInfo = tt.getSystemInfoSync();
     let windowWidth = systemInfo.windowWidth;
     let windowHeight = systemInfo.windowHeight;
     let isLandscape = windowWidth > windowHeight;
-    // SystemInfo
+    globalAdapter.isSubContext = (tt.getOpenDataContext === undefined);
     globalAdapter.isDevTool = (systemInfo.platform === 'devtools');
     utils.cloneMethod(globalAdapter, tt, 'getSystemInfoSync');
 
@@ -43,7 +44,6 @@ if (window.__globalAdapter) {
     // Message
     utils.cloneMethod(globalAdapter, tt, 'getOpenDataContext');
     utils.cloneMethod(globalAdapter, tt, 'onMessage');
-    globalAdapter.isSubContext = (globalAdapter.getOpenDataContext === undefined);
 
     // SharedCanvas
     utils.cloneMethod(globalAdapter, tt, 'getSharedCanvas');
@@ -86,7 +86,7 @@ if (window.__globalAdapter) {
                         x = -y;
                         y = tmp;
                     }
-                    
+
                     resClone.x = x * deviceOrientation;
                     resClone.y = y * deviceOrientation;
                     resClone.z = res.z;
