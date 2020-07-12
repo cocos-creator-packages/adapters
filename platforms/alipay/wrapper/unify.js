@@ -3,6 +3,8 @@ const utils = require('./utils');
 if (window.__globalAdapter) {
     let globalAdapter = window.__globalAdapter;
     // SystemInfo
+    globalAdapter.isSubContext = false;  // sub context not supported
+    globalAdapter.isDevTool = window.navigator && (/AlipayIDE/.test(window.navigator.userAgent));
     utils.cloneMethod(globalAdapter, my, 'getSystemInfoSync');
 
     // TouchEvent
@@ -53,7 +55,6 @@ if (window.__globalAdapter) {
     // Message
     utils.cloneMethod(globalAdapter, my, 'getOpenDataContext');
     utils.cloneMethod(globalAdapter, my, 'onMessage');
-    globalAdapter.isSubContext = false;  // sub context not supported
 
     // Subpackage not supported
     // utils.cloneMethod(globalAdapter, my, 'loadSubpackage');

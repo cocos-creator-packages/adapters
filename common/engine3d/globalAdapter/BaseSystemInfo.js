@@ -31,7 +31,8 @@ let systemInfo = {
         sys.osVersion = version ? version[0] : system;
         sys.osMainVersion = parseInt(sys.osVersion);
 
-        sys.browserVersion = env.version;
+        sys.browserType = null;
+        sys.browserVersion = null;
 
         var w = env.windowWidth;
         var h = env.windowHeight;

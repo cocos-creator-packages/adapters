@@ -1,5 +1,5 @@
 const systemInfo = require('../common/engine3d/globalAdapter/BaseSystemInfo');
-const env = wx.getSystemInfoSync();
+const env = tt.getSystemInfoSync();
 let adaptSysFunc = systemInfo.adaptSys;
 
 Object.assign(systemInfo, {
@@ -21,11 +21,11 @@ Object.assign(systemInfo, {
             }
         }
         // wechatgame subdomain
-        if (!wx.getOpenDataContext) {
-            sys.platform = sys.WECHAT_GAME_SUB;
+        if (!tt.getOpenDataContext) {
+            sys.platform = sys.BYTEDANCE_GAME;
         }
         else {
-          sys.platform = sys.WECHAT_GAME;
+            sys.platform = sys.BYTEDANCE_GAME_SUB;
         }
 
         sys.glExtension = function (name) {
