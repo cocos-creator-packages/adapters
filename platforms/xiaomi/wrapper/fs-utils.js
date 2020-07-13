@@ -229,7 +229,7 @@ var fsUtils = {
     },
 
     loadSubpackage (name, onProgress, onComplete) {
-        name = 'usr_' + name;  // prevention of name conflicts 
+        name = 'usr_' + name;  // prevention of name conflicts with platform 
         var task = qg.loadSubpackage({
             name: name,
             success: function () {
