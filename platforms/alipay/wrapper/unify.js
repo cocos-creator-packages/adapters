@@ -2,8 +2,9 @@ const utils = require('../../../common/utils');
 
 if (window.__globalAdapter) {
     let globalAdapter = window.__globalAdapter;
-    globalAdapter.isDevTool = window.navigator && (/AlipayIDE/.test(window.navigator.userAgent));
     // SystemInfo
+    globalAdapter.isSubContext = false;  // sub context not supported
+    globalAdapter.isDevTool = window.navigator && (/AlipayIDE/.test(window.navigator.userAgent));
     utils.cloneMethod(globalAdapter, my, 'getSystemInfoSync');
 
     // TouchEvent
@@ -29,9 +30,13 @@ if (window.__globalAdapter) {
           cb && cb(res);
         });
     };
-    
+
     // Audio
-    utils.cloneMethod(globalAdapter, my, 'createInnerAudioContext');
+    globalAdapter.createInnerAudioContext = function() {
+        let audio = my.createInnerAudioContext();
+        audio.onCanplay = audio.onCanPlay.bind(audio);
+        return audio;
+    };
 
     // FrameRate
     utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
@@ -50,7 +55,9 @@ if (window.__globalAdapter) {
     // Message
     utils.cloneMethod(globalAdapter, my, 'getOpenDataContext');
     utils.cloneMethod(globalAdapter, my, 'onMessage');
-    globalAdapter.isSubContext = false;  // sub context not supported
+
+    // Subpackage not supported
+    // utils.cloneMethod(globalAdapter, my, 'loadSubpackage');
 
     // SharedCanvas
     utils.cloneMethod(globalAdapter, my, 'getSharedCanvas');
@@ -73,16 +80,16 @@ if (window.__globalAdapter) {
     let isLandscape = windowWidth > windowHeight;
     function accelerometerChangeCallback (res, cb) {
         let resClone = {};
-                
+
         let x = res.x;
         let y = res.y;
-        
+
         if (isLandscape) {
             let tmp = x;
             x = -y;
             y = tmp;
         }
-        
+
         resClone.x = x;
         resClone.y = y;
         resClone.z = res.z;

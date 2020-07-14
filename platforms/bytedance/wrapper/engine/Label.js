@@ -1,25 +1,27 @@
 if (cc && cc.Label) {
     const gfx = cc.gfx;
     const Label = cc.Label;
-
+    const globalAdapter = __globalAdapter;
     // shared label canvas
-    let _sharedLabelCanvas = document.createElement('canvas');
-    let _sharedLabelCanvasCtx = _sharedLabelCanvas.getContext('2d');
-    let canvasData = {
-        canvas: _sharedLabelCanvas,
-        context: _sharedLabelCanvasCtx,
-    };
-    cc.game.on(cc.game.EVENT_ENGINE_INITED, function () {
-        Object.assign(Label._canvasPool, {
-            get() {
-                return canvasData;
-            },
-
-            put() {
-                // do nothing
-            }
+    if (!globalAdapter.isSubContext) {
+        let _sharedLabelCanvas = document.createElement('canvas');
+        let _sharedLabelCanvasCtx = _sharedLabelCanvas.getContext('2d');
+        let canvasData = {
+            canvas: _sharedLabelCanvas,
+            context: _sharedLabelCanvasCtx,
+        };
+        cc.game.on(cc.game.EVENT_ENGINE_INITED, function () {
+            Object.assign(Label._canvasPool, {
+                get() {
+                    return canvasData;
+                },
+    
+                put() {
+                    // do nothing
+                }
+            });
         });
-    });
+    }
 
     let _originUpdateMaterial = Label.prototype._updateMaterialWebgl;
     // fix ttf font black border
@@ -34,7 +36,7 @@ if (cc && cc.Label) {
             }
             let dstBlendFactor = cc.macro.BlendFactor.ONE_MINUS_SRC_ALPHA;
             let srcBlendFactor;
-            if (!(__globalAdapter.isDevTool || this.font instanceof cc.BitmapFont)) {
+            if (!(globalAdapter.isDevTool || this.font instanceof cc.BitmapFont)) {
                 // Premultiplied alpha on runtime
                 srcBlendFactor = cc.macro.BlendFactor.ONE;
             }
