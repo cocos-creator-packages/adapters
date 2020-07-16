@@ -46,10 +46,10 @@ window.boot = function () {
         if (err) return console.error(err.message, err.stack);
         count++;
         if (count === bundleRoot.length + 1) {
-            cc.assetManager.loadBundle(settings.hasStartSceneBundle ? START_SCENE : MAIN, cb);
-        }
-        else if (count === bundleRoot.length + 2) {
-            cc.game.run(option, onStart);
+            // if there is start-scene bundle. should load start-scene bundle in the last stage
+            cc.assetManager.loadBundle(settings.hasStartSceneBundle ? START_SCENE : MAIN, function (err) {
+                if (!err) cc.game.run(option, onStart);
+            });
         }
     }
 
