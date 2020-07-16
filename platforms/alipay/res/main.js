@@ -43,7 +43,8 @@ window.boot = function () {
         if (err) return console.error(err.message, err.stack);
         count++;
         if (count === bundleRoot.length + 1) {
-            // if there is start-scene bundle. should load start-scene bundle in the last stage
+            // if there is start-scene bundle. should load start-scene bundle in the last stage. 
+            // Otherwise the main bundle should be the last
             cc.assetManager.loadBundle(settings.hasStartSceneBundle ? START_SCENE : MAIN, function (err) {
                 if (!err) cc.game.run(option, onStart);
             });
