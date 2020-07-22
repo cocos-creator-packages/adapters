@@ -4,14 +4,14 @@
  https://www.cocos.com/
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated engine source code (the "Software"), a limited,
+ of fsUtils software and associated engine source code (the "Software"), a limited,
   worldwide, royalty-free, non-assignable, revocable and non-exclusive license
  to use Cocos Creator solely to develop games on your target platforms. You shall
   not use Cocos Creator software for developing other software or tools that's
   used for developing games. You are not granted to publish, distribute,
   sublicense, and/or sell copies of Cocos Creator.
 
- The software or tools in this License Agreement are licensed, not sold.
+ The software or tools in fsUtils License Agreement are licensed, not sold.
  Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -22,16 +22,16 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-var fs = qg.getFileSystemManager ? qg.getFileSystemManager() : null;
+var fs = tt.getFileSystemManager ? tt.getFileSystemManager() : null;
 
 var fsUtils = {
 
     fs,
 
     getUserDataPath () {
-        return qg.env.USER_DATA_PATH;
+        return tt.env.USER_DATA_PATH;
     },
-    
+
     checkFsValid () {
         if (!fs) {
             console.warn('can not get the file system!');
@@ -39,7 +39,7 @@ var fsUtils = {
         }
         return true;
     },
-    
+
     deleteFile (filePath, onComplete) {
         fs.unlink({
             filePath: filePath,
@@ -52,7 +52,7 @@ var fsUtils = {
             }
         });
     },
-    
+
     downloadFile (remoteUrl, filePath, header, onProgress, onComplete) {
         var options = {
             url: remoteUrl,
@@ -75,12 +75,12 @@ var fsUtils = {
         }
         if (filePath) options.filePath = filePath;
         if (header) options.header = header;
-        var task = qg.downloadFile(options);
+        var task = tt.downloadFile(options);
         onProgress && task.onProgressUpdate(onProgress);
     },
-    
+
     saveFile (srcPath, destPath, onComplete) {
-        qg.saveFile({
+        tt.saveFile({
             tempFilePath: srcPath,
             filePath: destPath,
             success: function (res) {
@@ -92,7 +92,7 @@ var fsUtils = {
             }
         });
     },
-    
+
     copyFile (srcPath, destPath, onComplete) {
         fs.copyFile({
             srcPath: srcPath,
@@ -106,7 +106,7 @@ var fsUtils = {
             }
         });
     },
-    
+
     writeFile (path, data, encoding, onComplete) {
         fs.writeFile({
             filePath: path,
@@ -121,7 +121,7 @@ var fsUtils = {
             }
         });
     },
-    
+
     writeFileSync (path, data, encoding) {
         try {
             fs.writeFileSync(path, data, encoding);
@@ -132,7 +132,7 @@ var fsUtils = {
             return new Error(e.message);
         }
     },
-    
+
     readFile (filePath, encoding, onComplete) {
         fs.readFile({
             filePath: filePath,
@@ -146,8 +146,8 @@ var fsUtils = {
             }
         });
     },
-    
-    readDir (filePath, callback) {
+
+    readDir (filePath, onComplete) {
         fs.readdir({
             dirPath: filePath,
             success: function (res) {
@@ -159,11 +159,11 @@ var fsUtils = {
             }
         });
     },
-    
+
     readText (filePath, onComplete) {
         fsUtils.readFile(filePath, 'utf8', onComplete);
     },
-    
+
     readArrayBuffer (filePath, onComplete) {
         fsUtils.readFile(filePath, '', onComplete);
     },
@@ -183,7 +183,7 @@ var fsUtils = {
             onComplete && onComplete(err, out);
         });
     },
-    
+
     readJsonSync (path) {
         try {
             var str = fs.readFileSync(path, 'utf8');
@@ -194,7 +194,7 @@ var fsUtils = {
             return new Error(e.message);
         }
     },
-    
+
     makeDirSync (path, recursive) {
         try {
             fs.mkdirSync(path, recursive);
@@ -215,7 +215,7 @@ var fsUtils = {
             return new Error(e.message);
         }
     },
-    
+
     exists (filePath, onComplete) {
         fs.access({
             path: filePath,
@@ -229,19 +229,7 @@ var fsUtils = {
     },
 
     loadSubpackage (name, onProgress, onComplete) {
-        name = 'usr_' + name;  // prevention of name conflicts with platform 
-        var task = qg.loadSubpackage({
-            name: name,
-            success: function () {
-                onComplete && onComplete();
-            },
-            fail: function (res) {
-                console.warn('Load Subpackage failed: ' + res.errMsg);
-                onComplete && onComplete(new Error(`Failed to load subpackage ${name}: ${res.errMsg}`));
-            }
-        });
-        onProgress && task.onProgressUpdate(onProgress);
-        return task;
+        throw new Error('Not Implemented');
     },
 
     unzip (zipFilePath, targetPath, onComplete) {
@@ -251,8 +239,8 @@ var fsUtils = {
             success () {
                 onComplete && onComplete(null);
             },
-            fail (errMsg) {
-                onComplete && onComplete(new Error('unzip failed: ' + errMsg));
+            fail (res) {
+                onComplete && onComplete(new Error('unzip failed: ' + res.errMsg));
             },
         })
     },
