@@ -48,7 +48,7 @@ cc.game._prepareFinished = function (cb) {
     });
 };
 
-wx.onMessage(function (data) {
+tt.onMessage(function (data) {
     if (data.fromEngine) {
         if (data.event === 'boot') {
             window.boot();

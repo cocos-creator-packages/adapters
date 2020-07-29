@@ -19,5 +19,9 @@ __globalAdapter.handleSystemInfo(() => {
         // Release Image objects after uploaded gl texture
         cc.macro.CLEANUP_IMAGE_CACHE = true;
     }
-    window.boot();
+    
+    // sub context need to boot after SubContextView component enabled in main context
+    if (!__globalAdapter.isSubContext) {
+        window.boot();
+    }
 });

@@ -1,10 +1,15 @@
 function adaptContainerStrategy (containerStrategyProto) {
     containerStrategyProto._setupContainer = function (view, width, height) {
-        let locCanvas = cc.game.canvas;
         // Setup pixel ratio for retina display
         var devicePixelRatio = view._devicePixelRatio = 1;
-        if (view.isRetinaEnabled())
+        if (view.isRetinaEnabled()) {
             devicePixelRatio = view._devicePixelRatio = Math.min(view._maxPixelRatio, window.devicePixelRatio || 1);
+        }
+        // size of sharedCanvas is readonly in subContext
+        if (__globalAdapter.isSubContext) {
+            return;
+        }
+        let locCanvas = cc.game.canvas;
         // Setup canvas
         width *= devicePixelRatio;
         height *= devicePixelRatio;
