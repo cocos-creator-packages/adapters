@@ -240,7 +240,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail (res) {
-                console.warn(`unzip failed: path: ${dirPath} message: ${e.message}`);
+                console.warn(`unzip failed: path: ${zipFilePath} message: ${res.errMsg}`);
                 onComplete && onComplete(new Error('unzip failed: ' + res.errMsg));
             },
         })
