@@ -36,16 +36,20 @@ window.boot = function () {
     });
 
     let { RESOURCES, INTERNAL, MAIN, START_SCENE } = cc.AssetManager.BuiltinBundleName;
-    let bundleRoot = [INTERNAL, MAIN];
-    settings.hasStartSceneBundle && bundleRoot.push(START_SCENE);
+    let bundleRoot = [INTERNAL];
     settings.hasResourcesBundle && bundleRoot.push(RESOURCES);
+    settings.hasStartSceneBundle && bundleRoot.push(MAIN);
     
     var count = 0;
     function cb (err) {
         if (err) return console.error(err.message, err.stack);
         count++;
         if (count === bundleRoot.length + 1) {
-            cc.game.run(option, onStart);
+            // if there is start-scene bundle. should load start-scene bundle in the last stage
+            // Otherwise the main bundle should be the last
+            cc.assetManager.loadBundle(settings.hasStartSceneBundle ? START_SCENE : MAIN, function (err) {
+                if (!err) cc.game.run(option, onStart);
+            });
         }
     }
 
