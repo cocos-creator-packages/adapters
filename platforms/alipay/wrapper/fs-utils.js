@@ -55,7 +55,6 @@ function deleteFile (filePath, callback) {
 function downloadFile (remoteUrl, filePath, callback) {
     my.downloadFile({
         url: remoteUrl,
-        filePath: filePath,
         success: function (res) {
             if (!filePath) {
                 callback && callback(null, res.apFilePath);
@@ -72,6 +71,7 @@ function downloadFile (remoteUrl, filePath, callback) {
 }
 
 function saveFile (srcPath, destPath, callback) {
+    // saveFile function don`t have callback So use copyFile function
     copyFile(srcPath, destPath, callback);
 }
 
