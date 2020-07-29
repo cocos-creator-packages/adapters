@@ -7,6 +7,8 @@
     const js = cc.js;
     const KeyboardReturnType = EditBox.KeyboardReturnType;
     const MAX_VALUE = 65535;
+    const KEYBOARD_HIDE_TIME = 600;
+    let _hideKeyboardTimeout = null;
     let _currentEditBoxImpl = null;
 
     function getKeyboardReturnType (type) {
@@ -51,28 +53,17 @@
 
         beginEditing () {
             // In case multiply register events
-            if (_currentEditBoxImpl === this) {
+            if (this._editing) {
                 return;
             }
-            let delegate = this._delegate;
-            // handle the old keyboard
-            if (_currentEditBoxImpl) {
-                let currentImplCbs = _currentEditBoxImpl._eventListeners;
-                currentImplCbs.onKeyboardComplete();
-
-                __globalAdapter.updateKeyboard && __globalAdapter.updateKeyboard({
-                    value: delegate._string,
-                });
-            }
-            else {
+            this._ensureKeyboardHide(() => {
+                let delegate = this._delegate;
                 this._showKeyboard();
-            }
-
-            this._registerKeyboardEvent();
-
-            this._editing = true;
-            _currentEditBoxImpl = this;
-            delegate.editBoxEditingDidBegan();
+                this._registerKeyboardEvent();
+                this._editing = true;
+                _currentEditBoxImpl = this;
+                delegate.editBoxEditingDidBegan();
+            });
         },
 
         endEditing () {
@@ -125,6 +116,27 @@
                 __globalAdapter.offKeyboardComplete(cbs.onKeyboardComplete);
                 cbs.onKeyboardComplete = null;
             }
+        },
+
+        _otherEditing () {
+            return !!_currentEditBoxImpl && _currentEditBoxImpl !== this && _currentEditBoxImpl._editing;
+        },
+
+        _ensureKeyboardHide (cb) {
+            let otherEditing = this._otherEditing();
+            if (!otherEditing && !_hideKeyboardTimeout) {
+                return cb();
+            }
+            if (_hideKeyboardTimeout) {
+                clearTimeout(_hideKeyboardTimeout);
+            }
+            if (otherEditing) {
+                _currentEditBoxImpl.endEditing();
+            }
+            _hideKeyboardTimeout = setTimeout(() => {
+                _hideKeyboardTimeout = null;
+                cb();
+            }, KEYBOARD_HIDE_TIME);
         },
 
         _showKeyboard () {
