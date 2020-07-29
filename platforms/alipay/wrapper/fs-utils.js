@@ -75,6 +75,7 @@ var fsUtils = {
     },
     
     saveFile (srcPath, destPath, onComplete) {
+        // Hack, seems like my.saveFile dose not work
         fsUtils.copyFile(srcPath, destPath, onComplete);
     },
     
