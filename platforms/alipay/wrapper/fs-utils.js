@@ -55,9 +55,13 @@ function deleteFile (filePath, callback) {
 function downloadFile (remoteUrl, filePath, callback) {
     my.downloadFile({
         url: remoteUrl,
-        filePath: filePath,
         success: function (res) {
-            callback && callback(null, res.apFilePath);
+            if (!filePath) {
+                callback && callback(null, res.apFilePath);
+            }
+            else {
+                copyFile(res.apFilePath, filePath, callback);
+            }
         },
         fail: function (res) {
             console.error('download file failed', res);
@@ -67,18 +71,8 @@ function downloadFile (remoteUrl, filePath, callback) {
 }
 
 function saveFile (srcPath, destPath, callback) {
-    my.saveFile({
-        tempFilePath: srcPath,
-        filePath: destPath,
-        success: function (res) {
-            console.log('save file finished:' + destPath);
-            callback && callback(null, res.savedFilePath);
-        },
-        fail: function (res) {
-            console.error('save file failed', res);
-            callback && callback(new Error(res.errorMessage), null);
-        }
-    });
+    // saveFile function don`t have callback So use copyFile function
+    copyFile(srcPath, destPath, callback);
 }
 
 function copyFile (srcPath, destPath, callback) {
