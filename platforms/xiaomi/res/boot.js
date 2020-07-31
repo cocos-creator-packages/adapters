@@ -16,38 +16,45 @@ window.boot = function () {
         );
     };
 
-    // jsList
-    var jsList = settings.jsList;
-    
-    if (jsList) {
-        jsList = jsList.map(function (x) {
-            return 'src/' + x;
-        });
-    }
-    
     var option = {
         id: 'GameCanvas',
         debugMode: settings.debug ? cc.debug.DebugMode.INFO : cc.debug.DebugMode.ERROR,
         showFPS: settings.debug,
         frameRate: 60,
-        jsList: jsList,
         groupList: settings.groupList,
         collisionMatrix: settings.collisionMatrix,
     }
+    
+    cc.assetManager.init({ 
+        bundleVers: settings.bundleVers,
+        subpackages: settings.subpackages,
+        remoteBundles: settings.remoteBundles,
+        server: settings.server,
+     });
 
-    cc.assetManager.init({ bundleVers: settings.bundleVers });
-
-    var resourcesRoot = REMOTE_SERVER_ROOT + '/assets/resources';
-    var internalRoot = REMOTE_SERVER_ROOT + '/assets/internal';
-    var mainRoot = REMOTE_SERVER_ROOT + '/assets/main';
+    let { RESOURCES, INTERNAL, MAIN, START_SCENE } = cc.AssetManager.BuiltinBundleName;
+    let bundleRoot = [INTERNAL];
+    settings.hasResourcesBundle && bundleRoot.push(RESOURCES);
+    settings.hasStartSceneBundle && bundleRoot.push(MAIN);
+    
     var count = 0;
     function cb (err) {
-        if (!err) count++;
-        if (count === 3) {
-            cc.game.run(option, onStart);
+        if (err) return console.error(err.message, err.stack);
+        count++;
+        if (count === bundleRoot.length + 1) {
+            // if there is start-scene bundle. should load start-scene bundle in the last stage
+            // Otherwise the main bundle should be the last
+            cc.assetManager.loadBundle(settings.hasStartSceneBundle ? START_SCENE : MAIN, function (err) {
+                if (!err) cc.game.run(option, onStart);
+            });
         }
     }
-    cc.assetManager.loadBundle(internalRoot,  cb);
-    cc.assetManager.loadBundle(resourcesRoot, cb);
-    cc.assetManager.loadBundle(mainRoot, cb);
+
+    // load plugins
+    cc.assetManager.loadScript(settings.jsList.map(function (x) { return 'src/' + x;}), cb);
+
+    // load bundles
+    for (let i = 0; i < bundleRoot.length; i++) {
+        cc.assetManager.loadBundle(bundleRoot[i], cb);
+    }
 };

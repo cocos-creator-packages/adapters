@@ -26,8 +26,8 @@ function adaptSys (sys, env) {
     var version = /[\d\.]+/.exec(system);
     sys.osVersion = version ? version[0] : system;
     sys.osMainVersion = parseInt(sys.osVersion);
-
-    sys.browserVersion = env.version;
+    sys.browserType = null;
+    sys.browserVersion = null;
 
     var w = env.windowWidth;
     var h = env.windowHeight;
@@ -39,11 +39,10 @@ function adaptSys (sys, env) {
 
     sys.localStorage = window.localStorage;
 
-    var _supportWebGL = false;
+    var _supportWebGL = __globalAdapter.isSubContext ? false : true;;
     var _supportWebp = false;
     try {
         var _canvas = document.createElement("canvas");
-        _supportWebGL = _canvas.getContext("webgl");
         _supportWebp = _canvas.toDataURL('image/webp').startsWith('data:image/webp');
     }
     catch (err) { }

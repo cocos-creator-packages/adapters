@@ -12,13 +12,12 @@ require('./main');  // TODO: move to common
 // Adjust devicePixelRatio
 cc.view._maxPixelRatio = 4;
 
-// handle remote downloader
-window.REMOTE_SERVER_ROOT = "";
-window.SUBCONTEXT_ROOT = "";
-
 if (cc.sys.platform !== cc.sys.WECHAT_GAME_SUB) {
     // Release Image objects after uploaded gl texture
     cc.macro.CLEANUP_IMAGE_CACHE = true;
 }
 
-window.boot();
+// sub context need to boot after SubContextView component enabled in main context
+if (!__globalAdapter.isSubContext) {
+    window.boot();
+}

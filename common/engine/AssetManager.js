@@ -1,12 +1,19 @@
 const cacheManager = require('../cache-manager');
-const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, readJsonSync, manifestPath } = require('../../wrapper/fs-utils');
+const { fs, downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, getUserDataPath } = window.fsUtils;
 
 const REGEX = /^\w+:\/\/.*/;
 
 const downloader = cc.assetManager.downloader;
+const parser = cc.assetManager.parser;
+const presets = cc.assetManager.presets;
 const isSubDomain = __globalAdapter.isSubContext;
-downloader.limitations[cc.AssetManager.LoadStrategy.NORMAL] = { maxConcurrent: 10, maxRequestsPerFrame: 10 };
-var subpackages = new cc.AssetManager.Cache();
+downloader.maxConcurrency = 8;
+downloader.maxRequestsPerFrame = 64;
+presets['scene'].maxConcurrency = 10;
+presets['scene'].maxRequestsPerFrame = 64;
+
+let SUBCONTEXT_ROOT, REMOTE_SERVER_ROOT;
+let subpackages = {}, remoteBundles = {};
 
 function downloadScript (url, options, onComplete) {
     if (typeof options === 'function') {
@@ -19,6 +26,26 @@ function downloadScript (url, options, onComplete) {
     else {
         __cocos_require__(url);
         onComplete && onComplete(null);
+    }
+}
+
+function handleZip (url, options, onComplete) {
+    let cachedUnzip = cacheManager.cachedFiles.get(url);
+    if (cachedUnzip) {
+        cacheManager.updateLastTime(url);
+        onComplete && onComplete(null, cachedUnzip.url);
+    }
+    else if (REGEX.test(url)) {
+        downloadFile(url, null, options.header, options.onFileProgress, function (err, downloadedZipPath) {
+            if (err) {
+                onComplete && onComplete(err);
+                return;
+            }
+            cacheManager.unzipAndCacheBundle(url, downloadedZipPath, options.__cacheBundleRoot__, onComplete);
+        });
+    }
+    else {
+        cacheManager.unzipAndCacheBundle(url, url, options.__cacheBundleRoot__, onComplete);
     }
 }
 
@@ -35,31 +62,22 @@ function downloadDomAudio (url, options, onComplete) {
     onComplete && onComplete(null, dom);
 }
 
-function readFile(filePath, options, onComplete) {
-    switch (options.responseType) {
-        case 'json': 
-            readJson(filePath, onComplete);
-            break;
-        case 'arraybuffer':
-            readArrayBuffer(filePath, onComplete);
-            break;
-        default:
-            readText(filePath, onComplete);
-            break;
-    }
-}
-
-function download (url, func, options, onProgress, onComplete) {
+function download (url, func, options, onFileProgress, onComplete) {
     var result = transformUrl(url, options);
     if (result.inLocal) {
         func(result.url, options, onComplete);
     }
     else if (result.inCache) {
-        cacheManager.updateLastTime(url)
-        func(result.url, options, onComplete);
+        cacheManager.updateLastTime(url);
+        func(result.url, options, function (err, data) {
+            if (err) {
+                cacheManager.removeCache(url);
+            }
+            onComplete(err, data);
+        });
     }
     else {
-        downloadFile(url, null, options.header, onProgress, function (err, path) {
+        downloadFile(url, null, options.header, onFileProgress, function (err, path) {
             if (err) {
                 onComplete(err, null);
                 return;
@@ -67,7 +85,7 @@ function download (url, func, options, onProgress, onComplete) {
             func(path, options, function (err, data) {
                 if (!err) {
                     cacheManager.tempFiles.add(url, path);
-                    cacheManager.cacheFile(url, path, options.saveFile, true);
+                    cacheManager.cacheFile(url, path, options.cacheEnabled, options.__cacheBundleRoot__, true);
                 }
                 onComplete(err, data);
             });
@@ -75,11 +93,28 @@ function download (url, func, options, onProgress, onComplete) {
     }
 }
 
+function parseArrayBuffer (url, options, onComplete) {
+    readArrayBuffer(url, onComplete);
+}
+
+function parseText (url, options, onComplete) {
+    readText(url, onComplete);
+}
+
+function parseJson (url, options, onComplete) {
+    readJson(url, onComplete);
+}
+
+function downloadText (url, options, onComplete) {
+    download(url, parseText, options, options.onFileProgress, onComplete);
+}
+
 var downloadJson = !isSubDomain ? function (url, options, onComplete) {
-    options.responseType = "json";
-    download(url, readFile, options, options.onProgress, onComplete);
+    download(url, parseJson, options, options.onFileProgress, onComplete);
 } : function (url, options, onComplete) {
-    var content = require('../../../' + cc.path.changeExtname(url, '.js'));
+    var { url } = transformUrl(url, options);
+    url = url.slice(SUBCONTEXT_ROOT.length + 1);  // remove subcontext root in url
+    var content = __cocos_require__(cc.path.changeExtname(url, '.js'));
     onComplete && onComplete(null, content);
 }
 
@@ -90,68 +125,131 @@ var loadFont = !isSubDomain ? function (url, options, onComplete) {
     onComplete(null, 'Arial');
 }
 
-function downloadArrayBuffer (url, options, onComplete) {
-    options.responseType = "arraybuffer";
-    download(url, readFile, options, options.onProgress, onComplete);
+function doNothing (content, options, onComplete) { onComplete(null, content); }
+
+function downloadAsset (url, options, onComplete) {
+    download(url, doNothing, options, options.onFileProgress, onComplete);
 }
 
-function downloadText (url, options, onComplete) {
-    options.responseType = "text";
-    download(url, readFile, options, options.onProgress, onComplete);
-}
-
-function downloadAudio (url, options, onComplete) {
-    download(url, downloadDomAudio, options, options.onProgress, onComplete);
-}
-
-function downloadVideo (url, options, onComplete) {
-    download(url, function (url, options, onComplete) { onComplete(null, url); }, options, options.onProgress, onComplete);
-}
-
-function downloadFont (url, options, onComplete) {
-    download(url, loadFont, options, options.onProgress, onComplete);
-}
-
-function downloadImage (url, options, onComplete) {
-    download(url, downloader.downloadDomImage, options, options.onProgress, onComplete);
-}
-
-function subdomainDownloadImage (url, options, onComplete) {
+function subdomainTransformUrl (url, options, onComplete) {
     var { url } = transformUrl(url, options);
-    downloader.downloadDomImage(url, options, onComplete);
+    onComplete(null, url);
 }
 
-function downloadImageInAndroid (url, options, onComplete) {
-    var result = transformUrl(url, options);
-    if (result.inLocal) {
-        downloader.downloadDomImage(result.url, options, onComplete);
-    }
-    else if (result.inCache) {
-        cacheManager.updateLastTime(url)
-        downloader.downloadDomImage(result.url, options, onComplete);
-    }
-    else {
-        downloader.downloadDomImage(url, options, function (err, img) {
-            if (!err) {
-                cacheManager.cacheFile(url, url, options.saveFile, false);
+function downloadBundle (nameOrUrl, options, onComplete) {
+    let bundleName = cc.path.basename(nameOrUrl);
+    var version = options.version || cc.assetManager.downloader.bundleVers[bundleName];
+
+    if (subpackages[bundleName]) {
+        var config = `subpackages/${bundleName}/config.${version ? version + '.' : ''}json`;
+        loadSubpackage(bundleName, options.onFileProgress, function (err) {
+            if (err) {
+                onComplete(err, null);
+                return;
             }
-            onComplete(err, img);
+            downloadJson(config, options, function (err, data) {
+                data && (data.base = `subpackages/${bundleName}/`);
+                onComplete(err, data);
+            });
         });
     }
+    else {
+        let js, url;
+        if (REGEX.test(nameOrUrl)) {
+            url = nameOrUrl;
+            js = `src/scripts/${bundleName}/index.js`;
+            cacheManager.makeBundleFolder(bundleName);
+        }
+        else {
+            if (remoteBundles[bundleName]) {
+                url = `${REMOTE_SERVER_ROOT}remote/${bundleName}`;
+                js = `src/scripts/${bundleName}/index.js`;
+                cacheManager.makeBundleFolder(bundleName);
+            }
+            else {
+                url = `assets/${bundleName}`;
+                js = `assets/${bundleName}/index.js`;
+            }
+        }
+        __cocos_require__(js);
+        options.cacheEnabled = true;
+        options.__cacheBundleRoot__ = bundleName;
+        var config = `${url}/config.${version ? version + '.' : ''}json`;
+        downloadJson(config, options, function (err, data) {
+            if (err) {
+                onComplete && onComplete(err);
+                return;
+            }
+            if (data.isZip) {
+                let zipVersion = data.zipVersion;
+                let zipUrl = `${url}/res.${zipVersion ? zipVersion + '.' : ''}zip`;
+                handleZip(zipUrl, options, function (err, unzipPath) {
+                    if (err) {
+                        onComplete && onComplete(err);
+                        return;
+                    }
+                    data.base = unzipPath + '/res/';
+                    // PATCH: for android alipay version before v10.1.95 (v10.1.95 included)
+                    // to remove in the future
+                    let sys = cc.sys;
+                    if (sys.platform === sys.ALIPAY_GAME && sys.os === sys.OS_ANDROID) {
+                        let resPath = unzipPath + 'res/';
+                        if (fs.accessSync({path: resPath})) {
+                            data.base = resPath;
+                        }
+                    }
+                    onComplete && onComplete(null, data);
+                });
+            }
+            else {
+                data.base = url + '/';
+                onComplete && onComplete(null, data);
+            }
+        });
+    }
+};
+
+const originParsePVRTex = parser.parsePVRTex;
+let parsePVRTex = function (file, options, onComplete) {
+    readArrayBuffer(file, function (err, data) {
+        if (err) return onComplete(err);
+        originParsePVRTex(data, options, onComplete);
+    });
+};
+
+const originParsePKMTex = parser.parsePKMTex;
+let parsePKMTex = function (file, options, onComplete) {
+    readArrayBuffer(file, function (err, data) {
+        if (err) return onComplete(err);
+        originParsePKMTex(data, options, onComplete);
+    });
+};
+
+function parsePlist (url, options, onComplete) {
+    readText(url, function (err, file) {
+        var result = null;
+        if (!err) {
+            result = cc.plistParser.parse(file);
+            if (!result) err = new Error('parse failed');
+        }
+        onComplete && onComplete(err, result);
+    });
 }
 
-downloadImage = isSubDomain ? subdomainDownloadImage : (cc.sys.os === cc.sys.OS_ANDROID ? downloadImageInAndroid : downloadImage);
+let downloadImage = isSubDomain ? subdomainTransformUrl : downloadAsset;
 downloader.downloadDomAudio = downloadDomAudio;
 downloader.downloadScript = downloadScript;
+parser.parsePVRTex = parsePVRTex;
+parser.parsePKMTex = parsePKMTex;
 
 downloader.register({
     '.js' : downloadScript,
 
     // Audio
-    '.mp3' : downloadAudio,
-    '.ogg' : downloadAudio,
-    '.wav' : downloadAudio,
-    '.m4a' : downloadAudio,
+    '.mp3' : downloadAsset,
+    '.ogg' : downloadAsset,
+    '.wav' : downloadAsset,
+    '.m4a' : downloadAsset,
 
     // Image
     '.png' : downloadImage,
@@ -163,50 +261,103 @@ downloader.register({
     '.tiff' : downloadImage,
     '.image' : downloadImage,
     '.webp' : downloadImage,
-    '.pvr': downloadArrayBuffer,
-    '.pkm': downloadArrayBuffer,
+    '.pvr': downloadAsset,
+    '.pkm': downloadAsset,
 
-    '.font': downloadFont,
-    '.eot': downloadFont,
-    '.ttf': downloadFont,
-    '.woff': downloadFont,
-    '.svg': downloadFont,
-    '.ttc': downloadFont,
+    '.font': downloadAsset,
+    '.eot': downloadAsset,
+    '.ttf': downloadAsset,
+    '.woff': downloadAsset,
+    '.svg': downloadAsset,
+    '.ttc': downloadAsset,
 
     // Txt
-    '.txt' : downloadText,
-    '.xml' : downloadText,
-    '.vsh' : downloadText,
-    '.fsh' : downloadText,
-    '.atlas' : downloadText,
+    '.txt' : downloadAsset,
+    '.xml' : downloadAsset,
+    '.vsh' : downloadAsset,
+    '.fsh' : downloadAsset,
+    '.atlas' : downloadAsset,
 
-    '.tmx' : downloadText,
-    '.tsx' : downloadText,
+    '.tmx' : downloadAsset,
+    '.tsx' : downloadAsset,
+    '.plist' : downloadAsset,
+    '.fnt' : downloadAsset,
 
     '.json' : downloadJson,
-    '.ExportJson' : downloadJson,
-    '.plist' : downloadText,
+    '.ExportJson' : downloadAsset,
 
-    '.fnt' : downloadText,
+    '.binary' : downloadAsset,
+    '.bin': downloadAsset,
+    '.dbbin': downloadAsset,
+    '.skel': downloadAsset,
 
-    '.binary' : downloadArrayBuffer,
-    '.bin': downloadArrayBuffer,
-    '.dbbin': downloadArrayBuffer,
-    '.skel': downloadArrayBuffer,
+    '.mp4': downloadAsset,
+    '.avi': downloadAsset,
+    '.mov': downloadAsset,
+    '.mpg': downloadAsset,
+    '.mpeg': downloadAsset,
+    '.rm': downloadAsset,
+    '.rmvb': downloadAsset,
 
-    '.mp4': downloadVideo,
-    '.avi': downloadVideo,
-    '.mov': downloadVideo,
-    '.mpg': downloadVideo,
-    '.mpeg': downloadVideo,
-    '.rm': downloadVideo,
-    '.rmvb': downloadVideo,
+    'bundle': downloadBundle,
+
+    'default': downloadText,
+});
+
+parser.register({
+    '.png' : downloader.downloadDomImage,
+    '.jpg' : downloader.downloadDomImage,
+    '.bmp' : downloader.downloadDomImage,
+    '.jpeg' : downloader.downloadDomImage,
+    '.gif' : downloader.downloadDomImage,
+    '.ico' : downloader.downloadDomImage,
+    '.tiff' : downloader.downloadDomImage,
+    '.image' : downloader.downloadDomImage,
+    '.webp' : downloader.downloadDomImage,
+    '.pvr': parsePVRTex,
+    '.pkm': parsePKMTex,
+
+    '.font': loadFont,
+    '.eot': loadFont,
+    '.ttf': loadFont,
+    '.woff': loadFont,
+    '.svg': loadFont,
+    '.ttc': loadFont,
+
+    // Audio
+    '.mp3' : downloadDomAudio,
+    '.ogg' : downloadDomAudio,
+    '.wav' : downloadDomAudio,
+    '.m4a' : downloadDomAudio,
+
+    // Txt
+    '.txt' : parseText,
+    '.xml' : parseText,
+    '.vsh' : parseText,
+    '.fsh' : parseText,
+    '.atlas' : parseText,
+
+    '.tmx' : parseText,
+    '.tsx' : parseText,
+    '.fnt' : parseText,
+    '.plist' : parsePlist,
+
+    '.binary' : parseArrayBuffer,
+    '.bin': parseArrayBuffer,
+    '.dbbin': parseArrayBuffer,
+    '.skel': parseArrayBuffer,
+
+    '.ExportJson' : parseJson,
 });
 
 var transformUrl = !isSubDomain ? function (url, options) {
     var inLocal = false;
     var inCache = false;
-    if (REGEX.test(url)) {
+    var isInUserDataPath = url.startsWith(getUserDataPath());
+    if (isInUserDataPath) {
+        inLocal = true;
+    }
+    else if (REGEX.test(url)) {
         if (!options.reload) {
             var cache = cacheManager.cachedFiles.get(url);
             if (cache) {
@@ -233,61 +384,36 @@ var transformUrl = !isSubDomain ? function (url, options) {
     return { url };
 }
 
-var originLoadBundle = cc.assetManager.loadBundle;
-cc.assetManager.loadBundle = function (root, options, onComplete) {
-    if (subpackages.has(root)) {
-        if (typeof options === 'function') {
-            onComplete = options;
-            options = null;
-        }
-        options = options || {};
-        
-        loadSubpackage(subpackages.get(root), options.onProgress, function (err) {
-            if (err) {
-                onComplete && onComplete(err, null);
-                return;
-            }
-            options.priority = options.priority || 2;
-            var ver = options.ver || cc.assetManager.bundleVers[cc.path.basename(root)];
-            var config = ver ?  `${root}/config.${ver}.json`: `${root}/config.json`;
-            downloader.download(root, config, '.json', options, function (err, json) {
-                var bundle = null;
-                if (!err) {
-                    bundle = new cc.AssetManager.Bundle();
-                    json.base = root + '/';
-                    bundle.init(json);
-                }
-                onComplete && onComplete(err, bundle);
-            });
-        });
-    }
-    else {
-        return originLoadBundle.call(cc.assetManager, root, options, onComplete);
-    }
-};
-
 if (!isSubDomain) {
     cc.assetManager.transformPipeline.append(function (task) {
         var input = task.output = task.input;
         for (var i = 0, l = input.length; i < l; i++) {
             var item = input[i];
             var options = item.options;
-            if (!item.config) options.saveFile = options.saveFile !== undefined ? options.saveFile : false;
+            if (!item.config) {
+                options.cacheEnabled = options.cacheEnabled !== undefined ? options.cacheEnabled : false;
+            }
+            else {
+                options.__cacheBundleRoot__ = item.config.name;
+            }
         }
     });
 
     var originInit = cc.assetManager.init;
     cc.assetManager.init = function (options) {
         originInit.call(cc.assetManager, options);
+        options.subpackages && options.subpackages.forEach(x => subpackages[x] = 'subpackages/' + x);
+        options.remoteBundles && options.remoteBundles.forEach(x => remoteBundles[x] = true);
+        REMOTE_SERVER_ROOT = options.server || '';
+        if (REMOTE_SERVER_ROOT && !REMOTE_SERVER_ROOT.endsWith('/')) REMOTE_SERVER_ROOT += '/';
         cacheManager.init();
     };
-    var content = readJsonSync(manifestPath);
-    if (content.subpackages) {
-        for (var i = 0, l = content.subpackages.length; i < l; i++) {
-            subpackages.add(content.subpackages[i].root, content.subpackages[i].name);
-        }
-    }
 }
-
-
+else {
+    var originInit = cc.assetManager.init;
+    cc.assetManager.init = function (options) {
+        originInit.call(cc.assetManager, options);
+        SUBCONTEXT_ROOT = options.subContextRoot || '';
+    };
+}
 

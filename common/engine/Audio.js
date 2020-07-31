@@ -1,6 +1,7 @@
-const Audio = cc.Audio;
+const Audio = cc._Audio;
 
 if (Audio) {
+    let originGetDuration = Audio.prototype.getDuration;
     Object.assign(Audio.prototype, {
         _createElement () {
             let elem = this._src._nativeAsset;
@@ -19,29 +20,28 @@ if (Audio) {
         },
 
         setCurrentTime (num) {
-            if (!this._element) {
-                this._nextTime = num;
-                return;
-            }
-            this._nextTime = 0;
-            this._element.seek(num);
+            let self = this;
+            this._src && this._src._ensureLoaded(function () {
+                self._element.seek(num);
+            });
         },
 
         stop () {
-            if (!this._element) return;
-            // HACK: some platforms won't set currentTime to 0 when stop audio
-            this._element.seek(0);
-            this._element.stop();
-            this._unbindEnded();
-            this.emit('stop');
-            this._state = Audio.State.STOPPED;
+            let self = this;
+            this._src && this._src._ensureLoaded(function () {
+                // HACK: some platforms won't set currentTime to 0 when stop audio
+                self._element.seek(0);
+                self._element.stop();
+                self._unbindEnded();
+                self.emit('stop');
+                self._state = Audio.State.STOPPED;
+            });
         },
 
-        _bindEnded (callback) {
-            callback = callback || this._onended;
+        _bindEnded () {
             let elem = this._element;
             if (elem) {
-              elem.onEnded && elem.onEnded(callback);
+              elem.onEnded && elem.onEnded(this._onended);
             }
         },
 
@@ -50,6 +50,14 @@ if (Audio) {
             if (elem) {
               elem.offEnded && elem.offEnded();
             }
+        },
+
+        getDuration () {
+            let duration = originGetDuration.call(this);
+            // HACK: in mini game, if dynamicly load audio, can't get duration from audioClip
+            // because duration is not coming from audio deserialization
+            duration = duration || (this._element ? this._element.duration : 0);
+            return duration;
         },
 
         // adapt some special operations on web platform

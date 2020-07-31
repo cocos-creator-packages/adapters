@@ -28,8 +28,6 @@ var fsUtils = {
 
     fs,
 
-    manifestPath: 'game.json',
-
     getUserDataPath () {
         return my.env.USER_DATA_PATH;
     },
@@ -49,7 +47,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail: function (res) {
-                cc.warn('Delete file failed: ' + res.errorMessage);
+                console.warn(`Delete file failed: path: ${filePath} message: ${res.errorMessage}`);
                 onComplete && onComplete(new Error(res.errorMessage));
             }
         });
@@ -63,11 +61,11 @@ var fsUtils = {
                     onComplete && onComplete(null, res.apFilePath);
                 }
                 else {
-                    fsUtils.saveFile(res.apFilePath, filePath, onComplete);
+                    fsUtils.copyFile(res.apFilePath, filePath, onComplete);
                 }
             },
             fail: function (res) {
-                cc.warn('Download file failed: ' + res.errorMessage);
+                console.warn(`Download file failed: path: ${remoteUrl} message: ${res.errorMessage}`);
                 onComplete && onComplete(new Error(res.errorMessage), null);
             }
         }
@@ -77,17 +75,8 @@ var fsUtils = {
     },
     
     saveFile (srcPath, destPath, onComplete) {
-        my.saveFile({
-            tempFilePath: srcPath,
-            filePath: destPath,
-            success: function (res) {
-                onComplete && onComplete(null, res.savedFilePath);
-            },
-            fail: function (res) {
-                cc.warn('Save file failed: ' + res.errorMessage);
-                onComplete && onComplete(new Error(res.errorMessage), null);
-            }
-        });
+        // Hack, seems like my.saveFile dose not work
+        fsUtils.copyFile(srcPath, destPath, onComplete);
     },
     
     copyFile (srcPath, destPath, onComplete) {
@@ -98,7 +87,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail: function (res) {
-                cc.warn('Copy file failed: ' + res.errorMessage);
+                console.warn(`Copy file failed: path: ${srcPath} message: ${res.errorMessage}`);
                 onComplete && onComplete(new Error(res.errorMessage));
             }
         });
@@ -113,7 +102,7 @@ var fsUtils = {
                 onComplete && onComplete(null);
             },
             fail: function (res) {
-                cc.warn('Write file failed: ' + res.errorMessage);
+                console.warn(`Write file failed: path: ${path} message: ${res.errorMessage}`);
                 onComplete && onComplete(new Error(res.errorMessage));
             }
         });
@@ -129,7 +118,7 @@ var fsUtils = {
             return null;
         }
         catch (e) {
-            cc.warn('Write file failed: ' + e.message);
+            console.warn(`Write file failed: path: ${path} message: ${e.message}`);
             return new Error(e.message);
         }
     },
@@ -142,7 +131,7 @@ var fsUtils = {
                 onComplete && onComplete(null, res.data);
             },
             fail: function (res) {
-                cc.warn('Read file failed: ' + res.errorMessage);
+                console.warn(`Read file failed: path: ${filePath} message: ${res.errorMessage}`);
                 onComplete && onComplete (new Error(res.errorMessage), null);
             }
         });
@@ -155,7 +144,7 @@ var fsUtils = {
                 onComplete && onComplete(null, res.files);
             },
             fail: function (res) {
-                cc.warn('Read directory failed: ' + res.errorMessage);
+                console.warn(`Read directory failed: path: ${filePath} message: ${res.errorMessage}`);
                 onComplete && onComplete(new Error(res.errorMessage), null);
             }
         });
@@ -177,7 +166,7 @@ var fsUtils = {
                     out = JSON.parse(text);
                 }
                 catch (e) {
-                    cc.warn('Read json failed: ' + e.message);
+                    console.warn(`Read json failed: path: ${filePath} message: ${e.message}`);
                     err = new Error(e.message);
                 }
             }
@@ -194,7 +183,7 @@ var fsUtils = {
             return JSON.parse(res.data);
         }
         catch (e) {
-            cc.warn('Read json failed: ' + e.message);
+            console.warn(`Read json failed: path: ${path} message: ${e.message}`);
             return new Error(e.message);
         }
     },
@@ -208,7 +197,7 @@ var fsUtils = {
             return null;
         }
         catch (e) {
-            cc.warn('Make directory failed: ' + e.message);
+            console.warn(`Make directory failed: path: ${path} message: ${e.message}`);
             return new Error(e.message);
         }
     },
@@ -218,7 +207,7 @@ var fsUtils = {
             fs.rmdirSync({ dirPath, recursive });
         }
         catch (e) {
-            cc.warn('rm directory failed: ' + e.message);
+            console.warn(`rm directory failed: path: ${dirPath} message: ${e.message}`);
             return new Error(e.message);
         }
     },
@@ -237,7 +226,21 @@ var fsUtils = {
 
     loadSubpackage (name, onProgress, onComplete) {
         throw new Error('Not Implemented');
-    }
+    },
+
+    unzip (zipFilePath, targetPath, onComplete) {
+        fs.unzip({
+            zipFilePath,
+            targetPath,
+            success () {
+                onComplete && onComplete(null);
+            },
+            fail (res) {
+                console.warn(`unzip failed: path: ${zipFilePath} message: ${res.errorMessage}`);
+                onComplete && onComplete(new Error('unzip failed: ' + res.errorMessage));
+            },
+        })
+    },
 };
 
-cc.assetManager.fsUtils = module.exports = fsUtils;
+window.fsUtils = module.exports = fsUtils;

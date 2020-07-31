@@ -46,13 +46,12 @@
             }
             else {
                 // deferred loading video clip
-                cc.assetManager.loadNativeFile(clip, (err, nativeAsset) => {
+                cc.assetManager.postLoadNative(clip, (err) => {
                     if (err) {
-                        console.error(err);
+                        console.error(err.message, err.stack);
                         return;
                     }
-                    clip._nativeAsset = nativeAsset;
-                    this._impl.setURL(nativeAsset, this._mute || this._volume === 0);
+                    this._impl.setURL(clip._nativeAsset, this._mute || this._volume === 0);
                 });
             }
         }
@@ -127,8 +126,8 @@
             this._video = __globalAdapter.createVideo();
             this._video.showCenterPlayBtn = false;
             this._video.controls = false;
-            this._duration = -1;
-            this._currentTime = -1;
+            this._duration = 0;
+            this._currentTime = 0;
             this._loaded = false;
             this.setVisible(false);
             this._bindEvent();
@@ -204,7 +203,6 @@
                 return;
             }
             self._currentTime = 0;
-            video.seek(0);  // ensure to set currentTime by 0 when video is stopped
             self._playing = false;
             self._dispatchEvent(_impl.EventType.STOPPED);
         });

@@ -3,6 +3,8 @@ const utils = require('../../../common/utils');
 if (window.__globalAdapter) {
     let globalAdapter = window.__globalAdapter;
     // SystemInfo
+    globalAdapter.isSubContext = false;  // sub context not supported
+    globalAdapter.isDevTool = false;
     utils.cloneMethod(globalAdapter, qg, 'getSystemInfoSync');
 
     // TouchEvent
@@ -42,7 +44,6 @@ if (window.__globalAdapter) {
     // Message
     utils.cloneMethod(globalAdapter, qg, 'getOpenDataContext');
     utils.cloneMethod(globalAdapter, qg, 'onMessage');
-    globalAdapter.isSubContext = false;  // sub context not supported
 
     // SharedCanvas
     utils.cloneMethod(globalAdapter, qg, 'getSharedCanvas');
