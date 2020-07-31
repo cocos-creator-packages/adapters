@@ -155,7 +155,7 @@ function downloadBundle (nameOrUrl, options, onComplete) {
     }
     else {
         let js, url;
-        if (REGEX.test(nameOrUrl)) {
+        if (REGEX.test(nameOrUrl) || nameOrUrl.startsWith(getUserDataPath())) {
             url = nameOrUrl;
             js = `src/scripts/${bundleName}/index.js`;
             cacheManager.makeBundleFolder(bundleName);
