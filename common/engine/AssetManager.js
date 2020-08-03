@@ -1,7 +1,7 @@
 const cacheManager = require('../cache-manager');
 const { fs, downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, getUserDataPath } = window.fsUtils;
 
-const REGEX = /^\w+:\/\/.*/;
+const REGEX = /^http[s]{0,1}:\/\/.*/;
 
 const downloader = cc.assetManager.downloader;
 const parser = cc.assetManager.parser;

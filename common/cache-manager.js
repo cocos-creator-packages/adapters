@@ -32,7 +32,7 @@ var callbacks = [];
 var cleaning = false;
 var errTest = /the maximum size of the file storage/;
 var suffix = 0;
-const REGEX = /^\w+:\/\/.*/;
+const REGEX = /^http[s]{0,1}:\/\/.*/;
 
 var cacheManager = {
 
