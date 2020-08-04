@@ -6,6 +6,7 @@
     const EditBoxComp = cc.EditBoxComponent;
     const js = cc.js;
     const KeyboardReturnType = EditBoxComp.KeyboardReturnType;
+    const MAX_VALUE = 65535;
     let _currentEditBoxImpl = null;
 
     function getKeyboardReturnType (type) {
@@ -80,27 +81,12 @@
             cbs.onKeyboardComplete && cbs.onKeyboardComplete();
         },
 
-        setMaxLength(maxLength) {
-            if (!isNaN(maxLength)) {
-                if (maxLength < 0) {
-                    //we can't set Number.MAX_VALUE to input's maxLength property
-                    //so we use a magic number here, it should works at most use cases.
-                    maxLength = 65535;
-                }
-
-                this._maxLength = maxLength;
-            }
-        },
-
         _registerKeyboardEvent () {
             let self = this;
             let delegate = this._delegate;
             let cbs = this._eventListeners;
 
             cbs.onKeyboardInput = function (res) {
-                if (res.value.length > self._maxLength) {
-                    res.value = res.value.slice(0, self._maxLength);
-                }
                 if (delegate._string !== res.value) {
                     delegate._editBoxTextChanged(res.value);
                 }
@@ -144,10 +130,9 @@
         _showKeyboard () {
             let delegate = this._delegate;
             let multiline = (delegate.inputMode === EditBoxComp.InputMode.ANY);
-            this.setMaxLength(delegate.maxLength);
             __globalAdapter.showKeyboard({
                 defaultValue: delegate.string,
-                maxLength: this._maxLength,
+                maxLength: delegate.maxLength < 0 ? MAX_VALUE : delegate.maxLength,
                 multiple: multiline,
                 confirmHold: false,
                 confirmType: getKeyboardReturnType(delegate.returnType),
