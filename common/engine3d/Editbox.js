@@ -48,19 +48,6 @@
             this._delegate = delegate;
         },
 
-        setFocus (value) {
-            if (value) {
-                this.beginEditing();
-            }
-            else {
-                this.endEditing();
-            }
-        },
-
-        isFocused () {
-            return this._editing;
-        },
-
         beginEditing () {
             // In case multiply register events
             if (_currentEditBoxImpl === this) {
