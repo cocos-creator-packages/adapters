@@ -26,24 +26,27 @@ if (cc && cc.LabelComponent) {
     // fix ttf font black border
     Object.assign(Label.prototype, {
         _updateBlendFunc () {
-            if(this._material) {
-                let dstBlendFactor = cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA;
-                let srcBlendFactor;
-                if (!(isDevTool || this.font instanceof cc.BitmapFont)) {
-                    srcBlendFactor = cc.GFXBlendFactor.ONE;
-                }
-                else {
-                    srcBlendFactor = cc.GFXBlendFactor.SRC_ALPHA;
-                }
-                const target = this._blendTemplate.blendState.targets[0];
-                if (target.blendDst !== dstBlendFactor || target.blendSrc !== srcBlendFactor) {
-                    target.blendDst = dstBlendFactor;
-                    target.blendSrc = srcBlendFactor;
-                    this._blendTemplate.depthStencilState = this._material.passes[0].depthStencilState;
-                    this._blendTemplate.rasterizerState = this._material.passes[0].rasterizerState;
-                    this._material.overridePipelineStates(this._blendTemplate, 0);
-                }
+            let dstBlendFactor = cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA;
+            let srcBlendFactor;
+            if (!(isDevTool || this.font instanceof cc.BitmapFont)) {
+                srcBlendFactor = cc.GFXBlendFactor.ONE;
             }
+            else {
+                srcBlendFactor = cc.GFXBlendFactor.SRC_ALPHA;
+            }
+
+            let mat = this.getMaterial(0);
+            const target = this._blendTemplate.blendState.targets[0];
+
+            if ((this._uiMaterialIns !== null && this._uiMatInsDirty) ||
+                (target.blendDst !== dstBlendFactor || target.blendSrc !== srcBlendFactor)) {
+                mat = this.getUIMaterialInstance();
+                target.blendDst = dstBlendFactor;
+                target.blendSrc = srcBlendFactor;
+                mat.overridePipelineStates(this._blendTemplate, 0);
+            }
+
+            return mat || this.getUIRenderMaterial();
         }
     });
 }
