@@ -140,6 +140,8 @@ function writeFileSync (path, data, encoding) {
 function readFile (filePath, encoding, callback) {
     var result = checkFsValid();
     if (result) return result;
+    filePath = filePath.replace('./','');
+
     fs.readFile({
         filePath: filePath,
         encoding: encoding,
