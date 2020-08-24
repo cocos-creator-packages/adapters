@@ -35,8 +35,11 @@ window.boot = function () {
         subContextRoot: settings.subContextRoot
     });
 
-    let { RESOURCES, INTERNAL, MAIN, START_SCENE } = cc.AssetManager.BuiltinBundleName;
-    let bundleRoot = [INTERNAL];
+    var RESOURCES = cc.AssetManager.BuiltinBundleName.RESOURCES;
+    var INTERNAL = cc.AssetManager.BuiltinBundleName.INTERNAL;
+    var MAIN = cc.AssetManager.BuiltinBundleName.MAIN;
+    var START_SCENE = cc.AssetManager.BuiltinBundleName.START_SCENE;
+    var bundleRoot = [INTERNAL];
     settings.hasResourcesBundle && bundleRoot.push(RESOURCES);
     settings.hasStartSceneBundle && bundleRoot.push(MAIN);
     
@@ -57,7 +60,7 @@ window.boot = function () {
     cc.assetManager.loadScript(settings.jsList.map(function (x) { return 'src/' + x;}), cb);
 
     // load bundles
-    for (let i = 0; i < bundleRoot.length; i++) {
+    for (var i = 0; i < bundleRoot.length; i++) {
         cc.assetManager.loadBundle(bundleRoot[i], cb);
     }
 };
