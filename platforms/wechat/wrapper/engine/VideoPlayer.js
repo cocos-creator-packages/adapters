@@ -300,6 +300,9 @@
         this._h = node._contentSize.height;
 
         let camera = cc.Camera.findCamera(node);
+        if (!camera) {
+            return;
+        }
         camera.getWorldToScreenMatrix2D(_cameraMat);
         Mat4.multiply(_cameraMat, _cameraMat, _worldMat);
 
