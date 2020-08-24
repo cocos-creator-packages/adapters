@@ -280,6 +280,10 @@
 
     _p.updateMatrix = function (node) {
         if (!this._video || !this._visible) return;
+        let camera = cc.Camera.findCamera(node);
+        if (!camera) {
+            return;
+        }
 
         node.getWorldMatrix(_worldMat);
         if (this._m00 === _worldMat.m[0] && this._m01 === _worldMat.m[1] &&
@@ -299,10 +303,6 @@
         this._w = node._contentSize.width;
         this._h = node._contentSize.height;
 
-        let camera = cc.Camera.findCamera(node);
-        if (!camera) {
-            return;
-        }
         camera.getWorldToScreenMatrix2D(_cameraMat);
         Mat4.multiply(_cameraMat, _cameraMat, _worldMat);
 
