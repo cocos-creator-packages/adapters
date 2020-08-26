@@ -25,6 +25,7 @@ export default class XMLHttpRequest extends EventTarget {
   static LOADING = 3
   static DONE = 4
 
+  timeout = 0;
   /*
    * TODO 这一批事件应该是在 XMLHttpRequestEventTarget.prototype 上面的
    */
@@ -96,6 +97,7 @@ export default class XMLHttpRequest extends EventTarget {
         header: _requestHeader.get(this),
         dataType: 'other',
         responseType: this.responseType === 'arraybuffer' ? 'arraybuffer' : 'text',
+        timeout: this.timeout || undefined,
         success: ({ data, statusCode, header }) => {
           this.status = statusCode
           _responseHeader.set(this, header)
