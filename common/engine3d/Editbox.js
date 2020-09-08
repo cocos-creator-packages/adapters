@@ -1,9 +1,9 @@
 (function () {
-    if (!(cc && cc.EditBox)) {
+    if (!(cc && cc.EditBoxComponent)) {
         return;
     }
 
-    const EditBoxComp = cc.EditBox;
+    const EditBoxComp = cc.EditBoxComponent;
     const js = cc.js;
     const KeyboardReturnType = EditBoxComp.KeyboardReturnType;
     const MAX_VALUE = 65535;
