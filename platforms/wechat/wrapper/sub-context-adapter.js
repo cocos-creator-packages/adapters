@@ -59,6 +59,9 @@ wx.onMessage(function (data) {
             viewportInMain.width = data.width;
             viewportInMain.height = data.height;
         }
+        else if (data.event === 'resize') {
+            window.dispatchEvent({type: 'resize'});
+        }
         else if (isEngineReady) {
             if (data.event === 'mainLoop') {
                 if (data.value) {
