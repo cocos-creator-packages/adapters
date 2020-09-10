@@ -72,7 +72,10 @@ RemoteDownloader.prototype.init = function () {
 };
 
 RemoteDownloader.prototype.handle = function (item, callback) {
-
+    // HACK: fix loading settings.json
+    if (item.url.startsWith('./')) {
+        item.url = item.url.slice(2);
+    }
     if (item.type === 'js') {
         return null;
     }
