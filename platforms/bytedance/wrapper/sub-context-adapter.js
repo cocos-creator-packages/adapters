@@ -51,7 +51,10 @@ cc.game._prepareFinished = function (cb) {
 tt.onMessage(function (data) {
     if (data.fromEngine) {
         if (data.event === 'boot') {
-            window.boot();
+            cc.game._banRunningMainLoop = false;
+            if (cc.game._firstSceneLaunched) {
+                cc.game._runMainLoop();
+            }
         }
         else if (data.event === 'viewport') {
             viewportInMain.x = data.x;
