@@ -1985,9 +1985,7 @@ function inject() {
     _window.removeEventListener = function (type, listener) {
         _window.document.removeEventListener(type, listener);
     };
-    _window.dispatchEvent = function (event = {}) {
-        _window.document.dispatchEvent(event);
-    };
+    _window.dispatchEvent = _window.document.dispatchEvent;
 
     if (_util.isIDE) {
         for (var key in _window) {

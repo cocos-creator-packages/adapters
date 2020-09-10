@@ -8,11 +8,11 @@ Object.assign(game, {
     _banRunningMainLoop: __globalAdapter.isSubContext,
     _firstSceneLaunched: false,
 
-    run (config, onStart) {
+    run () {
         cc.director.once(cc.Director.EVENT_AFTER_SCENE_LAUNCH, () => {
             this._firstSceneLaunched = true;
         });
-        originRun.call(this, config, onStart);
+        originRun.apply(this, arguments);
     },
     
     setFrameRate (frameRate) {

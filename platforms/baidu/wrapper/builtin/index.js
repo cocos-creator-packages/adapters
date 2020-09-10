@@ -20,9 +20,7 @@ function inject() {
     _window.removeEventListener = (type, listener) => {
         _window.document.removeEventListener(type, listener)
     }
-    _window.dispatchEvent = function(event = {}) {
-        _window.document.dispatchEvent(event);
-    }
+    _window.dispatchEvent = _window.document.dispatchEvent;
 
     if (isDevtool()) {
         for (const key in _window) {
