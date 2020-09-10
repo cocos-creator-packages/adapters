@@ -48,8 +48,7 @@ if (window.__globalAdapter) {
     utils.cloneMethod(globalAdapter, swan, 'onMessage');
 
     // Subpackage
-    // baidu can`t use system So need special treatment
-    // utils.cloneMethod(globalAdapter, swan, 'loadSubpackage');
+    utils.cloneMethod(globalAdapter, swan, 'loadSubpackage');
 
     // SharedCanvas
     utils.cloneMethod(globalAdapter, swan, 'getSharedCanvas');
