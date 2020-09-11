@@ -1,13 +1,13 @@
 export default {
     container: {
-        width: 640,
-        height: 960,
+        width: '100%',
+        height: '100%',
         borderRadius: 12,
     },
 
     header: {
-        height: 80,
-        width: 640,
+        width: '100%',
+        height: '10%',
         flexDirection: 'column',
         alignItems: 'center',
       	backgroundColor: '#ffffff',
@@ -16,9 +16,9 @@ export default {
     },
 
     title: {
-        width: 98,
+        width: '10%',
+        height: '100%',
         fontSize: 35,
-        height: 80,
         lineHeight: 80,
         textAlign: 'center',
         fontWeight: 'bold',
@@ -27,21 +27,21 @@ export default {
     },
 
     rankList: {
-        width: 640,
-        height: 880,
+        width: '100%',
+        height: '90%',
       	backgroundColor: '#ffffff',
     },
 
     list: {
-        width: 640,
-        height: 790,
+        width: '100%',
+        height: '88%',
       	backgroundColor: '#ffffff',
         marginTop: 30,
     },
 
     listTips: {
-        width: 640,
-        height: 90,
+        width: '100%',
+        height: '12%',
         lineHeight: 90,
         textAlign: 'center',
         fontSize: 25,
@@ -54,24 +54,43 @@ export default {
 
     listItem: {
         backgroundColor: '#F7F7F7',
-        width: 640,
-        height: 100,
+        width: '100%',
+        height: '10%',
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
     },
 
     listItemOld: {
        backgroundColor: '#ffffff',
     },
 
+    listItemUserData: {
+        width: '75%',
+        height: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+    },
+
+    listItemScore: {
+        width: '25%',
+        height: 100,
+        fontSize: 33,
+        fontWeight: 'bold',
+        paddingRight : 200,
+        lineHeight: 100,
+        textAlign: 'center',
+    },
+
     listItemNum: {
+        width: 100,
+        height: 80,
         fontSize: 30,
         fontWeight: 'bold',
         color: '#452E27',
         lineHeight: 100,
-        height: 100,
         textAlign: 'center',
-        width: 80,
     },
 
     listHeadImg: {
@@ -81,21 +100,10 @@ export default {
     },
 
     listItemName:{
-        fontSize: 30,
-        height: 100,
-        lineHeight: 100,
         width: 210,
+        height: 100,
+        fontSize: 30,
+        lineHeight: 100,
         marginLeft: 30,
     },
-
-    listItemScore: {
-        fontSize: 33,
-        fontWeight: 'bold',
-        marginLeft : 0,
-        height: 100,
-        lineHeight: 100,
-        width: 200,
-        textAlign: 'right',
-    },
 }
-

@@ -1,4 +1,3 @@
-let __env = GameGlobal.wx || GameGlobal.tt || GameGlobal.swan;
 module.exports =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -134,7 +133,8 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
  // components
 
- // 全局事件管道
+
+GameGlobal.__env = GameGlobal.wx || GameGlobal.tt || GameGlobal.swan; // 全局事件管道
 
 var EE = new tiny_emitter__WEBPACK_IMPORTED_MODULE_2___default.a();
 var imgPool = new _common_pool_js__WEBPACK_IMPORTED_MODULE_1__["default"]('imgPool');
@@ -543,8 +543,11 @@ var _Layout = /*#__PURE__*/function (_Element) {
 
       if (typeof __env !== 'undefined') {
         __env.onTouchStart(this.touchStart);
+
         __env.onTouchMove(this.touchMove);
+
         __env.onTouchEnd(this.touchEnd);
+
         __env.onTouchCancel(this.touchCancel);
       } else {
         document.onmousedown = this.touchStart;
@@ -2381,8 +2384,7 @@ function createImage() {
 }
 function getDpr() {
   // totally not consider dpr
-  return 1;
-  // if (typeof __env !== "undefined") {
+  return 1; // if (typeof __env !== "undefined") {
   //   return __env.getSystemInfoSync().devicePixelRatio;
   // } else {
   //   return window.devicePixelRatio;
