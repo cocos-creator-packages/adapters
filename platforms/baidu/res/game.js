@@ -20,8 +20,5 @@ __globalAdapter.handleSystemInfo(() => {
         cc.macro.CLEANUP_IMAGE_CACHE = true;
     }
     
-    // sub context need to boot after SubContextView component enabled in main context
-    if (!__globalAdapter.isSubContext) {
-        window.boot();
-    }
+    window.boot();
 });

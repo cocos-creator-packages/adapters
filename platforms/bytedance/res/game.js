@@ -17,7 +17,4 @@ if (cc.sys.platform !== cc.sys.BYTEDANCE_GAME_SUB) {
     cc.macro.CLEANUP_IMAGE_CACHE = true;
 }
 
-// sub context need to boot after SubContextView component enabled in main context
-if (!__globalAdapter.isSubContext) {
-    window.boot();
-}
+window.boot();

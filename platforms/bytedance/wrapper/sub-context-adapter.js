@@ -1,6 +1,7 @@
 // Ensure recieving message from main context before engine being inited
 let isEngineReady = false;
-cc.game.once(cc.game.EVENT_ENGINE_INITED, function () {
+const game = cc.game;
+game.once(game.EVENT_ENGINE_INITED, function () {
     isEngineReady = true;
 });
 
@@ -31,7 +32,7 @@ cc.view.convertToLocationInView = function (tx, ty, relatedPos, out) {
 };
 
 // In sub context, run main loop after subContextView component get enabled.
-cc.game._prepareFinished = function (cb) {
+game._prepareFinished = function (cb) {
     this._prepared = true;
 
     // Init engine
@@ -51,7 +52,10 @@ cc.game._prepareFinished = function (cb) {
 tt.onMessage(function (data) {
     if (data.fromEngine) {
         if (data.event === 'boot') {
-            window.boot();
+            game._banRunningMainLoop = false;
+            if (game._firstSceneLaunched) {
+                game._runMainLoop();
+            }
         }
         else if (data.event === 'viewport') {
             viewportInMain.x = data.x;
@@ -59,20 +63,23 @@ tt.onMessage(function (data) {
             viewportInMain.width = data.width;
             viewportInMain.height = data.height;
         }
+        else if (data.event === 'resize') {
+            window.dispatchEvent({type: 'resize'});
+        }
         else if (isEngineReady) {
             if (data.event === 'mainLoop') {
                 if (data.value) {
-                    cc.game.resume();
+                    game.resume();
                 }
                 else {
-                    cc.game.pause();
+                    game.pause();
                 }
             }
             else if (data.event === 'frameRate') {
-                cc.game.setFrameRate(data.value);
+                game.setFrameRate(data.value);
             }
             else if (data.event === 'step') {
-                cc.game.step();
+                game.step();
             }
         }
     }
@@ -81,13 +88,13 @@ tt.onMessage(function (data) {
 // Canvas component adaptation
 
 cc.Canvas.prototype.update = function () {
-    if (this._width !== cc.game.canvas.width || this._height !== cc.game.canvas.height) {
+    if (this._width !== game.canvas.width || this._height !== game.canvas.height) {
         this.applySettings();
     }
 };
 let originalApplySettings = cc.Canvas.prototype.applySettings;
 cc.Canvas.prototype.applySettings = function () {
     originalApplySettings.call(this);
-    this._width = cc.game.canvas.width;
-    this._height = cc.game.canvas.height;
+    this._width = game.canvas.width;
+    this._height = game.canvas.height;
 };

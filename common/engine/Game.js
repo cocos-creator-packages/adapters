@@ -3,7 +3,18 @@ const renderer = cc.renderer;
 const game = cc.game;
 const dynamicAtlasManager = cc.dynamicAtlasManager;
 
+let originRun = game.run;
 Object.assign(game, {
+    _banRunningMainLoop: __globalAdapter.isSubContext,
+    _firstSceneLaunched: false,
+
+    run () {
+        cc.director.once(cc.Director.EVENT_AFTER_SCENE_LAUNCH, () => {
+            this._firstSceneLaunched = true;
+        });
+        originRun.apply(this, arguments);
+    },
+    
     setFrameRate (frameRate) {
         this.config.frameRate = frameRate;
         if (__globalAdapter.setPreferredFramesPerSecond) {
@@ -21,6 +32,9 @@ Object.assign(game, {
     },
 
     _runMainLoop () {
+        if (this._banRunningMainLoop) {
+            return;
+        }
         var self = this, callback, config = self.config,
             director = cc.director,
             skip = true, frameRate = config.frameRate;
