@@ -172,7 +172,6 @@ function downloadBundle (nameOrUrl, options, onComplete) {
             }
         }
         __cocos_require__(js);
-        options.cacheEnabled = true;
         options.__cacheBundleRoot__ = bundleName;
         var config = `${url}/config.${version ? version + '.' : ''}json`;
         downloadJson(config, options, function (err, data) {
@@ -391,6 +390,7 @@ if (!isSubDomain) {
             var item = input[i];
             var options = item.options;
             if (!item.config) {
+                if (item.ext === 'bundle') continue;
                 options.cacheEnabled = options.cacheEnabled !== undefined ? options.cacheEnabled : false;
             }
             else {
