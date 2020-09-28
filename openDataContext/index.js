@@ -21,7 +21,7 @@ function updateViewPort(data) {
 }
 
 __env.onMessage(data => {
-    if ( data.fromEngine && data.event === 'viewport' ) {
+    if ( data.type === 'engine' && data.event === 'viewport' ) {
         updateViewPort(data);
         draw();
     }
