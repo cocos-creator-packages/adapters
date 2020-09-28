@@ -1,13 +1,11 @@
 import style from './render/style'
-import tplFn from './render/templateFn'
+import template from './render/template'
 import Layout from './engine'
-import dataDemo from './dataDemo'
 
 let __env = GameGlobal.wx || GameGlobal.tt || GameGlobal.swan;
 let sharedCanvas  = __env.getSharedCanvas();
 let sharedContext = sharedCanvas.getContext('2d');
 function draw() {
-    let template = tplFn(dataDemo);
     Layout.clear();
     Layout.init(template, style);
     Layout.layout(sharedContext);

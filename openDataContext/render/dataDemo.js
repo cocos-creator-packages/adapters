@@ -14,7 +14,7 @@ const maxCount = 30;
 for (let i = 0; i < maxCount; ++i) {
     let item = {};
     item.rankScore = Math.floor((Math.random() * 500));
-    item.avatarUrl = 'openDataContext/avatar.png';
+    item.avatarUrl = 'openDataContext/render/avatar.png';
     item.nickname = 'Player_' + i;
     dataDemo.data.push(item);
 }
