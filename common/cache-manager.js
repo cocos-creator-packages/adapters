@@ -268,6 +268,10 @@ var cacheManager = {
         unzip(zipFilePath, targetPath, function (err) {
             if (err) {
                 rmdirSync(targetPath, true);
+                if (errTest.test(err.message)) {
+                    self.outOfStorage = true;
+                    self.autoClear && self.clearLRU();
+                }
                 onComplete && onComplete(err);
                 return;
             }
