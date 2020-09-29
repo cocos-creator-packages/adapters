@@ -202,7 +202,7 @@ var cacheManager = {
         var self = this;
         this.cachedFiles.forEach(function (val, key) {
             if (val.bundle === 'internal') return;
-            if (self._isZipFile(key) && cc.assetManager.bundles.has(val.bundle)) return;
+            if (self._isZipFile(key) && cc.assetManager.bundles.find(bundle => bundle.base.indexOf(val.url) !== -1)) return;
             caches.push({ originUrl: key, url: val.url, lastTime: val.lastTime });
         });
         caches.sort(function (a, b) {
