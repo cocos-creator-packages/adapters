@@ -41,7 +41,6 @@ function RemoteDownloader () {
     this.async = true;
     this.pipeline = null;
     this.REMOTE_SERVER_ROOT = '';
-    this.SUBCONTEXT_ROOT = '';
 };
 RemoteDownloader.ID = ID;
 
@@ -72,7 +71,10 @@ RemoteDownloader.prototype.init = function () {
 };
 
 RemoteDownloader.prototype.handle = function (item, callback) {
-
+    // HACK: fix loading settings.json
+    if (item.url.startsWith('./')) {
+        item.url = item.url.slice(2);
+    }
     if (item.type === 'js') {
         return null;
     }
@@ -88,19 +90,6 @@ RemoteDownloader.prototype.handle = function (item, callback) {
                 return;
             }
         }
-    }
-
-    if (__globalAdapter.isSubContext) {
-        // if getFileSystemManager interface is undefined, need to skip
-        if (REGEX.test(item.url)) {
-            return null;
-        }
-
-        item.url = this.SUBCONTEXT_ROOT + '/' + item.url;
-        if (fsUtils.checkFsValid()) return null;
-
-        handleItem(item, callback);
-        return;
     }
 
     // readFromLocal(item, callback);
