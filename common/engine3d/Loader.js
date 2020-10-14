@@ -86,12 +86,40 @@ function downloadImage (item, callback, isCrossOrigin) {
     img.src = url;
 }
 
-function downloadAudio (item, callback) {
-    if (cc.sys.__audioSupport.format.length === 0) {
-        return new Error(debug.getError(4927));
-    }
+function loadInnerAudioContext (url) {
+    return new Promise((resolve, reject) => {
+        const nativeAudio = __globalAdapter.createInnerAudioContext();
 
-    loadMiniAudio(item, callback);
+        let timer = setTimeout(() => {
+            clearEvent();
+            resolve(nativeAudio);
+        }, 8000);
+        function clearEvent () {
+            nativeAudio.offCanplay(success);
+            nativeAudio.offError(fail);
+        }
+        function success () {
+            clearEvent();
+            clearTimeout(timer);
+            resolve(nativeAudio);
+        }
+        function fail () {
+            clearEvent();
+            clearTimeout(timer);
+            reject('failed to load innerAudioContext: ' + err);
+        }
+        nativeAudio.onCanplay(success);
+        nativeAudio.onError(fail);
+        nativeAudio.src = url;
+    });
+}
+
+function downloadAudio (item, callback) {
+    loadInnerAudioContext(item.url).then(nativeAudio => {
+        callback(null, nativeAudio);
+    }, err => {
+        callback(err);
+    });
 }
 
 function loadMiniAudio (item, callback) {
@@ -141,3 +169,7 @@ cc.loader.loader.addHandlers({
     svg: loadFont,
     ttc: loadFont,
 });
+
+module.exports = {
+    loadInnerAudioContext,
+};

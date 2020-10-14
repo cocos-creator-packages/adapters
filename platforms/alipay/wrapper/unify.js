@@ -35,6 +35,7 @@ if (window.__globalAdapter) {
     globalAdapter.createInnerAudioContext = function() {
         let audio = my.createInnerAudioContext();
         audio.onCanplay = audio.onCanPlay.bind(audio);
+        audio.offCanplay = audio.offCanPlay.bind(audio);
         return audio;
     };
 
