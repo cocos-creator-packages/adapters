@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "build-template": "xiaomigame",
     "scripts": {
-        "build": "quickgame build --cocos-wx-game --include-file-ext .pem,.pkm",
-        "release": "quickgame release --cocos-wx-game --include-file-ext .pem,.pkm",
+        "build": "quickgame build --cocos-wx-game --include-file-ext .pem,.pkm,.webp",
+        "release": "quickgame release --cocos-wx-game --include-file-ext .pem,.pkm,.webp",
         "server": "quickgame server",
         "debug": "quickgame debug"
     },
