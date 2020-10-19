@@ -11,8 +11,7 @@ downloader.maxRequestsPerFrame = 64;
 presets['scene'].maxConcurrency = 10;
 presets['scene'].maxRequestsPerFrame = 64;
 
-let REMOTE_SERVER_ROOT;
-let subpackages = {}, remoteBundles = {};
+let subpackages = {};
 
 function downloadScript (url, options, onComplete) {
     if (REGEX.test(url)) {
@@ -149,8 +148,8 @@ function downloadBundle (nameOrUrl, options, onComplete) {
             cacheManager.makeBundleFolder(bundleName);
         }
         else {
-            if (remoteBundles[bundleName]) {
-                url = `${REMOTE_SERVER_ROOT}remote/${bundleName}`;
+            if (downloader.remoteBundles.indexOf(bundleName) !== -1) {
+                url = `${downloader.remoteServerAddress}remote/${bundleName}`;
                 js = `src/scripts/${bundleName}/index.js`;
                 cacheManager.makeBundleFolder(bundleName);
             }
@@ -400,9 +399,6 @@ var originInit = cc.assetManager.init;
 cc.assetManager.init = function (options) {
     originInit.call(cc.assetManager, options);
     options.subpackages && options.subpackages.forEach(x => subpackages[x] = 'subpackages/' + x);
-    options.remoteBundles && options.remoteBundles.forEach(x => remoteBundles[x] = true);
-    REMOTE_SERVER_ROOT = options.server || '';
-    if (REMOTE_SERVER_ROOT && !REMOTE_SERVER_ROOT.endsWith('/')) REMOTE_SERVER_ROOT += '/';
     cacheManager.init();
 };
 
