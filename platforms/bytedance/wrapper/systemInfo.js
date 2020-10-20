@@ -28,12 +28,12 @@ Object.assign(adapter, {
             sys.platform = sys.BYTEDANCE_GAME;
         }
 
-        sys.glExtension = function (name) {
-            if (name === 'OES_texture_float') {
-                return false;
-            }
-            return !!cc.renderer.device.ext(name);
-        };
+        // sys.glExtension = function (name) {
+        //     if (name === 'OES_texture_float') {
+        //         return false;
+        //     }
+        //     return !!cc.renderer.device.ext(name);
+        // };
 
         // move to common if other platforms support
         sys.getSafeAreaRect = function () {

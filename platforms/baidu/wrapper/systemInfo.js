@@ -15,11 +15,11 @@ Object.assign(adapter, {
             sys.platform = sys.BAIDU_GAME;
         }
 
-        sys.glExtension = function (name) {
-            if (name === 'OES_texture_float') {
-                return false;
-            }
-            return !!cc.renderer.device.ext(name);
-        };
+        // sys.glExtension = function (name) {
+        //     if (name === 'OES_texture_float') {
+        //         return false;
+        //     }
+        //     return !!cc.renderer.device.ext(name);
+        // };
     },
 });
