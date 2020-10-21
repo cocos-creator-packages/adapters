@@ -61,7 +61,13 @@ var fsUtils = {
                     onComplete && onComplete(null, res.apFilePath);
                 }
                 else {
-                    fsUtils.copyFile(res.apFilePath, filePath, onComplete);
+                    fsUtils.copyFile(res.apFilePath, filePath, function (err) {
+                        if (err) {
+                            onComplete && onComplete(err);
+                        } else {
+                            onComplete && onComplete(null, filePath);
+                        }
+                    });
                 }
             },
             fail: function (res) {

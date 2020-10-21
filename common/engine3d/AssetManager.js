@@ -18,7 +18,7 @@ function downloadScript (url, options, onComplete) {
         onComplete && onComplete(new Error('Can not load remote scripts'));
     }
     else {
-        require(url);
+        require('../../../' + url);
         onComplete && onComplete(null);
     }
 }
@@ -44,16 +44,12 @@ function handleZip (url, options, onComplete) {
 }
 
 function downloadDomAudio (url, options, onComplete) {
-    if (typeof options === 'function') {
-        onComplete = options;
-        options = null;
-    }
     
-    var dom = document.createElement('audio');
-    dom.src = url;
+    const clip = __globalAdapter.createInnerAudioContext();
+    clip.src = url;
     
     // HACK: wechat does not callback when load large number of assets
-    onComplete && onComplete(null, dom);
+    onComplete && onComplete(null, clip);
 }
 
 function download (url, func, options, onFileProgress, onComplete) {
@@ -120,10 +116,11 @@ function downloadAsset (url, options, onComplete) {
 
 function downloadBundle (nameOrUrl, options, onComplete) {
     let bundleName = cc.path.basename(nameOrUrl);
-    var version = options.version || cc.assetManager.downloader.bundleVers[bundleName];
+    let version = options.version || cc.assetManager.downloader.bundleVers[bundleName];
+    let suffix = version ? version + '.' : '';
 
     if (subpackages[bundleName]) {
-        var config = `subpackages/${bundleName}/config.${version ? version + '.' : ''}json`;
+        var config = `subpackages/${bundleName}/config.${suffix}json`;
         loadSubpackage(bundleName, options.onFileProgress, function (err) {
             if (err) {
                 onComplete(err, null);
@@ -144,25 +141,25 @@ function downloadBundle (nameOrUrl, options, onComplete) {
         let js, url;
         if (REGEX.test(nameOrUrl) || nameOrUrl.startsWith(getUserDataPath())) {
             url = nameOrUrl;
-            js = `src/scripts/${bundleName}/index.js`;
+            js = `src/bundle-scripts/${bundleName}/index.${suffix}js`;
             cacheManager.makeBundleFolder(bundleName);
         }
         else {
             if (downloader.remoteBundles.indexOf(bundleName) !== -1) {
                 url = `${downloader.remoteServerAddress}remote/${bundleName}`;
-                js = `src/scripts/${bundleName}/index.js`;
+                js = `src/bundle-scripts/${bundleName}/index.${suffix}js`;
                 cacheManager.makeBundleFolder(bundleName);
             }
             else {
                 url = `assets/${bundleName}`;
-                js = `assets/${bundleName}/index.js`;
+                js = `assets/${bundleName}/index.${suffix}js`;
             }
         }
-        require(js);
+        require('../../../' + js);
         const System = typeof window === 'undefined' ? System : window.System;
         System.import('virtual:///prerequisite-imports/' + bundleName).then(function() {
             options.__cacheBundleRoot__ = bundleName;
-            var config = `${url}/config.${version ? version + '.' : ''}json`;
+            var config = `${url}/config.${suffix}json`;
             downloadJson(config, options, function (err, data) {
                 if (err) {
                     onComplete && onComplete(err);
