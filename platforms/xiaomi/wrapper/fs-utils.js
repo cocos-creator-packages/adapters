@@ -187,7 +187,7 @@ var fsUtils = {
     readJsonSync (path) {
         try {
             var str = fs.readFileSync(path, 'utf8');
-            return JSON.parse(str);
+            return JSON.parse(str.data);
         }
         catch (e) {
             console.warn(`Read json failed: path: ${path} message: ${e.message}`);
