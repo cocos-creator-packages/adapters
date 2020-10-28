@@ -1,80 +1,112 @@
+const { loadInnerAudioContext } = require('./AssetManager.js');
 const AudioPlayer = cc.internal.AudioPlayer;
 const { PlayingState, AudioType } = cc.AudioClip;
+const AudioManager = cc.internal.AudioManager;
+AudioManager.maxAudioChannel = 10;
+
+class AudioManagerMiniGame extends AudioManager {
+    discardOnePlayingIfNeeded() {
+        if (this._playingAudios.length < AudioManager.maxAudioChannel) {
+            return;
+        }
+
+        // a played audio has a higher priority than a played shot
+        let audioToDiscard;
+        let oldestOneShotIndex = this._playingAudios.findIndex(audio => !(audio instanceof AudioPlayerMiniGame));
+        if (oldestOneShotIndex > -1) {
+            audioToDiscard = this._playingAudios[oldestOneShotIndex];
+            this._playingAudios.splice(oldestOneShotIndex, 1);
+        }
+        else {
+            audioToDiscard = this._playingAudios.shift();
+        }
+        if (audioToDiscard) {
+            audioToDiscard.stop();
+        }
+    }
+}
+
 
 cc.AudioClip.prototype._getPlayer = function (clip) {
     this._loadMode = AudioType.JSB_AUDIO;
-    return AudioPlayerWX;
+    return AudioPlayerMiniGame;
 };
 
-export class AudioPlayerWX extends AudioPlayer {
+export class AudioPlayerMiniGame extends AudioPlayer {
+    static _manager = new AudioManagerMiniGame();
     _startTime = 0;
     _offset = 0;
     _volume = 1;
     _loop = false;
-    _oneShoting = false;
 
     constructor (info) {
         super(info);
-        this._audio = info.clip;
+        this._nativeAudio = info.nativeAudio;
 
-        this._audio.onPlay(() => {
+        this._nativeAudio.onPlay(() => {
             if (this._state === PlayingState.PLAYING) { return; }
             this._state = PlayingState.PLAYING;
             this._startTime = performance.now();
-            this._eventTarget.emit('started');
+            this._clip.emit('started');
         });
-        this._audio.onPause(() => {
+        this._nativeAudio.onPause(() => {
             if (this._state === PlayingState.STOPPED) { return; }
             this._state = PlayingState.STOPPED;
             this._offset += performance.now() - this._startTime;
         });
-        this._audio.onStop(() => {
+        this._nativeAudio.onStop(() => {
             if (this._state === PlayingState.STOPPED) { return; }
             this._state = PlayingState.STOPPED;
             this._offset = 0;
         });
-        this._audio.onEnded(() => {
+        this._nativeAudio.onEnded(() => {
             if (this._state === PlayingState.STOPPED) { return; }
             this._state = PlayingState.STOPPED;
             this._offset = 0;
-            this._eventTarget.emit('ended');
+            this._clip.emit('ended');
+            AudioPlayerMiniGame._manager.removePlaying(this);
         });
-        this._audio.onError(function (res) { return console.error(res.errMsg);});
+        this._nativeAudio.onError(function (res) { return console.error(res.errMsg);});
     }
 
     play () {
-        if (!this._audio || this._state === PlayingState.PLAYING) { return; }
+        if (!this._nativeAudio) { return; }
         if (this._blocking) { this._interrupted = true; return; }
-        if (this._oneShoting) {
-            this._audio.volume = this._volume;
-            this._audio.loop = this._loop;
-            this._oneShoting = false;
+        if (this._state === PlayingState.PLAYING) {
+            /* sometimes there is no way to update the playing state
+            especially when player unplug earphones and the audio automatically stops
+            so we need to force updating the playing state by pausing audio */
+            this.pause();
+            // restart if already playing
+            this.setCurrentTime(0);
         }
-        this._audio.play();
+        AudioPlayerMiniGame._manager.discardOnePlayingIfNeeded();
+        this._nativeAudio.play();
+        AudioPlayerMiniGame._manager.addPlaying(this);
     }
 
     pause () {
-        if (!this._audio || this._state !== PlayingState.PLAYING) { return; }
-        this._audio.pause();
+        if (!this._nativeAudio || this._state !== PlayingState.PLAYING) { return; }
+        this._nativeAudio.pause();
+        AudioPlayerMiniGame._manager.removePlaying(this._clip);
     }
 
     stop () {
-        if (!this._audio) { return; }
-        this._audio.stop();
+        if (!this._nativeAudio) { return; }
+        this._nativeAudio.stop();
+        AudioPlayerMiniGame._manager.removePlaying(this._clip);
     }
 
     playOneShot (volume) {
-        /* InnerAudioContext doesn't support multiple playback at the
-           same time so here we fall back to re-start style approach */
-        if (volume === undefined) { volume = 1; }
-        if (!this._audio) { return; }
-        this._offset = 0;
-        this._oneShoting = true;
-        this._audio.loop = false;
-        this._audio.volume = volume;
-        // stop and play immediately could run into issues on iOS
-        if (this._state === PlayingState.PLAYING) { this._audio.seek(0); }
-        else { this._audio.play(); }
+        loadInnerAudioContext(this._nativeAudio.src).then(innerAudioContext => {
+            AudioPlayerMiniGame._manager.discardOnePlayingIfNeeded();
+            innerAudioContext.volume = volume;
+            innerAudioContext.play();
+            AudioPlayerMiniGame._manager.addPlaying(innerAudioContext);
+            innerAudioContext.onEnded(() => {
+                AudioPlayerMiniGame._manager.removePlaying(innerAudioContext);
+            });
+        });
     }
 
     getCurrentTime () {
@@ -88,10 +120,10 @@ export class AudioPlayerWX extends AudioPlayer {
     }
 
     setCurrentTime (val) {
-        if (!this._audio) { return; }
+        if (!this._nativeAudio) { return; }
         this._offset = cc.math.clamp(val, 0, this._duration) * 1000;
         this._startTime = performance.now();
-        this._audio.seek(val);
+        this._nativeAudio.seek(val);
     }
 
     getVolume () {
@@ -100,7 +132,7 @@ export class AudioPlayerWX extends AudioPlayer {
 
     setVolume (val, immediate) {
         this._volume = val;
-        if (this._audio) { this._audio.volume = val; }
+        if (this._nativeAudio) { this._nativeAudio.volume = val; }
     }
 
     getLoop () {
@@ -109,11 +141,11 @@ export class AudioPlayerWX extends AudioPlayer {
 
     setLoop (val) {
         this._loop = val;
-        if (this._audio) { this._audio.loop = val; }
+        if (this._nativeAudio) { this._nativeAudio.loop = val; }
     }
 
     destroy () {
-        if (this._audio) { this._audio.destroy(); }
+        if (this._nativeAudio) { this._nativeAudio.destroy(); }
         super.destroy();
     }
 }

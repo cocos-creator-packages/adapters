@@ -43,13 +43,40 @@ function handleZip (url, options, onComplete) {
     }
 }
 
+export function loadInnerAudioContext (url) {
+    return new Promise((resolve, reject) => {
+        const nativeAudio = __globalAdapter.createInnerAudioContext();
+
+        let timer = setTimeout(() => {
+            clearEvent();
+            resolve(nativeAudio);
+        }, 8000);
+        function clearEvent () {
+            nativeAudio.offCanplay(success);
+            nativeAudio.offError(fail);
+        }
+        function success () {
+            clearEvent();
+            clearTimeout(timer);
+            resolve(nativeAudio);
+        }
+        function fail () {
+            clearEvent();
+            clearTimeout(timer);
+            reject('failed to load innerAudioContext: ' + err);
+        }
+        nativeAudio.onCanplay(success);
+        nativeAudio.onError(fail);
+        nativeAudio.src = url;
+    });
+}
+
 function downloadDomAudio (url, options, onComplete) {
-    
-    const clip = __globalAdapter.createInnerAudioContext();
-    clip.src = url;
-    
-    // HACK: wechat does not callback when load large number of assets
-    onComplete && onComplete(null, clip);
+    loadInnerAudioContext(url).then(nativeAudio => {
+        onComplete(null, nativeAudio);
+    }, err => {
+        onComplete(new Error(err));
+    });
 }
 
 function download (url, func, options, onFileProgress, onComplete) {

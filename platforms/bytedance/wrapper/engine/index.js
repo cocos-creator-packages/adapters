@@ -1,1 +1,2 @@
 require('./Label');
+require('./ImageAsset');

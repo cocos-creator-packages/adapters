@@ -27,13 +27,6 @@ Object.assign(systemInfo, {
         else {
             sys.platform = sys.BYTEDANCE_GAME_SUB;
         }
-
-        sys.glExtension = function (name) {
-            if (name === 'OES_texture_float') {
-                return false;
-            }
-            return !!cc.renderer.device.ext(name);
-        };
     }
 });
 
