@@ -1,4 +1,4 @@
-const { loadInnerAudioContext } = require('./Loader.js');
+const { loadInnerAudioContext } = require('./AssetManager.js');
 const AudioPlayer = cc.internal.AudioPlayer;
 const { PlayingState, AudioType } = cc.AudioClip;
 const AudioManager = cc.internal.AudioManager;
