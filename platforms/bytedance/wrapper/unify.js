@@ -113,4 +113,11 @@ if (window.__globalAdapter) {
             });
         },
     });
+
+    // safeArea
+    // origin point on the top-left corner
+    globalAdapter.getSafeArea = function () {
+        let { top, left, bottom, right, width, height } = systemInfo.safeArea;
+        return { top, left, bottom, right, width, height };
+    }
 }
