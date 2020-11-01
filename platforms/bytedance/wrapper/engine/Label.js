@@ -26,13 +26,13 @@ if (cc && cc.LabelComponent) {
     // fix ttf font black border
     Object.assign(Label.prototype, {
         _updateBlendFunc () {
-            let dstBlendFactor = cc.GFXBlendFactor.ONE_MINUS_SRC_ALPHA;
+            let dstBlendFactor = cc.gfx.BlendFactor.ONE_MINUS_SRC_ALPHA;
             let srcBlendFactor;
             if (!(isDevTool || this.font instanceof cc.BitmapFont)) {
-                srcBlendFactor = cc.GFXBlendFactor.ONE;
+                srcBlendFactor = cc.gfx.BlendFactor.ONE;
             }
             else {
-                srcBlendFactor = cc.GFXBlendFactor.SRC_ALPHA;
+                srcBlendFactor = cc.gfx.BlendFactor.SRC_ALPHA;
             }
 
             let mat = this.getMaterial(0);
