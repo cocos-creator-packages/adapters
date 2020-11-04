@@ -115,7 +115,7 @@ class VideoPlayerImplMiniGame extends cc.internal.VideoPlayerImpl {
 
     createVideoPlayer(url) {
         if (!__globalAdapter.createVideo) {
-            cc.warn('VideoPlayer not supported');
+            console.warn('VideoPlayer not supported');
             return;
         }
 
@@ -198,24 +198,37 @@ class VideoPlayerImplMiniGame extends cc.internal.VideoPlayerImpl {
         return this._duration;
     }
 
-    syncPlaybackRate() {
-        cc.warn('The platform does not support');
+    syncPlaybackRate(value) {
+        let video = this._video;
+        if(video && value !== video.playbackRate) {
+            if (value === 0.5 | value === 0.8 |value === 1.0 |value === 1.25 | value === 1.5) {
+                video.playbackRate = value;
+            } else {
+                console.warn('The platform does not support this PlaybackRate!');
+            }
+        }
     }
 
     syncVolume() {
-        cc.warn('The platform does not support');
+        console.warn('The platform does not support');
     }
 
-    syncMute() {
-        cc.warn('The platform does not support');
+    syncMute(enable) {
+        let video = this._video;
+        if (video && video.muted !== enable) {
+            video.muted = enable;
+        }
     }
 
-    syncLoop() {
-        cc.warn('The platform does not support');
+    syncLoop(enable) {
+        let video = this._video;
+        if (video && video.loop !== enable) {
+            video.loop = enable;
+        }
     }
 
     syncStayOnBottom() {
-        cc.warn('The platform does not support');
+        console.warn('The platform does not support');
     }
 
     getCurrentTime() {
