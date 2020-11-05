@@ -21,13 +21,7 @@ Object.assign(systemInfo, {
                 sys.os = sys.OS_IOS;
             }
         }
-        // wechatgame subdomain
-        if (!wx.getOpenDataContext) {
-            sys.platform = sys.WECHAT_GAME_SUB;
-        }
-        else {
-          sys.platform = sys.WECHAT_GAME;
-        }
+        sys.platform = sys.WECHAT_GAME;
 
         // move to common if other platforms support
         sys.getSafeAreaRect = function () {

@@ -20,13 +20,7 @@ Object.assign(systemInfo, {
                 sys.os = sys.OS_IOS;
             }
         }
-        // wechatgame subdomain
-        if (!tt.getOpenDataContext) {
-            sys.platform = sys.BYTEDANCE_GAME;
-        }
-        else {
-            sys.platform = sys.BYTEDANCE_GAME_SUB;
-        }
+        sys.platform = sys.BYTEDANCE_MINI_GAME;
 
         // move to common if other platforms support
         sys.getSafeAreaRect = function () {

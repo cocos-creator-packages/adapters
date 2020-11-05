@@ -5,7 +5,7 @@ Object.assign(systemInfo, {
     // Extend adaptSys interface
     adaptSys (sys) {
         adaptSysFunc.call(this, sys);
-        sys.platform = sys.XIAOMI_GAME;
+        sys.platform = sys.XIAOMI_QUICK_GAME;
     }
 });
 

@@ -51,13 +51,7 @@ Object.assign(systemInfo, {
     // Extend adaptSys interface
     adaptSys (sys) {
         adaptSysFunc.call(this, sys, _env);
-        // baidugame subdomain
-        if (!swan.getOpenDataContext) {
-            sys.platform = sys.BAIDU_GAME_SUB;
-        }
-        else {
-            sys.platform = sys.BAIDU_GAME;
-        }
+        sys.platform = sys.BAIDU_MINI_GAME;
     }
 });
 
