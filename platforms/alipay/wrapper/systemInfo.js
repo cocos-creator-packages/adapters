@@ -5,7 +5,7 @@ Object.assign(systemInfo, {
     // Extend adaptSys interface
     adaptSys (sys) {
         adaptSysFunc.call(this, sys);
-        sys.platform = sys.ALIPAY_GAME;
+        sys.platform = sys.ALIPAY_MINI_GAME;
     }
 });
 
