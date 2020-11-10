@@ -153,7 +153,6 @@ function downloadBundle (nameOrUrl, options, onComplete) {
                 onComplete(err, null);
                 return;
             }
-            const System = typeof window === 'undefined' ? System : window.System;
             downloader.importBundleEntry(bundleName).then(function() {
                 downloadJson(config, options, function (err, data) {
                     data && (data.base = `subpackages/${bundleName}/`);
