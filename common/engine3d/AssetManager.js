@@ -183,8 +183,7 @@ function downloadBundle (nameOrUrl, options, onComplete) {
             }
         }
         require('../../../' + js);
-        const System = typeof window === 'undefined' ? System : window.System;
-        System.import('virtual:///prerequisite-imports/' + bundleName).then(function() {
+        downloader.importBundleEntry(bundleName).then(function() {
             options.__cacheBundleRoot__ = bundleName;
             var config = `${url}/config.${suffix}json`;
             downloadJson(config, options, function (err, data) {
