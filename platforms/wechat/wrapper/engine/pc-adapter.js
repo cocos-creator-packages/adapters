@@ -153,11 +153,27 @@ function adaptMouseEvent () {
     });
 }
 
+function adaptGL () {
+    if (canvas) {
+        let webglRC = canvas.getContext('webgl');
+        let originalUseProgram = webglRC.useProgram.bind(webglRC);
+        webglRC.useProgram = function (program) {
+            if (program) {
+                originalUseProgram(program);
+            }
+        }
+    }
+}
+
 (function () {
     // TODO: add mac
     if (env.platform !== 'windows') {
         return;
     }
+
+    // use program not supported to unbind program on pc end
+    adaptGL();
+
     inputMgr.registerSystemEvent = function () {
         if (this._isRegisterEvent) {
             return;
