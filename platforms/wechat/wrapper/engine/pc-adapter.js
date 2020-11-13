@@ -136,14 +136,14 @@ function adaptMouseEvent () {
     }
     registerMouseEvent('onMouseDown', EventMouse.DOWN, function (res, mouseEvent) {
         inputMgr._mousePressed = true;
-        inputMgr.handleTouchesBegin([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
+        inputMgr.handleTouchesBegin([inputMgr.getTouchByXY(mouseEvent, res.x, res.y, canvasRect)]);
     });
     registerMouseEvent('onMouseUp', EventMouse.UP, function (res, mouseEvent) {
         inputMgr._mousePressed = false;
-        inputMgr.handleTouchesEnd([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
+        inputMgr.handleTouchesEnd([inputMgr.getTouchByXY(mouseEvent, res.x, res.y, canvasRect)]);
     });
     registerMouseEvent('onMouseMove', EventMouse.MOVE, function (res, mouseEvent) {
-        inputMgr.handleTouchesMove([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
+        inputMgr.handleTouchesMove([inputMgr.getTouchByXY(mouseEvent, res.x, res.y, canvasRect)]);
         if (!inputMgr._mousePressed) {
             mouseEvent.setButton(null);
         }
