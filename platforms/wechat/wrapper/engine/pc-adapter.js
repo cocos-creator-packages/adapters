@@ -136,14 +136,14 @@ function adaptMouseEvent () {
     }
     registerMouseEvent('onMouseDown', EventMouse.DOWN, function (res, mouseEvent) {
         inputMgr._mousePressed = true;
-        inputMgr.handleTouchesBegin([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
+        inputMgr.handleTouchesBegin([inputMgr.getTouchByXY(mouseEvent, res.x, res.y, canvasRect)]);
     });
     registerMouseEvent('onMouseUp', EventMouse.UP, function (res, mouseEvent) {
         inputMgr._mousePressed = false;
-        inputMgr.handleTouchesEnd([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
+        inputMgr.handleTouchesEnd([inputMgr.getTouchByXY(mouseEvent, res.x, res.y, canvasRect)]);
     });
     registerMouseEvent('onMouseMove', EventMouse.MOVE, function (res, mouseEvent) {
-        inputMgr.handleTouchesMove([inputMgr.getTouchByXY(res.x, res.y, canvasRect)]);
+        inputMgr.handleTouchesMove([inputMgr.getTouchByXY(mouseEvent, res.x, res.y, canvasRect)]);
         if (!inputMgr._mousePressed) {
             mouseEvent.setButton(null);
         }
@@ -153,11 +153,27 @@ function adaptMouseEvent () {
     });
 }
 
+function adaptGL () {
+    if (canvas) {
+        let webglRC = canvas.getContext('webgl');
+        let originalUseProgram = webglRC.useProgram.bind(webglRC);
+        webglRC.useProgram = function (program) {
+            if (program) {
+                originalUseProgram(program);
+            }
+        }
+    }
+}
+
 (function () {
     // TODO: add mac
     if (env.platform !== 'windows') {
         return;
     }
+
+    // use program not supported to unbind program on pc end
+    adaptGL();
+
     inputMgr.registerSystemEvent = function () {
         if (this._isRegisterEvent) {
             return;
