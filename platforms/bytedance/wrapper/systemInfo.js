@@ -1,4 +1,5 @@
 const systemInfo = require('../common/engine3d/globalAdapter/BaseSystemInfo');
+const adapter = window.__globalAdapter;
 const env = tt.getSystemInfoSync();
 let adaptSysFunc = systemInfo.adaptSys;
 
