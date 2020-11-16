@@ -48,7 +48,7 @@ function handleZip(url, options, onComplete) {
 }
 
 function downloadDomAudio(url, options, onComplete) {
-    const clip = qg.createInnerAudioContext();
+    const clip = wuji.createInnerAudioContext();
     clip.src = url;
     onComplete(null, clip);
 }
@@ -154,7 +154,7 @@ function downloadBundle(nameOrUrl, options, onComplete) {
                 onComplete(err, null);
                 return;
             }
-            downloader.importBundleEntry(bundleName).then(function() {
+            System.import('virtual:///prerequisite-imports/' + bundleName).then(function() {
                 downloadJson(config, options, function (err, data) {
                     data && (data.base = `${_subpackagesPath}${bundleName}/`);
                     onComplete(err, data);
@@ -188,7 +188,7 @@ function downloadBundle(nameOrUrl, options, onComplete) {
             loadedScripts[js] = true;
         }
 
-        downloader.importBundleEntry(bundleName).then(function() {
+        System.import('virtual:///prerequisite-imports/' + bundleName).then(function() {
             options.__cacheBundleRoot__ = bundleName;
             var config = `${url}/config.${suffix}json`;
             downloadJson(config, options, function (err, data) {

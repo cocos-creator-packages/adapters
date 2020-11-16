@@ -18,7 +18,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-var fs = qg.getFileSystemManager ? qg.getFileSystemManager() : null;
+var fs = wuji.getFileSystemManager ? wuji.getFileSystemManager() : null;
 
 var fsUtils = {
 
@@ -80,12 +80,12 @@ var fsUtils = {
             }
         }
         if (header) options.header = header;
-        var task = qg.download(options);
+        var task = wuji.download(options);
         onProgress && task.onProgressUpdate(onProgress);
     },
 
     saveFile(srcPath, destPath, onComplete) {
-        qg.moveFile({
+        wuji.moveFile({
             srcUri: srcPath,
             dstUri: destPath,
             success: function (res) {
@@ -128,14 +128,14 @@ var fsUtils = {
     },
 
     writeFileSync(path, data, encoding) {
-        const result = fs.writeFileSync(path, data, encoding);
-
-        if (result) {
+        try {
+            fs.writeFileSync(path, data, encoding);
             return null;
         }
-        else {
-            console.warn(`writeFileSync failed: path: ${path} result: ${result}`);
-            return new Error(`writeFileSync fail, result = ${result}`);
+        catch (e) {
+            // NOTE: throw an undefined error
+            console.warn(`Write file failed: path: ${path}`, e);
+            return new Error(e);
         }
     },
 
@@ -255,7 +255,7 @@ var fsUtils = {
     },
 
     loadSubpackage(name, onProgress, onComplete) {
-        var task = qg.loadSubpackage({
+        var task = wuji.loadSubpackage({
             name: 'usr_' + name,
             success: function () {
                 onComplete && onComplete();

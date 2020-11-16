@@ -25,24 +25,24 @@
 
 jsb.inputBox = {
 	onConfirm: function(cb) {
-		qg.onKeyboardConfirm(cb);
+		wuji.onKeyboardConfirm(cb);
 	},
 	offConfirm: function(cb) {
-		qg.offKeyboardConfirm(cb);
+		wuji.offKeyboardConfirm(cb);
 	},
 
 	onComplete: function(cb) {
-		qg.onKeyboardComplete(cb);
+		wuji.onKeyboardComplete(cb);
 	},
 	offComplete: function(cb) {
-		qg.offKeyboardComplete(cb);
+		wuji.offKeyboardComplete(cb);
 	},
 
 	onInput: function(cb) {
-		qg.onKeyboardInput(cb);
+		wuji.onKeyboardInput(cb);
 	},
 	offInput: function(cb) {
-		qg.offKeyboardInput(cb);
+		wuji.offKeyboardInput(cb);
 	},
 
     /**
@@ -57,9 +57,9 @@ jsb.inputBox = {
      * Values of options.inputType can be [text|email|number|phone|password].
      */
 	show: function(options) {
-		qg.showKeyboard(options);
+		wuji.showKeyboard(options);
 	},
 	hide: function() {
-		qg.hideKeyboard();
+		wuji.hideKeyboard();
 	},
 };

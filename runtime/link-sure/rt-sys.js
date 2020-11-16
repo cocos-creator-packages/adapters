@@ -32,7 +32,7 @@
     sys.getNetworkType = noop;
 
     sys.getBatteryLevel = function() {
-        const batteryInfo = qg.getBatteryInfoSync();
+        const batteryInfo = wuji.getBatteryInfoSync();
 
         return batteryInfo && batteryInfo.level;
     };

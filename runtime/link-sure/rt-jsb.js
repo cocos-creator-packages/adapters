@@ -28,7 +28,7 @@
 if (!jsb.fileUtils) {
     jsb.fileUtils = {
         getStringFromFile: function (url) {
-            const result = qg.readFileSync && qg.readFileSync({
+            const result = wuji.readFileSync && wuji.readFileSync({
                 uri: url,
                 encoding: 'utf8'
             });
@@ -37,7 +37,7 @@ if (!jsb.fileUtils) {
         },
 
         getDataFromFile: function (url) {
-            const result = qg.readFileSync && qg.readFileSync({
+            const result = wuji.readFileSync && wuji.readFileSync({
                 uri: url,
                 encoding: 'binary'
             });
@@ -52,7 +52,7 @@ if (!jsb.fileUtils) {
 
         writeToFile: function (map, url) {
             var str = JSON.stringify(map);
-            const result = qg.writeFileSync && qg.writeFileSync({
+            const result = wuji.writeFileSync && wuji.writeFileSync({
                 uri: url,
                 encoding: 'utf8',
                 text: str
@@ -65,7 +65,7 @@ if (!jsb.fileUtils) {
 
         getValueMapFromFile: function (url) {
             var map_object = {};
-            var read = qg.readFileSync && qg.readFileSync({
+            var read = wuji.readFileSync && wuji.readFileSync({
                 uri: url,
                 encoding: 'utf8'
             });
@@ -85,14 +85,14 @@ if (!jsb.fileUtils) {
 }
 
 if (!jsb.saveImageData) {
-    if (qg.saveImageTempSync && qg.copyFileSync) {
+    if (wuji.saveImageTempSync && wuji.copyFileSync) {
         jsb.saveImageData = function (data, width, height, filePath) {
             var index = filePath.lastIndexOf(".");
             if (index === -1) {
                 return false;
             }
             var fileType = filePath.substr(index + 1);
-            var tempFilePath = qg.saveImageTempSync({
+            var tempFilePath = wuji.saveImageTempSync({
                 'data': data,
                 'width': width,
                 'height': height,
@@ -101,7 +101,7 @@ if (!jsb.saveImageData) {
             if (tempFilePath === '') {
                 return false;
             }
-            var savedFilePath = qg.copyFileSync({
+            var savedFilePath = wuji.copyFileSync({
                 srcUri: tempFilePath,
                 dstUri: filePath
             });
@@ -119,7 +119,7 @@ if (!jsb.saveImageData) {
 
 if (!jsb.setPreferredFramesPerSecond) {
     jsb.setPreferredFramesPerSecond = function (fps) {
-        qg.setPreferredFramesPerSecond(fps);
+        wuji.setPreferredFramesPerSecond(fps);
     }
 }
 
@@ -131,12 +131,12 @@ if (jsb.device) {
             return;
         }
         if (!enabled) {
-            qg.unsubscribeAccelerometer();
+            wuji.unsubscribeAccelerometer();
             _tempGravitySenceArray = undefined;
             return;
         }
         _tempGravitySenceArray = new Array(6).fill(0);
-        qg.subscribeAccelerometer({
+        wuji.subscribeAccelerometer({
             callback: function (obj) {
 
             _tempGravitySenceArray[3] = obj.x;

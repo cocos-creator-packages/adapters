@@ -3,7 +3,7 @@ if (typeof jsb.garbageCollect === "undefined") {
 }
 
 if (typeof __gl === "undefined") {
-    __gl = qg.getWebGL();
+    __gl = wuji.getWebGL();
 }
 
 if (typeof __canvas === "undefined" && __gl) {

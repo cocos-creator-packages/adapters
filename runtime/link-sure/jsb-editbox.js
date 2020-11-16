@@ -85,7 +85,7 @@
 
         // let rect = this._getRect();
 
-        qg.showKeyboard({
+        wuji.showKeyboard({
             defaultValue: editBox.string,
             maxLength: editBoxImpl._maxLength,
             multiple: multiline,
@@ -101,7 +101,7 @@
         function onConfirm(res) {
             editBoxImpl._delegate && editBoxImpl._delegate._editBoxEditingReturn && editBoxImpl._delegate._editBoxEditingReturn();
         }
-        qg.onKeyboardConfirm(onConfirm);
+        wuji.onKeyboardConfirm(onConfirm);
 
         function onInput(res) {
             if (res.value.length > editBoxImpl._maxLength) {
@@ -113,15 +113,15 @@
                 }
             }
         }
-        qg.onKeyboardInput(onInput);
+        wuji.onKeyboardInput(onInput);
 
         function onComplete(res) {
             editBoxImpl.endEditing();
-            qg.offKeyboardConfirm(onConfirm);
-            qg.offKeyboardInput(onInput);
-            qg.offKeyboardComplete(onComplete);
+            wuji.offKeyboardConfirm(onConfirm);
+            wuji.offKeyboardInput(onInput);
+            wuji.offKeyboardComplete(onComplete);
         }
-        qg.onKeyboardComplete(onComplete);
+        wuji.onKeyboardComplete(onComplete);
     };
 
     _p.setTabIndex = function (index) {
