@@ -23,7 +23,9 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-(function(){
+let  rt = loadRuntime();
+
+ (function(){
     'use strict';
 
     const sys = cc.sys;
@@ -32,7 +34,7 @@
     sys.getNetworkType = noop;
 
     sys.getBatteryLevel = function() {
-        const batteryInfo = qg.getBatteryInfoSync();
+        const batteryInfo = rt.getBatteryInfoSync();
 
         return batteryInfo && batteryInfo.level;
     };

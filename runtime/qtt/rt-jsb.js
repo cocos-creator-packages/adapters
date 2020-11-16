@@ -25,10 +25,12 @@
  ****************************************************************************/
 'use strict';
 
+let rt = loadRuntime();
+
 if (!jsb.fileUtils) {
     jsb.fileUtils = {
         getStringFromFile: function (url) {
-            const result = qg.readFileSync && qg.readFileSync({
+            const result = rt.readFileSync && rt.readFileSync({
                 uri: url,
                 encoding: 'utf8'
             });
@@ -37,7 +39,7 @@ if (!jsb.fileUtils) {
         },
 
         getDataFromFile: function (url) {
-            const result = qg.readFileSync && qg.readFileSync({
+            const result = rt.readFileSync && rt.readFileSync({
                 uri: url,
                 encoding: 'binary'
             });
@@ -52,7 +54,7 @@ if (!jsb.fileUtils) {
 
         writeToFile: function (map, url) {
             var str = JSON.stringify(map);
-            const result = qg.writeFileSync && qg.writeFileSync({
+            const result = rt.writeFileSync && rt.writeFileSync({
                 uri: url,
                 encoding: 'utf8',
                 text: str
@@ -65,7 +67,7 @@ if (!jsb.fileUtils) {
 
         getValueMapFromFile: function (url) {
             var map_object = {};
-            var read = qg.readFileSync && qg.readFileSync({
+            var read = rt.readFileSync && rt.readFileSync({
                 uri: url,
                 encoding: 'utf8'
             });
@@ -85,14 +87,14 @@ if (!jsb.fileUtils) {
 }
 
 if (!jsb.saveImageData) {
-    if (qg.saveImageTempSync && qg.copyFileSync) {
+    if (rt.saveImageTempSync && rt.copyFileSync) {
         jsb.saveImageData = function (data, width, height, filePath) {
             var index = filePath.lastIndexOf(".");
             if (index === -1) {
                 return false;
             }
             var fileType = filePath.substr(index + 1);
-            var tempFilePath = qg.saveImageTempSync({
+            var tempFilePath = rt.saveImageTempSync({
                 'data': data,
                 'width': width,
                 'height': height,
@@ -101,7 +103,7 @@ if (!jsb.saveImageData) {
             if (tempFilePath === '') {
                 return false;
             }
-            var savedFilePath = qg.copyFileSync({
+            var savedFilePath = rt.copyFileSync({
                 srcUri: tempFilePath,
                 dstUri: filePath
             });
@@ -119,7 +121,7 @@ if (!jsb.saveImageData) {
 
 if (!jsb.setPreferredFramesPerSecond) {
     jsb.setPreferredFramesPerSecond = function (fps) {
-        qg.setPreferredFramesPerSecond(fps);
+        rt.setPreferredFramesPerSecond(fps);
     }
 }
 
@@ -131,12 +133,12 @@ if (jsb.device) {
             return;
         }
         if (!enabled) {
-            qg.unsubscribeAccelerometer();
+            rt.unsubscribeAccelerometer();
             _tempGravitySenceArray = undefined;
             return;
         }
         _tempGravitySenceArray = new Array(6).fill(0);
-        qg.subscribeAccelerometer({
+        rt.subscribeAccelerometer({
             callback: function (obj) {
 
             _tempGravitySenceArray[3] = obj.x;

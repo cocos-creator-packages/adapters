@@ -18,6 +18,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
+let rt = loadRuntime();
 
 (function () {
     const EditBox = cc.EditBoxComponent;
@@ -85,7 +86,7 @@
 
         // let rect = this._getRect();
 
-        qg.showKeyboard({
+        rt.showKeyboard({
             defaultValue: editBox.string,
             maxLength: editBoxImpl._maxLength,
             multiple: multiline,
@@ -101,7 +102,7 @@
         function onConfirm(res) {
             editBoxImpl._delegate && editBoxImpl._delegate._editBoxEditingReturn && editBoxImpl._delegate._editBoxEditingReturn();
         }
-        qg.onKeyboardConfirm(onConfirm);
+        rt.onKeyboardConfirm(onConfirm);
 
         function onInput(res) {
             if (res.value.length > editBoxImpl._maxLength) {
@@ -113,15 +114,15 @@
                 }
             }
         }
-        qg.onKeyboardInput(onInput);
+        rt.onKeyboardInput(onInput);
 
         function onComplete(res) {
             editBoxImpl.endEditing();
-            qg.offKeyboardConfirm(onConfirm);
-            qg.offKeyboardInput(onInput);
-            qg.offKeyboardComplete(onComplete);
+            rt.offKeyboardConfirm(onConfirm);
+            rt.offKeyboardInput(onInput);
+            rt.offKeyboardComplete(onComplete);
         }
-        qg.onKeyboardComplete(onComplete);
+        rt.onKeyboardComplete(onComplete);
     };
 
     _p.setTabIndex = function (index) {

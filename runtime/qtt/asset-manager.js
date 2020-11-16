@@ -1,6 +1,7 @@
 const cacheManager = require('./cache-manager');
 const { downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, getUserDataPath, _subpackagesPath } = require('./fs-utils');
 
+let rt = loadRuntime();
 const REGEX = /^https?:\/\/.*/;
 
 const downloader = cc.assetManager.downloader;
@@ -48,7 +49,7 @@ function handleZip(url, options, onComplete) {
 }
 
 function downloadDomAudio(url, options, onComplete) {
-    const clip = qg.createInnerAudioContext();
+    const clip = rt.createInnerAudioContext();
     clip.src = url;
     onComplete(null, clip);
 }

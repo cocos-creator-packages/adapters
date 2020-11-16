@@ -22,27 +22,28 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
+let rt = loadRuntime();
 
 jsb.inputBox = {
 	onConfirm: function(cb) {
-		qg.onKeyboardConfirm(cb);
+		rt.onKeyboardConfirm(cb);
 	},
 	offConfirm: function(cb) {
-		qg.offKeyboardConfirm(cb);
+		rt.offKeyboardConfirm(cb);
 	},
 
 	onComplete: function(cb) {
-		qg.onKeyboardComplete(cb);
+		rt.onKeyboardComplete(cb);
 	},
 	offComplete: function(cb) {
-		qg.offKeyboardComplete(cb);
+		rt.offKeyboardComplete(cb);
 	},
 
 	onInput: function(cb) {
-		qg.onKeyboardInput(cb);
+		rt.onKeyboardInput(cb);
 	},
 	offInput: function(cb) {
-		qg.offKeyboardInput(cb);
+		rt.offKeyboardInput(cb);
 	},
 
     /**
@@ -57,9 +58,9 @@ jsb.inputBox = {
      * Values of options.inputType can be [text|email|number|phone|password].
      */
 	show: function(options) {
-		qg.showKeyboard(options);
+		rt.showKeyboard(options);
 	},
 	hide: function() {
-		qg.hideKeyboard();
+		rt.hideKeyboard();
 	},
 };

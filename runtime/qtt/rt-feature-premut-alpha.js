@@ -33,7 +33,7 @@ let _premultAlpha = function(data, premult) {
 }
 
 do {
-    let rt = window["qg"];
+    let rt = window.loadRuntime();
     if (typeof rt != "object") {
         console.error("not quick game platform");
         break;
