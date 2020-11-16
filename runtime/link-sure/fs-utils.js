@@ -80,7 +80,7 @@ var fsUtils = {
             }
         }
         if (header) options.header = header;
-        var task = wuji.download(options);
+        var task = wuji.downloadFile(options);
         onProgress && task.onProgressUpdate(onProgress);
     },
 
