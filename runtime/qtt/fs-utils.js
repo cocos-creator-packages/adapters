@@ -28,7 +28,7 @@ var fsUtils = {
     _subpackagesPath: '',
 
     getUserDataPath() {
-        return 'internal://files';
+        return rt.env.USER_DATA_PATH;
     },
 
     checkFsValid() {

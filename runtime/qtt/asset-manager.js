@@ -49,9 +49,7 @@ function handleZip(url, options, onComplete) {
 }
 
 function downloadDomAudio(url, options, onComplete) {
-    const clip = rt.createInnerAudioContext();
-    clip.src = url;
-    onComplete(null, clip);
+    onComplete(null, url);
 }
 
 function download(url, func, options, onFileProgress, onComplete) {
