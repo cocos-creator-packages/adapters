@@ -27,7 +27,7 @@ var fsUtils = {
     _subpackagesPath: '',
 
     getUserDataPath() {
-        return 'internal://files';
+        return wuji.env.USER_DATA_PATH;
     },
 
     checkFsValid() {
