@@ -128,7 +128,7 @@ if (cc.internal.VideoPlayer) {
                 this._duration = 0;
                 this._currentTime = 0;
                 this._loaded = false;
-                this.setVisible(true);
+                this.setVisible(this._visible);
                 this._bindEvent();
                 this._forceUpdate = true;
             }
@@ -167,7 +167,6 @@ if (cc.internal.VideoPlayer) {
             let video = this.video;
             if (video) {
                 video.stop();
-                this.setVisible(false);
                 video.destroy();
                 this._playing = false;
                 this._loaded = false;
