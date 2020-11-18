@@ -167,7 +167,6 @@ if (cc.internal.VideoPlayer) {
             let video = this.video;
             if (video) {
                 video.stop();
-                this.setVisible(false);
                 video.destroy();
                 this._playing = false;
                 this._loaded = false;
