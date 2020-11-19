@@ -86,15 +86,15 @@ var fsUtils = {
     },
 
     saveFile(srcPath, destPath, onComplete) {
-        rt.moveFile({
-            srcUri: srcPath,
-            dstUri: destPath,
+        fs.saveFile({
+            tempFilePath: srcPath,
+            filePath: destPath,
             success: function (res) {
                 onComplete && onComplete(null);
             },
-            fail: function (res, code) {
-                console.warn(`Save file failed: path: ${srcPath} code: ${code}`);
-                onComplete && onComplete(new Error(`move File fail, code = ${code}`));
+            fail: function (res) {
+                console.warn(`Save file failed: path: ${srcPath} message: ${res.errMsg}`);
+                onComplete && onComplete(new Error(res.errMsg));
             }
         });
     },
@@ -256,18 +256,7 @@ var fsUtils = {
     },
 
     loadSubpackage(name, onProgress, onComplete) {
-        var task = rt.loadSubpackage({
-            name: 'usr_' + name,
-            success: function () {
-                onComplete && onComplete();
-            },
-            fail: function (res) {
-                console.warn(`Load Subpackage failed: path: ${name} message: ${res.errMsg}`);
-                onComplete && onComplete(new Error(`Failed to load subpackage ${name}: ${res.errMsg}`));
-            }
-        });
-        onProgress && task.onProgressUpdate(onProgress);
-        return task;
+        throw new Error('Not Implemented');
     },
     
     unzip(zipFilePath, targetPath, onComplete) {
