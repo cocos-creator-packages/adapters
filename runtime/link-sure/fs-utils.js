@@ -85,15 +85,15 @@ var fsUtils = {
     },
 
     saveFile(srcPath, destPath, onComplete) {
-        wuji.moveFile({
-            srcUri: srcPath,
-            dstUri: destPath,
+        fs.saveFile({
+            tempFilePath: srcPath,
+            filePath: destPath,
             success: function (res) {
                 onComplete && onComplete(null);
             },
-            fail: function (res, code) {
-                console.warn(`Save file failed: path: ${srcPath} code: ${code}`);
-                onComplete && onComplete(new Error(`move File fail, code = ${code}`));
+            fail: function (res) {
+                console.warn(`Save file failed: path: ${srcPath} message: ${res.errMsg}`);
+                onComplete && onComplete(new Error(res.errMsg));
             }
         });
     },
@@ -256,7 +256,7 @@ var fsUtils = {
 
     loadSubpackage(name, onProgress, onComplete) {
         var task = wuji.loadSubpackage({
-            name: 'usr_' + name,
+            name: name,
             success: function () {
                 onComplete && onComplete();
             },
