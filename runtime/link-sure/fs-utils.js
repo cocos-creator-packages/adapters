@@ -177,7 +177,7 @@ var fsUtils = {
     readArrayBufferSync(path) {
         try {
             var buffer = fs.readFileSync(path, 'binary');
-            return buffer.data;
+            return buffer;
         }
         catch (e) {
             console.warn(`Read json failed: path: ${path} message: ${e.message}`);
@@ -204,7 +204,7 @@ var fsUtils = {
     readJsonSync(path) {
         try {
             var str = fs.readFileSync(path, 'utf8');
-            return JSON.parse(str.data);
+            return JSON.parse(str);
         }
         catch (e) {
             console.warn(`Read json failed: path: ${path} message: ${e.message}`);
