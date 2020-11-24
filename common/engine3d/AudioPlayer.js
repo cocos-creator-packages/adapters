@@ -1,8 +1,35 @@
-const { loadInnerAudioContext } = require('./AssetManager.js');
 const AudioPlayer = cc.internal.AudioPlayer;
 const { PlayingState, AudioType } = cc.AudioClip;
 const AudioManager = cc.internal.AudioManager;
 AudioManager.maxAudioChannel = 10;
+
+function loadInnerAudioContext (url) {
+    return new Promise((resolve, reject) => {
+        const nativeAudio = __globalAdapter.createInnerAudioContext();
+
+        let timer = setTimeout(() => {
+            clearEvent();
+            resolve(nativeAudio);
+        }, 8000);
+        function clearEvent () {
+            nativeAudio.offCanplay(success);
+            nativeAudio.offError(fail);
+        }
+        function success () {
+            clearEvent();
+            clearTimeout(timer);
+            resolve(nativeAudio);
+        }
+        function fail () {
+            clearEvent();
+            clearTimeout(timer);
+            reject('failed to load innerAudioContext: ' + err);
+        }
+        nativeAudio.onCanplay(success);
+        nativeAudio.onError(fail);
+        nativeAudio.src = url;
+    });
+}
 
 class AudioManagerMiniGame extends AudioManager {
     discardOnePlayingIfNeeded() {

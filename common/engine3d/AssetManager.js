@@ -43,7 +43,7 @@ function handleZip (url, options, onComplete) {
     }
 }
 
-export function loadInnerAudioContext (url) {
+function loadInnerAudioContext (url) {
     return new Promise((resolve, reject) => {
         const nativeAudio = __globalAdapter.createInnerAudioContext();
 
