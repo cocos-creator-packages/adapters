@@ -31,3 +31,4 @@ require('./rt-websocket.js');
 require('./jsb-audio.js');
 require('./asset-manager.js');
 require('./jsb-editbox.js');
+require('./DeviceMotionEvent.js');
