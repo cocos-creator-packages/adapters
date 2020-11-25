@@ -69,6 +69,11 @@ var fsUtils = {
                 }
             },
             fail: function (res) {
+                // straightfully return the remoteUrl because image url out of whitelist
+                // can't be downloaded on bytedance platform
+                if (res.errMsg && res.errMsg.includes('Failed to load')) {
+                    return onComplete && onComplete(null, remoteUrl);
+                }
                 console.warn(`Download file failed: path: ${remoteUrl} message: ${res.errMsg}`);
                 onComplete && onComplete(new Error(res.errMsg), null);
             }
