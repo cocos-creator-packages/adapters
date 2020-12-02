@@ -40,15 +40,17 @@ if (Audio) {
 
         _bindEnded () {
             let elem = this._element;
-            if (elem) {
-              elem.onEnded && elem.onEnded(this._onended);
+            if (elem && elem.onEnded && !this._onended._binded) {
+              this._onended._binded = true;
+              elem.onEnded(this._onended);
             }
         },
 
         _unbindEnded () {
             let elem = this._element;
-            if (elem) {
-              elem.offEnded && elem.offEnded();
+            if (elem && elem.offEnded && this._onended._binded) {
+              this._onended._binded = false;
+              elem.offEnded && elem.offEnded(this._onended);
             }
         },
 
