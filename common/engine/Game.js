@@ -120,6 +120,9 @@ Object.assign(game, {
         function onShown(res) {
             if (hidden) {
                 hidden = false;
+                if (game.renderType === game.RENDER_TYPE_WEBGL) {
+                    game._renderContext.finish();
+                }                
                 game.emit(game.EVENT_SHOW, res);
             }
         }
