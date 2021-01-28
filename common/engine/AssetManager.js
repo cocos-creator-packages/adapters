@@ -188,10 +188,10 @@ function downloadBundle (nameOrUrl, options, onComplete) {
                         return;
                     }
                     data.base = unzipPath + '/res/';
-                    // PATCH: for android youku version before v10.1.95 (v10.1.95 included)
+                    // PATCH: for android alipay version before v10.1.95 (v10.1.95 included)
                     // to remove in the future
                     let sys = cc.sys;
-                    if (sys.platform === sys.YOUKU_GAME && sys.os === sys.OS_ANDROID) {
+                    if (sys.platform === sys.ALIPAY_GAME && sys.os === sys.OS_ANDROID) {
                         let resPath = unzipPath + 'res/';
                         if (fs.accessSync({path: resPath})) {
                             data.base = resPath;
