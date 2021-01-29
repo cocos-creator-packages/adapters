@@ -105,43 +105,46 @@ var cacheManager = {
     _cache () {
         checkNextPeriod = false;
         var self = this;
-        for (var id in this.cacheQueue) {
-            var { srcUrl, isCopy, cacheBundleRoot } = this.cacheQueue[id];
-            var time = Date.now().toString();
+        let id = '';
+        for (var key in this.cacheQueue) {
+            id = key;
+            break;
+        }
+        if (!id) return;
+        var { srcUrl, isCopy, cacheBundleRoot } = this.cacheQueue[id];
+        var time = Date.now().toString();
 
-            var localPath = '';
+        var localPath = '';
 
-            if (cacheBundleRoot) {
-                localPath = `${this.cacheDir}/${cacheBundleRoot}/${time}${suffix++}${cc.path.extname(id)}`;
-            }
-            else {
-                localPath = `${this.cacheDir}/${time}${suffix++}${cc.path.extname(id)}`;
-            }
-             
-            function callback (err) {
-                if (err)  {
-                    if (isOutOfStorage(err.message)) {
-                        self.outOfStorage = true;
-                        self.autoClear && self.clearLRU();
-                        return;
-                    }
-                } else {
-                    self.cachedFiles.add(id, { bundle: cacheBundleRoot, url: localPath, lastTime: time });
-                    self.writeCacheFile();
+        if (cacheBundleRoot) {
+            localPath = `${this.cacheDir}/${cacheBundleRoot}/${time}${suffix++}${cc.path.extname(id)}`;
+        }
+        else {
+            localPath = `${this.cacheDir}/${time}${suffix++}${cc.path.extname(id)}`;
+        }
+            
+        function callback (err) {
+            if (err)  {
+                if (isOutOfStorage(err.message)) {
+                    self.outOfStorage = true;
+                    self.autoClear && self.clearLRU();
+                    return;
                 }
-                delete self.cacheQueue[id];
-                if (!cc.js.isEmptyObject(self.cacheQueue) && !checkNextPeriod) {
-                    checkNextPeriod = true;
-                    setTimeout(self._cache.bind(self), self.cacheInterval);
-                }
+            } else {
+                self.cachedFiles.add(id, { bundle: cacheBundleRoot, url: localPath, lastTime: time });
+                self.writeCacheFile();
             }
-            if (!isCopy) {
-                downloadFile(srcUrl, localPath, null, callback);
+            delete self.cacheQueue[id];
+            if (!cc.js.isEmptyObject(self.cacheQueue) && !checkNextPeriod) {
+                checkNextPeriod = true;
+                setTimeout(self._cache.bind(self), self.cacheInterval);
             }
-            else {
-                copyFile(srcUrl, localPath, callback);
-            }
-            return;
+        }
+        if (!isCopy) {
+            downloadFile(srcUrl, localPath, null, callback);
+        }
+        else {
+            copyFile(srcUrl, localPath, callback);
         }
     },
 
