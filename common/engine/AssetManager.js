@@ -49,7 +49,7 @@ function handleZip (url, options, onComplete) {
     }
 }
 
-function downloadDomAudio (url, options, onComplete) {
+function parseDomAudio (url, options, onComplete) {
     if (typeof options === 'function') {
         onComplete = options;
         options = null;
@@ -69,6 +69,7 @@ function download (url, func, options, onFileProgress, onComplete) {
     }
     else if (result.inCache) {
         cacheManager.updateLastTime(url);
+        options.__originalUrl__ = url;
         func(result.url, options, function (err, data) {
             if (err) {
                 cacheManager.removeCache(url);
@@ -94,15 +95,60 @@ function download (url, func, options, onFileProgress, onComplete) {
 }
 
 function parseArrayBuffer (url, options, onComplete) {
-    readArrayBuffer(url, onComplete);
+    readArrayBuffer(url, function (err, data) {
+        if (err) {
+            // remove cache
+            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
+        }
+        onComplete && onComplete(err, data);
+    });
 }
 
 function parseText (url, options, onComplete) {
-    readText(url, onComplete);
+    readText(url, function (err, data) {
+        if (err) {
+            // remove cache
+            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
+        }
+        onComplete && onComplete(err, data);
+    });
 }
 
 function parseJson (url, options, onComplete) {
-    readJson(url, onComplete);
+    readJson(url, function (err, data) {
+        if (err) {
+            // remove cache
+            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
+        }
+        onComplete && onComplete(err, data);
+    });
+}
+
+function parseImage (url, options, onComplete) {
+    var img = new Image();
+
+    if (window.location.protocol !== 'file:') {
+        img.crossOrigin = 'anonymous';
+    }
+
+    function loadCallback () {
+        img.removeEventListener('load', loadCallback);
+        img.removeEventListener('error', errorCallback);
+        onComplete && onComplete(null, img);
+    }
+    
+    function errorCallback () {
+        img.removeEventListener('load', loadCallback);
+        img.removeEventListener('error', errorCallback);
+        // remove cache when load image failed
+        if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
+        onComplete && onComplete(new Error(cc.debug.getError(4930, url)));
+    }
+
+    img.addEventListener('load', loadCallback);
+    img.addEventListener('error', errorCallback);
+    img.src = url;
+    return img;
 }
 
 function downloadText (url, options, onComplete) {
@@ -211,7 +257,10 @@ function downloadBundle (nameOrUrl, options, onComplete) {
 const originParsePVRTex = parser.parsePVRTex;
 let parsePVRTex = function (file, options, onComplete) {
     readArrayBuffer(file, function (err, data) {
-        if (err) return onComplete(err);
+        if (err) {
+            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
+            return onComplete(err);
+        }
         originParsePVRTex(data, options, onComplete);
     });
 };
@@ -219,7 +268,10 @@ let parsePVRTex = function (file, options, onComplete) {
 const originParsePKMTex = parser.parsePKMTex;
 let parsePKMTex = function (file, options, onComplete) {
     readArrayBuffer(file, function (err, data) {
-        if (err) return onComplete(err);
+        if (err) {
+            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
+            return onComplete(err);
+        }
         originParsePKMTex(data, options, onComplete);
     });
 };
@@ -231,12 +283,15 @@ function parsePlist (url, options, onComplete) {
             result = cc.plistParser.parse(file);
             if (!result) err = new Error('parse failed');
         }
+        if (err) {
+            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
+        }
         onComplete && onComplete(err, result);
     });
 }
 
 let downloadImage = isSubDomain ? subdomainTransformUrl : downloadAsset;
-downloader.downloadDomAudio = downloadDomAudio;
+downloader.downloadDomAudio = parseDomAudio;
 downloader.downloadScript = downloadScript;
 parser.parsePVRTex = parsePVRTex;
 parser.parsePKMTex = parsePKMTex;
@@ -304,15 +359,15 @@ downloader.register({
 });
 
 parser.register({
-    '.png' : downloader.downloadDomImage,
-    '.jpg' : downloader.downloadDomImage,
-    '.bmp' : downloader.downloadDomImage,
-    '.jpeg' : downloader.downloadDomImage,
-    '.gif' : downloader.downloadDomImage,
-    '.ico' : downloader.downloadDomImage,
-    '.tiff' : downloader.downloadDomImage,
-    '.image' : downloader.downloadDomImage,
-    '.webp' : downloader.downloadDomImage,
+    '.png' : parseImage,
+    '.jpg' : parseImage,
+    '.bmp' : parseImage,
+    '.jpeg' : parseImage,
+    '.gif' : parseImage,
+    '.ico' : parseImage,
+    '.tiff' : parseImage,
+    '.image' : parseImage,
+    '.webp' : parseImage,
     '.pvr': parsePVRTex,
     '.pkm': parsePKMTex,
 
@@ -324,10 +379,10 @@ parser.register({
     '.ttc': loadFont,
 
     // Audio
-    '.mp3' : downloadDomAudio,
-    '.ogg' : downloadDomAudio,
-    '.wav' : downloadDomAudio,
-    '.m4a' : downloadDomAudio,
+    '.mp3' : parseDomAudio,
+    '.ogg' : parseDomAudio,
+    '.wav' : parseDomAudio,
+    '.m4a' : parseDomAudio,
 
     // Txt
     '.txt' : parseText,
