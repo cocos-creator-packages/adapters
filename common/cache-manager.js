@@ -22,7 +22,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, writeFile, deleteFile, rmdirSync, unzip, isOutOfStorage } = window.fsUtils;
+const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, deleteFile, rmdirSync, unzip, isOutOfStorage } = window.fsUtils;
 
 var checkNextPeriod = false;
 var writeCacheFileList = null;
