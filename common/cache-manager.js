@@ -22,7 +22,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, deleteFile, rmdirSync, unzip, isOutOfStorage } = window.fsUtils;
+const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, downloadFile, deleteFile, rmdirSync, unzip, isOutOfStorage, deleteFileSync } = window.fsUtils;
 
 var checkNextPeriod = false;
 var writeCacheFileList = null;
@@ -72,7 +72,7 @@ var cacheManager = {
         this.cacheDir = getUserDataPath() + '/' + this.cacheDir;
         var cacheFilePath = this.cacheDir + '/' + this.cachedFileName;
         var result = readJsonSync(cacheFilePath);
-        if (result instanceof Error || !result.version) {
+        if (result instanceof Error || !result.version || cc.js.isEmptyObject(result.files)) {
             if (!(result instanceof Error)) rmdirSync(this.cacheDir, true);
             this.cachedFiles = new cc.AssetManager.Cache();
             makeDirSync(this.cacheDir, true);
@@ -92,8 +92,19 @@ var cacheManager = {
     },
 
     _write () {
+        clearTimeout(writeCacheFileList);
         writeCacheFileList = null;
-        writeFileSync(this.cacheDir + '/' + this.cachedFileName, JSON.stringify({ files: this.cachedFiles._map, version: this.version }), 'utf8');
+        const content = JSON.stringify({ files: this.cachedFiles._map, version: this.version });
+        let result = writeFileSync(this.cacheDir + '/' + this.cachedFileName, content, 'utf8');
+        if (result instanceof Error) {
+            deleteFileSync(this.cacheDir + '/' + this.cachedFileName);
+            result = writeFileSync(this.cacheDir + '/' + this.cachedFileName, content, 'utf8');
+        }
+        if (result instanceof Error) {
+            console.error(result.message);
+            this.writeCacheFile();
+            this.autoClear && this.clearLRU();
+        }
     },
 
     writeCacheFile () {
@@ -164,7 +175,6 @@ var cacheManager = {
         this.cachedFiles = new cc.AssetManager.Cache();
         makeDirSync(this.cacheDir, true);
         this.outOfStorage = false;
-        clearTimeout(writeCacheFileList);
         this._write();
         cc.assetManager.bundles.forEach(bundle => {
             if (REGEX.test(bundle.base)) this.makeBundleFolder(bundle.name);
@@ -189,7 +199,6 @@ var cacheManager = {
         for (var i = 0, l = caches.length; i < l; i++) {
             this.cachedFiles.remove(caches[i].originUrl);
         }
-        clearTimeout(writeCacheFileList);
         this._write();
         function deferredDelete () {
             var item = caches.pop();
@@ -214,7 +223,6 @@ var cacheManager = {
     removeCache (url) {
         if (this.cachedFiles.has(url)) {
             var path = this.cachedFiles.remove(url).url;
-            clearTimeout(writeCacheFileList);
             this._write();
             if (this._isZipFile(url)) {
                 rmdirSync(path, true);
