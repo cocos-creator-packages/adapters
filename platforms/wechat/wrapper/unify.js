@@ -6,7 +6,12 @@ if (window.__globalAdapter) {
     let systemInfo = wx.getSystemInfoSync();
     let windowWidth = systemInfo.windowWidth;
     let windowHeight = systemInfo.windowHeight;
-    let isLandscape = windowWidth > windowHeight;
+
+    let screenWidth = systemInfo.screenWidth;
+    let screenHeight = systemInfo.screenHeight;
+    let orientation = systemInfo.deviceOrientation;
+    let isLandscape = orientation ? (orientation === "landscape"): (screenWidth > screenHeight);
+
     globalAdapter.isSubContext = (wx.getOpenDataContext === undefined);
     globalAdapter.isDevTool = (systemInfo.platform === 'devtools');
     utils.cloneMethod(globalAdapter, wx, 'getSystemInfoSync');
