@@ -204,11 +204,11 @@ var cacheManager = {
             var item = caches.pop();
             if (self._isZipFile(item.originUrl)) {
                 rmdirSync(item.url, true);
-                self._deleteFileCB();
             }
             else {
-                deleteFile(item.url, self._deleteFileCB.bind(self));
+                deleteFileSync(item.url);
             }
+            self._deleteFileCB();
             if (caches.length > 0) { 
                 setTimeout(deferredDelete, self.deleteInterval); 
             }

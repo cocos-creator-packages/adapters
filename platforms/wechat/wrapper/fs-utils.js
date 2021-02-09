@@ -114,15 +114,7 @@ var fsUtils = {
             srcPath: srcPath,
             destPath: destPath,
             success: function () {
-                fsUtils.exists(destPath, (exist) => {
-                    if (exist) {
-                        onComplete && onComplete(null);
-                    }
-                    else {
-                        console.warn(`Copy file failed: path: ${srcPath} message: file does not exist`);
-                        onComplete && onComplete(new Error('file does not exist'));
-                    }
-                })
+                onComplete && onComplete(null);
             },
             fail: function (res) {
                 console.warn(`Copy file failed: path: ${srcPath} message: ${res.errMsg}`);
