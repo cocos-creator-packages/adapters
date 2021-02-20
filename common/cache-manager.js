@@ -226,11 +226,11 @@ var cacheManager = {
             this._write();
             if (this._isZipFile(url)) {
                 rmdirSync(path, true);
-                this._deleteFileCB();
             }
             else {
-                deleteFile(path, this._deleteFileCB.bind(this));
+                deleteFileSync(path);
             }
+            this._deleteFileCB();
         }
     },
 
