@@ -2,14 +2,17 @@ function adaptSys (sys, env) {
     if (!env) {
         env = __globalAdapter.getSystemInfoSync();
     }
+
+    var language = env.language || 'unknown';
+    var system = env.system || 'iOS';
+    var platform = env.platform || 'iOS';
+
     sys.isNative = false;
     sys.isBrowser = false;
     sys.isMobile = true;
-    sys.language = env.language.substr(0, 2);
-    sys.languageCode = env.language.toLowerCase();
-    var system = env.system.toLowerCase();
+    sys.language = language.substr(0, 2);
+    sys.languageCode = language.toLowerCase();
 
-    let platform = env.platform;
     platform = platform.toLowerCase();
     if (platform === "android") {
         sys.os = sys.OS_ANDROID;
@@ -18,6 +21,7 @@ function adaptSys (sys, env) {
         sys.os = sys.OS_IOS;
     }
 
+    system = system.toLowerCase();
     // Adaptation to Android P
     if (system === 'android p') {
         system = 'android p 9.0';
