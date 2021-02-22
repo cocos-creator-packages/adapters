@@ -69,7 +69,6 @@ function download (url, func, options, onFileProgress, onComplete) {
     }
     else if (result.inCache) {
         cacheManager.updateLastTime(url);
-        options.__originalUrl__ = url;
         func(result.url, options, function (err, data) {
             if (err) {
                 cacheManager.removeCache(url);
@@ -95,60 +94,15 @@ function download (url, func, options, onFileProgress, onComplete) {
 }
 
 function parseArrayBuffer (url, options, onComplete) {
-    readArrayBuffer(url, function (err, data) {
-        if (err) {
-            // remove cache
-            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
-        }
-        onComplete && onComplete(err, data);
-    });
+    readArrayBuffer(url, onComplete);
 }
 
 function parseText (url, options, onComplete) {
-    readText(url, function (err, data) {
-        if (err) {
-            // remove cache
-            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
-        }
-        onComplete && onComplete(err, data);
-    });
+    readText(url, onComplete);
 }
 
 function parseJson (url, options, onComplete) {
-    readJson(url, function (err, data) {
-        if (err) {
-            // remove cache
-            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
-        }
-        onComplete && onComplete(err, data);
-    });
-}
-
-function parseImage (url, options, onComplete) {
-    var img = new Image();
-
-    if (window.location.protocol !== 'file:') {
-        img.crossOrigin = 'anonymous';
-    }
-
-    function loadCallback () {
-        img.removeEventListener('load', loadCallback);
-        img.removeEventListener('error', errorCallback);
-        onComplete && onComplete(null, img);
-    }
-    
-    function errorCallback () {
-        img.removeEventListener('load', loadCallback);
-        img.removeEventListener('error', errorCallback);
-        // remove cache when load image failed
-        if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
-        onComplete && onComplete(new Error(cc.debug.getError(4930, url)));
-    }
-
-    img.addEventListener('load', loadCallback);
-    img.addEventListener('error', errorCallback);
-    img.src = url;
-    return img;
+    readJson(url, onComplete);
 }
 
 function downloadText (url, options, onComplete) {
@@ -266,10 +220,7 @@ function downloadBundle (nameOrUrl, options, onComplete) {
 const originParsePVRTex = parser.parsePVRTex;
 let parsePVRTex = function (file, options, onComplete) {
     readArrayBuffer(file, function (err, data) {
-        if (err) {
-            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
-            return onComplete(err);
-        }
+        if (err) return onComplete(err);
         originParsePVRTex(data, options, onComplete);
     });
 };
@@ -277,10 +228,7 @@ let parsePVRTex = function (file, options, onComplete) {
 const originParsePKMTex = parser.parsePKMTex;
 let parsePKMTex = function (file, options, onComplete) {
     readArrayBuffer(file, function (err, data) {
-        if (err) {
-            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
-            return onComplete(err);
-        }
+        if (err) return onComplete(err);
         originParsePKMTex(data, options, onComplete);
     });
 };
@@ -300,6 +248,7 @@ function parsePlist (url, options, onComplete) {
 }
 
 let downloadImage = isSubDomain ? subdomainTransformUrl : downloadAsset;
+let parseImage = downloader.downloadDomImage;
 downloader.downloadDomAudio = parseDomAudio;
 downloader.downloadScript = downloadScript;
 parser.parsePVRTex = parsePVRTex;
