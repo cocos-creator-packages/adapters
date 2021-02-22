@@ -240,9 +240,6 @@ function parsePlist (url, options, onComplete) {
             result = cc.plistParser.parse(file);
             if (!result) err = new Error('parse failed');
         }
-        if (err) {
-            if (options.__originalUrl__) { cacheManager.removeCache(options.__originalUrl__); }
-        }
         onComplete && onComplete(err, result);
     });
 }
