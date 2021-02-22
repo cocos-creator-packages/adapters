@@ -3,7 +3,7 @@ function adaptSys (sys, env) {
         env = __globalAdapter.getSystemInfoSync();
     }
 
-    var language = env.language || 'unknown';
+    var language = env.language || '';
     var system = env.system || 'iOS';
     var platform = env.platform || 'iOS';
 
