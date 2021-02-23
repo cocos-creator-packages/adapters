@@ -58,6 +58,17 @@ var fsUtils = {
         });
     },
 
+    deleteFileSync (filePath) {
+        try {
+            fs.unlinkSync(filePath);
+            return null;
+        }
+        catch (err) {
+            console.warn(`Delete file failed: path: ${filePath} message: ${err.message}`);
+            return new Error(err.message);
+        }
+    },
+
     downloadFile (remoteUrl, filePath, header, onProgress, onComplete) {
         var options = {
             url: remoteUrl,

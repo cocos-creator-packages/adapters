@@ -58,7 +58,7 @@ var cacheManager = {
 
     cacheQueue: {},
 
-    version: '1.0',
+    version: '1.1',
 
     getCache (url) {
         return this.cachedFiles.has(url) ? this.cachedFiles.get(url).url : '';
@@ -72,8 +72,8 @@ var cacheManager = {
         this.cacheDir = getUserDataPath() + '/' + this.cacheDir;
         var cacheFilePath = this.cacheDir + '/' + this.cachedFileName;
         var result = readJsonSync(cacheFilePath);
-        if (result instanceof Error || !result.version || cc.js.isEmptyObject(result.files)) {
-            if (!(result instanceof Error)) rmdirSync(this.cacheDir, true);
+        if (result instanceof Error || !result.version || result.version !== this.version || cc.js.isEmptyObject(result.files)) {
+            rmdirSync(this.cacheDir, true);
             this.cachedFiles = new cc.AssetManager.Cache();
             makeDirSync(this.cacheDir, true);
             writeFileSync(cacheFilePath, JSON.stringify({ files: this.cachedFiles._map, version: this.version }), 'utf8');
@@ -99,10 +99,9 @@ var cacheManager = {
         if (result instanceof Error) {
             deleteFileSync(this.cacheDir + '/' + this.cachedFileName);
             result = writeFileSync(this.cacheDir + '/' + this.cachedFileName, content, 'utf8');
-        }
-        if (result instanceof Error) {
-            console.error(result.message);
-            this.writeCacheFile();
+            if (result instanceof Error) {
+                this.writeCacheFile();
+            }
             this.autoClear && this.clearLRU();
         }
     },
@@ -195,20 +194,13 @@ var cacheManager = {
             return a.lastTime - b.lastTime;
         });
         caches.length = Math.floor(this.cachedFiles.count / 3);
-        if (caches.length === 0) return;
-        for (var i = 0, l = caches.length; i < l; i++) {
-            this.cachedFiles.remove(caches[i].originUrl);
+        if (caches.length === 0) {
+            cleaning = false;
+            return;
         }
-        this._write();
         function deferredDelete () {
             var item = caches.pop();
-            if (self._isZipFile(item.originUrl)) {
-                rmdirSync(item.url, true);
-            }
-            else {
-                deleteFileSync(item.url);
-            }
-            self._deleteFileCB();
+            self.removeCache(item.originUrl);
             if (caches.length > 0) { 
                 setTimeout(deferredDelete, self.deleteInterval); 
             }
@@ -234,8 +226,8 @@ var cacheManager = {
         }
     },
 
-    _deleteFileCB (err) {
-        if (!err) this.outOfStorage = false;
+    _deleteFileCB () {
+        this.outOfStorage = false;
     },
 
     makeBundleFolder (bundleName) {
