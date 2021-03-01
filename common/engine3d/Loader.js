@@ -94,11 +94,40 @@ function downloadAudio (item, callback) {
     loadMiniAudio(item, callback);
 }
 
+function loadInnerAudioContext (url) {
+    return new Promise((resolve, reject) => {
+        const nativeAudio = __globalAdapter.createInnerAudioContext();
+
+        let timer = setTimeout(() => {
+            clearEvent();
+            resolve(nativeAudio);
+        }, 8000);
+        function clearEvent () {
+            nativeAudio.offCanplay(success);
+            nativeAudio.offError(fail);
+        }
+        function success () {
+            clearEvent();
+            clearTimeout(timer);
+            resolve(nativeAudio);
+        }
+        function fail () {
+            clearEvent();
+            clearTimeout(timer);
+            reject('failed to load innerAudioContext: ' + err);
+        }
+        nativeAudio.onCanplay(success);
+        nativeAudio.onError(fail);
+        nativeAudio.src = url;
+    });
+}
+
 function loadMiniAudio (item, callback) {
-    const clip = __globalAdapter.createInnerAudioContext();
-    clip.src = item.url;
-    // HACK: wechat does not callback when load large number of audios
-    callback(null, clip);
+    loadInnerAudioContext(item.url).then(function(audio) {
+        callback(null, audio);
+    }).catch(function(err) {
+        callback(err);
+    });
 }
 
 cc.loader.downloader.addHandlers({
