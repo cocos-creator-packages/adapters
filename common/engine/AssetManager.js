@@ -1,5 +1,5 @@
 const cacheManager = require('../cache-manager');
-const { fs, downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, getUserDataPath } = window.fsUtils;
+const { fs, downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, getUserDataPath, exists } = window.fsUtils;
 
 const REGEX = /^https?:\/\/.*/;
 
@@ -125,7 +125,15 @@ var loadFont = !isSubDomain ? function (url, options, onComplete) {
     onComplete(null, 'Arial');
 }
 
-function doNothing (content, options, onComplete) { onComplete(null, content); }
+function doNothing (content, options, onComplete) {
+    exists(content, (existence) => {
+        if (existence) {
+            onComplete(null, content); 
+        } else {
+            onComplete(new Error(`file ${content} does not exist!`));
+        }
+    });
+}
 
 function downloadAsset (url, options, onComplete) {
     download(url, doNothing, options, options.onFileProgress, onComplete);
