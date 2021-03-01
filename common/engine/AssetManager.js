@@ -85,7 +85,7 @@ function download (url, func, options, onFileProgress, onComplete) {
             func(path, options, function (err, data) {
                 if (!err) {
                     cacheManager.tempFiles.add(url, path);
-                    cacheManager.cacheFile(url, path, options.cacheEnabled, options.__cacheBundleRoot__, true);
+                    cacheManager.cacheFile(url, path, options.cacheEnabled, options.__cacheBundleRoot__);
                 }
                 onComplete(err, data);
             });
