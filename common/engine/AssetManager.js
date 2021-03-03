@@ -21,7 +21,7 @@ function downloadScript (url, options, onComplete) {
         options = null;
     }
     if (REGEX.test(url)) {
-        onComplete && onComplete(new Error('Can not load remote scripts'));
+        onComplete && onComplete(new Error(`Can not load remote scripts ${url}`));
     }
     else {
         __cocos_require__(url);
@@ -229,7 +229,7 @@ function parsePlist (url, options, onComplete) {
         var result = null;
         if (!err) {
             result = cc.plistParser.parse(file);
-            if (!result) err = new Error('parse failed');
+            if (!result) err = new Error(`parse ${url} failed, content: ${file}`);
         }
         onComplete && onComplete(err, result);
     });
