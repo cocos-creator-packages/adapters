@@ -74,6 +74,8 @@ var cacheManager = {
 
     autoClearThreshold: 0.7,
 
+    startupTime: 0,
+
     getCache (url) {
         if (this.cachedFiles.has(url)) {
             const item = this.cachedFiles.get(url);
@@ -89,6 +91,7 @@ var cacheManager = {
 
     init () {
         this.cacheDir = getUserDataPath() + '/' + this.cacheDir;
+        this.startupTime = Date.now();
         var cacheFilePath = this.cacheDir + '/' + this.cachedFileName;
         var result = readJsonSync(cacheFilePath);
         if (result instanceof Error || !result.version || result.version !== this.version || cc.js.isEmptyObject(result.files)) {
@@ -107,6 +110,7 @@ var cacheManager = {
         }
         this.cachedFilesDirty = true;
         this.tempFiles = new cc.AssetManager.Cache();
+        console.log('Init Cache Manager. vers: ' + this.version);
         setInterval(this.update.bind(this), 30);
     },
 
@@ -237,14 +241,13 @@ var cacheManager = {
     clearLRU () {
         var caches = [];
         this.cachedFiles.forEach(function (val, key) {
-            if (val.bundle === 'internal') return;
-            if (self._isZipFile(key) && cc.assetManager.bundles.find(bundle => bundle.base.indexOf(val.url) !== -1)) return;
+            if (val.lastTime >= this.startupTime) return;
             caches.push({ originUrl: key, lastTime: val.lastTime });
         });
         caches.sort(function (a, b) {
             return a.lastTime - b.lastTime;
         });
-        caches.length = Math.floor(this.cachedFiles.count / 3);
+        caches.length = Math.floor(this.cachedFiles.count / 2);
         for (var i = 0, l = caches.length; i < l; i++) {
             this.removeCache(caches[i].originUrl);
         }
