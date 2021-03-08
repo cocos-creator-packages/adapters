@@ -29,7 +29,7 @@ function downloadScript (url, options, onComplete) {
     }
 }
 
-function handleZip (url, options, onComplete) {
+function handleZip (url, options, size, onComplete) {
     let cachedUnzip = cacheManager.cachedFiles.get(url);
     if (cachedUnzip) {
         cacheManager.updateLastTime(url);
@@ -41,11 +41,11 @@ function handleZip (url, options, onComplete) {
                 onComplete && onComplete(err);
                 return;
             }
-            cacheManager.unzipAndCacheBundle(url, downloadedZipPath, options.__cacheBundleRoot__, onComplete);
+            cacheManager.unzipAndCacheBundle(url, downloadedZipPath, options.__cacheBundleRoot__, size, onComplete);
         });
     }
     else {
-        cacheManager.unzipAndCacheBundle(url, url, options.__cacheBundleRoot__, onComplete);
+        cacheManager.unzipAndCacheBundle(url, url, options.__cacheBundleRoot__, size, onComplete);
     }
 }
 
@@ -181,8 +181,9 @@ function downloadBundle (nameOrUrl, options, onComplete) {
             }
             if (data.isZip) {
                 let zipVersion = data.zipVersion;
+                let size = data.unpackedSize || 0;
                 let zipUrl = `${url}/res.${zipVersion ? zipVersion + '.' : ''}zip`;
-                handleZip(zipUrl, options, function (err, unzipPath) {
+                handleZip(zipUrl, options, size, function (err, unzipPath) {
                     if (err) {
                         onComplete && onComplete(err);
                         return;

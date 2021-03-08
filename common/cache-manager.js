@@ -1,3 +1,5 @@
+const { unlinkSync } = require("fs");
+
 /****************************************************************************
  Copyright (c) 2019 Xiamen Yaji Software Co., Ltd.
 
@@ -22,7 +24,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, rmdirSync, unzip, isOutOfStorage, deleteFileSync } = window.fsUtils;
+const { getUserDataPath, readJsonSync, makeDirSync, writeFileSync, copyFile, rmdirSync, unzip, isOutOfStorage, deleteFileSync, statSync, getUserSpaceSize } = window.fsUtils;
 
 var checkNextPeriod = false;
 var writeCacheFileList = null;
@@ -64,9 +66,15 @@ var cacheManager = {
 
     deleteQueue: [],
 
+    unzipQueue: [],
+
     waitForDeleteList: [],
 
-    version: '1.1',
+    version: '2',
+
+    cachedSize: 0,
+
+    autoClearThreshold: 0.7,
 
     getCache (url) {
         if (this.cachedFiles.has(url)) {
@@ -89,15 +97,19 @@ var cacheManager = {
             rmdirSync(this.cacheDir, true);
             this.cachedFiles = new cc.AssetManager.Cache();
             makeDirSync(this.cacheDir, true);
-            writeFileSync(cacheFilePath, JSON.stringify({ files: this.cachedFiles._map, version: this.version, deleteList: [], cacheQueue: [] }), 'utf8');
         }
         else {
             this.cachedFiles = new cc.AssetManager.Cache(result.files);
+            this.cachedFiles.forEach(x => {
+                this.cachedSize += x.size || 0;
+            });
             this.waitForDeleteList = result.deleteList;
             this.waitForDeleteList.push(...result.cacheQueue);
+            this.waitForDeleteList.push(...result.unzipQueue);
         }
+        this.cachedFilesDirty = true;
         this.tempFiles = new cc.AssetManager.Cache();
-        setInterval(this.update.bind(this), 100);
+        setInterval(this.update.bind(this), 30);
     },
 
     updateLastTime (url) {
@@ -110,17 +122,20 @@ var cacheManager = {
     _write () {
         clearTimeout(writeCacheFileList);
         writeCacheFileList = null;
+
+        const cacheCount = Math.ceil(this.writeFileInterval / this.cacheInterval);
         
         const cacheQueue = this.cacheQueue;
         if (cacheQueue.length === 0) {
-            cacheQueue = cacheQueue.concat(this.waitForCacheList.slice(3));
+            cacheQueue = cacheQueue.concat(this.waitForCacheList.slice(cacheCount));
         }
 
         const content = JSON.stringify({ 
             files: this.cachedFiles._map, 
             version: this.version, 
             deleteList: this.waitForDeleteList, 
-            cacheQueue: cacheQueue.map(x => { return { bundle: x.bundle, localPath: x.localPath, isZip: this._isZipFile(x.id) }})
+            cacheQueue: cacheQueue.map(x => { return { bundle: x.bundle, localPath: x.localPath, isZip: this._isZipFile(x.id) }}),
+            unzipQueue: this.unzipQueue
         });
 
         const cacheListFile = this.cacheDir + '/' + this.cachedFileName;
@@ -132,12 +147,12 @@ var cacheManager = {
             this.outOfStorage = true;
         }
 
-        this.deleteQueue = this.waitForDeleteList.slice(3);
+        this.deleteQueue = this.waitForDeleteList.slice(Math.ceil(this.writeFileInterval / this.deleteInterval));
         if (result instanceof Error) {
             this.cachedFilesDirty = true;
         } else {
             this.cacheQueue = cacheQueue;
-            this.waitForCacheList.splice(0, 3);
+            this.waitForCacheList.splice(0, cacheCount);
             this.cachedFilesDirty = false;
         }
     },
@@ -150,9 +165,10 @@ var cacheManager = {
 
     _cache () {
         checkNextPeriod = false;
-        var self = this;
+        let self = this;
         if (this.cacheQueue.length === 0) return;
-        var { id, srcUrl, bundle, localPath } = this.cacheQueue[0];
+        let { id, srcUrl, bundle, localPath } = this.cacheQueue[0];
+        let path = this._getCachePath(bundle, localPath);
             
         function callback (err) {
             if (err)  {
@@ -161,14 +177,22 @@ var cacheManager = {
                     return;
                 }
             } else {
-                // if has old version cache, should remove it.
-                self.removeCache(id);
-                self.cacheQueue.shift();
-                self.cachedFiles.add(id, { bundle, localPath, lastTime: Date.now() });
-                self.cachedFilesDirty = true;
+                let stat = statSync(path);
+                if (stat instanceof Error) {
+                    unlinkSync(path);
+                }
+                else {
+                    // if has old version cache, should remove it.
+                    self.removeCache(id);
+                    self.cacheQueue.shift();
+                    let size = (stat.size || 0) / 1000;
+                    self.cachedFiles.add(id, { bundle, localPath, lastTime: Date.now(), size });
+                    self.cachedSize += size;
+                    self.cachedFilesDirty = true;
+                }
             }
         }
-        copyFile(srcUrl, `${this.cacheDir}/${bundle ? bundle + '/' : ''}${localPath}`, callback);
+        copyFile(srcUrl, path, callback);
     },
 
     cacheFile (id, srcUrl, cacheEnabled, bundle) {
@@ -185,7 +209,10 @@ var cacheManager = {
         if (this.waitForCacheList.length > 0 || this.waitForDeleteList.length > 0 || this.cachedFilesDirty) this.writeCacheFile();
         this._startCacheQueue();
         this._startDeleteQueue();
-        if (this.outOfStorage && this.autoClear && this.waitForDeleteList.length === 0) {
+        if ((this.outOfStorage || this.cachedSize > this.autoClearThreshold * getUserSpaceSize())
+            && this.autoClear 
+            && this.waitForDeleteList.length === 0) 
+        {
             this.clearLRU();
         }
     },
@@ -247,7 +274,8 @@ var cacheManager = {
 
     removeCache (url) {
         if (this.cachedFiles.has(url)) {
-            const { localPath, bundle } = this.cachedFiles.remove(url);
+            const { localPath, bundle, size } = this.cachedFiles.remove(url);
+            this.cachedSize -= size;
             this.waitForDeleteList.push({ isZip: this._isZipFile(url), localPath, bundle });
         }
     },
@@ -260,16 +288,19 @@ var cacheManager = {
         makeDirSync(this.cacheDir + '/' + bundleName, true);
     },
 
-    unzipAndCacheBundle (id, zipFilePath, cacheBundleRoot, onComplete) {
-        let time = Date.now().toString();
-        let targetPath = `${this.cacheDir}/${cacheBundleRoot}/${time}${suffix++}`;
+    unzipAndCacheBundle (id, zipFilePath, bundle, size, onComplete) {
+        let time = Date.now();
+        let localPath = `${time}${suffix++}`;
         let self = this;
-        makeDirSync(targetPath, true);
+        makeDirSync(this._getCachePath(bundle, localPath), true);
         this.cachedFiles.forEach(function (val, key) {
             // remove old zip directory
-            if (val.bundle === cacheBundleRoot && self._isZipFile(key)) self.removeCache(key);
+            if (val.bundle === bundle && self._isZipFile(key)) self.removeCache(key);
         });
-        unzip(zipFilePath, targetPath, function (err) {
+        const unzipTask = { bundle, isZip: true, localPath };
+        this.unzipQueue.push(unzipTask);
+        this._write();
+        unzip(zipFilePath, this._getCachePath(bundle, localPath), function (err) {
             if (err) {
                 rmdirSync(targetPath, true);
                 if (isOutOfStorage(err.message)) {
@@ -278,8 +309,10 @@ var cacheManager = {
                 onComplete && onComplete(err);
                 return;
             }
-            self.cachedFiles.add(id, { bundle: cacheBundleRoot, url: targetPath, lastTime: time });
-            self.writeCacheFile();
+            cc.js.fastRemove(self.unzipQueue, unzipTask);
+            self.cachedFiles.add(id, { bundle, localPath, lastTime: time, size });
+            self.cachedSize += size;
+            self.cachedFilesDirty = true;
             onComplete && onComplete(null, targetPath);
         });
     },
