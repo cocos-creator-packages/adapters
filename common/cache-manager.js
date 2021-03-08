@@ -1,5 +1,3 @@
-const { unlinkSync } = require("fs");
-
 /****************************************************************************
  Copyright (c) 2019 Xiamen Yaji Software Co., Ltd.
 
@@ -179,7 +177,7 @@ var cacheManager = {
             } else {
                 let stat = statSync(path);
                 if (stat instanceof Error) {
-                    unlinkSync(path);
+                    deleteFileSync(path);
                 }
                 else {
                     // if has old version cache, should remove it.
