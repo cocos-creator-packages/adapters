@@ -36,6 +36,11 @@ var fsUtils = {
     getUserDataPath () {
         return swan.env.USER_DATA_PATH;
     },
+
+    getUserSpaceSize () {
+        // Baidu provides 50M User Space
+        return 50 * 1024;
+    },
     
     checkFsValid () {
         if (!fs) {
@@ -272,6 +277,16 @@ var fsUtils = {
             },
         })
     },
+
+    statSync (filePath, recursive) {
+        try {
+            return fs.statSync(filePath, recursive);
+        }
+        catch (e) {
+            console.warn(`stat file failed: path: ${filePath} message: ${e.message}`);
+            return new Error(e.message);
+        }
+    }
 };
 
 window.fsUtils = module.exports = fsUtils;

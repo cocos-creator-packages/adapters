@@ -38,6 +38,11 @@ var fsUtils = {
     getUserDataPath () {
         return my.env.USER_DATA_PATH;
     },
+
+    getUserSpaceSize () {
+        // Xiaomi provides 50M User Space
+        return 50 * 1024;
+    },
     
     checkFsValid () {
         if (!fs) {
@@ -258,6 +263,17 @@ var fsUtils = {
             },
         })
     },
+
+    statSync (path, recursive) {
+        let result = fs.statSync({ path, recursive });
+        if (result && result.error) {
+            console.warn(`stat file failed: path: ${path} message: ${result.errorMessage}`);
+            return new Error(result.errorMessage);
+        }
+        else {
+            return result.stats;
+        }
+    }
 };
 
 window.fsUtils = module.exports = fsUtils;

@@ -38,7 +38,7 @@ var fsUtils = {
     },
 
     getUserSpaceSize () {
-        // WeChat support 200M User Space
+        // WeChat provides 200M User Space
         return 200 * 1000;
     },
 

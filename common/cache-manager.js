@@ -183,7 +183,8 @@ var cacheManager = {
                     // if has old version cache, should remove it.
                     self.removeCache(id);
                     self.cacheQueue.shift();
-                    let size = (stat.size || 0) / 1000;
+                    // convert to KB
+                    let size = (stat.size || 0) / 1024;
                     self.cachedFiles.add(id, { bundle, localPath, lastTime: Date.now(), size });
                     self.cachedSize += size;
                     self.cachedFilesDirty = true;
