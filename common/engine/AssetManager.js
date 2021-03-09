@@ -21,7 +21,7 @@ function downloadScript (url, options, onComplete) {
         options = null;
     }
     if (REGEX.test(url)) {
-        onComplete && onComplete(new Error('Can not load remote scripts'));
+        onComplete && onComplete(new Error(`Can not load remote scripts ${url}`));
     }
     else {
         __cocos_require__(url);
@@ -29,7 +29,7 @@ function downloadScript (url, options, onComplete) {
     }
 }
 
-function handleZip (url, options, onComplete) {
+function handleZip (url, options, size, onComplete) {
     let cachedUnzip = cacheManager.cachedFiles.get(url);
     if (cachedUnzip) {
         cacheManager.updateLastTime(url);
@@ -41,15 +41,15 @@ function handleZip (url, options, onComplete) {
                 onComplete && onComplete(err);
                 return;
             }
-            cacheManager.unzipAndCacheBundle(url, downloadedZipPath, options.__cacheBundleRoot__, onComplete);
+            cacheManager.unzipAndCacheBundle(url, downloadedZipPath, options.__cacheBundleRoot__, size, onComplete);
         });
     }
     else {
-        cacheManager.unzipAndCacheBundle(url, url, options.__cacheBundleRoot__, onComplete);
+        cacheManager.unzipAndCacheBundle(url, url, options.__cacheBundleRoot__, size, onComplete);
     }
 }
 
-function downloadDomAudio (url, options, onComplete) {
+function parseDomAudio (url, options, onComplete) {
     if (typeof options === 'function') {
         onComplete = options;
         options = null;
@@ -85,7 +85,7 @@ function download (url, func, options, onFileProgress, onComplete) {
             func(path, options, function (err, data) {
                 if (!err) {
                     cacheManager.tempFiles.add(url, path);
-                    cacheManager.cacheFile(url, path, options.cacheEnabled, options.__cacheBundleRoot__, true);
+                    cacheManager.cacheFile(url, path, options.cacheEnabled, options.__cacheBundleRoot__);
                 }
                 onComplete(err, data);
             });
@@ -189,8 +189,9 @@ function downloadBundle (nameOrUrl, options, onComplete) {
             }
             if (data.isZip) {
                 let zipVersion = data.zipVersion;
+                let size = data.unpackedSize || 0;
                 let zipUrl = `${url}/res.${zipVersion ? zipVersion + '.' : ''}zip`;
-                handleZip(zipUrl, options, function (err, unzipPath) {
+                handleZip(zipUrl, options, size, function (err, unzipPath) {
                     if (err) {
                         onComplete && onComplete(err);
                         return;
@@ -237,14 +238,15 @@ function parsePlist (url, options, onComplete) {
         var result = null;
         if (!err) {
             result = cc.plistParser.parse(file);
-            if (!result) err = new Error('parse failed');
+            if (!result) err = new Error(`parse ${url} failed, content: ${file}`);
         }
         onComplete && onComplete(err, result);
     });
 }
 
 let downloadImage = isSubDomain ? subdomainTransformUrl : downloadAsset;
-downloader.downloadDomAudio = downloadDomAudio;
+let parseImage = downloader.downloadDomImage;
+downloader.downloadDomAudio = parseDomAudio;
 downloader.downloadScript = downloadScript;
 parser.parsePVRTex = parsePVRTex;
 parser.parsePKMTex = parsePKMTex;
@@ -312,15 +314,15 @@ downloader.register({
 });
 
 parser.register({
-    '.png' : downloader.downloadDomImage,
-    '.jpg' : downloader.downloadDomImage,
-    '.bmp' : downloader.downloadDomImage,
-    '.jpeg' : downloader.downloadDomImage,
-    '.gif' : downloader.downloadDomImage,
-    '.ico' : downloader.downloadDomImage,
-    '.tiff' : downloader.downloadDomImage,
-    '.image' : downloader.downloadDomImage,
-    '.webp' : downloader.downloadDomImage,
+    '.png' : parseImage,
+    '.jpg' : parseImage,
+    '.bmp' : parseImage,
+    '.jpeg' : parseImage,
+    '.gif' : parseImage,
+    '.ico' : parseImage,
+    '.tiff' : parseImage,
+    '.image' : parseImage,
+    '.webp' : parseImage,
     '.pvr': parsePVRTex,
     '.pkm': parsePKMTex,
 
@@ -332,10 +334,10 @@ parser.register({
     '.ttc': loadFont,
 
     // Audio
-    '.mp3' : downloadDomAudio,
-    '.ogg' : downloadDomAudio,
-    '.wav' : downloadDomAudio,
-    '.m4a' : downloadDomAudio,
+    '.mp3' : parseDomAudio,
+    '.ogg' : parseDomAudio,
+    '.wav' : parseDomAudio,
+    '.m4a' : parseDomAudio,
 
     // Txt
     '.txt' : parseText,

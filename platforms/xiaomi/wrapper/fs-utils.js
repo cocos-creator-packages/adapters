@@ -36,6 +36,11 @@ var fsUtils = {
     getUserDataPath () {
         return qg.env.USER_DATA_PATH;
     },
+
+    getUserSpaceSize () {
+        // Xiaomi provides 50M User Space
+        return 50 * 1024;
+    },
     
     checkFsValid () {
         if (!fs) {
@@ -56,6 +61,17 @@ var fsUtils = {
                 onComplete && onComplete(new Error(res.errMsg));
             }
         });
+    },
+
+    deleteFileSync (filePath) {
+        try {
+            fs.unlinkSync(filePath);
+            return null;
+        }
+        catch (err) {
+            console.warn(`Delete file failed: path: ${filePath} message: ${err.message}`);
+            return new Error(err.message);
+        }
     },
     
     downloadFile (remoteUrl, filePath, header, onProgress, onComplete) {
@@ -262,6 +278,16 @@ var fsUtils = {
             },
         })
     },
+
+    statSync (filePath, recursive) {
+        try {
+            return fs.statSync(filePath, recursive);
+        }
+        catch (e) {
+            console.warn(`stat file failed: path: ${filePath} message: ${e.message}`);
+            return new Error(e.message);
+        }
+    }
 };
 
 window.fsUtils = module.exports = fsUtils;
