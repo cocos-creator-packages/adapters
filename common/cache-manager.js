@@ -103,6 +103,7 @@ var cacheManager = {
                 this.cachedSize += x.size || 0;
             });
             this.waitForDeleteList = result.deleteList;
+            // remove the cache task uncompleted last time
             this.waitForDeleteList.push(...result.cacheQueue);
             this.waitForDeleteList.push(...result.unzipQueue);
             this.cachedFilesDirty = true;
@@ -210,6 +211,8 @@ var cacheManager = {
         if (this.waitForCacheList.length > 0 || this.waitForDeleteList.length > 0 || this.cachedFilesDirty) this.writeCacheFile();
         this._startCacheQueue();
         this._startDeleteQueue();
+
+        // trigger auto clear when cachedSize exceeded auto clear threshold
         if ((this.outOfStorage || this.cachedSize > this.autoClearThreshold * getUserSpaceSize())
             && this.autoClear 
             && this.waitForDeleteList.length === 0) 
@@ -241,6 +244,7 @@ var cacheManager = {
     clearLRU () {
         var caches = [];
         this.cachedFiles.forEach(function (val, key) {
+            // DO NOT remove the asset used by this time
             if (val.lastTime >= this.startupTime) return;
             caches.push({ originUrl: key, lastTime: val.lastTime });
         });
