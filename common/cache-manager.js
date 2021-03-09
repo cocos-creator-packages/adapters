@@ -47,7 +47,7 @@ var cacheManager = {
 
     deleteInterval: 500,
 
-    writeFileInterval: 1000,
+    writeFileInterval: 2000,
 
     // whether or not storage space has run out
     outOfStorage: false,
@@ -68,7 +68,7 @@ var cacheManager = {
 
     waitForDeleteList: [],
 
-    version: '2',
+    version: '2.0',
 
     cachedSize: 0,
 
@@ -95,9 +95,7 @@ var cacheManager = {
         var cacheFilePath = this.cacheDir + '/' + this.cachedFileName;
         var result = readJsonSync(cacheFilePath);
         if (result instanceof Error || !result.version || result.version !== this.version || cc.js.isEmptyObject(result.files)) {
-            rmdirSync(this.cacheDir, true);
-            this.cachedFiles = new cc.AssetManager.Cache();
-            makeDirSync(this.cacheDir, true);
+            this.clearCache();
         }
         else {
             this.cachedFiles = new cc.AssetManager.Cache(result.files);
@@ -107,8 +105,8 @@ var cacheManager = {
             this.waitForDeleteList = result.deleteList;
             this.waitForDeleteList.push(...result.cacheQueue);
             this.waitForDeleteList.push(...result.unzipQueue);
+            this.cachedFilesDirty = true;
         }
-        this.cachedFilesDirty = true;
         this.tempFiles = new cc.AssetManager.Cache();
         console.log('Init Cache Manager. vers: ' + this.version);
         setInterval(this.update.bind(this), 30);
@@ -136,17 +134,17 @@ var cacheManager = {
             files: this.cachedFiles._map, 
             version: this.version, 
             deleteList: this.waitForDeleteList, 
-            cacheQueue: cacheQueue.map(x => { return { bundle: x.bundle, localPath: x.localPath, isZip: this._isZipFile(x.id) }}),
+            cacheQueue: cacheQueue.map(x => { return { bundle: x.bundle, localPath: x.localPath, isZip: false }}),
             unzipQueue: this.unzipQueue
         });
 
         const cacheListFile = this.cacheDir + '/' + this.cachedFileName;
         let result = writeFileSync(cacheListFile, content, 'utf8');
         if (result instanceof Error) {
+            this.outOfStorage = true;
             // if write file failed, just delete cacheList.json so that everything will be cleaned on next startup
             deleteFileSync(cacheListFile);
             result = writeFileSync(cacheListFile, content, 'utf8');
-            this.outOfStorage = true;
         }
 
         this.deleteQueue = this.waitForDeleteList.slice(Math.ceil(this.writeFileInterval / this.deleteInterval));
@@ -230,9 +228,11 @@ var cacheManager = {
     clearCache () {
         rmdirSync(this.cacheDir, true);
         this.cachedFiles = new cc.AssetManager.Cache();
+        this.deleteQueue = [];
+        this.waitForDeleteList = [];
         makeDirSync(this.cacheDir, true);
         this.outOfStorage = false;
-        this._write();
+        this.cachedFilesDirty = true;
         cc.assetManager.bundles.forEach(bundle => {
             if (REGEX.test(bundle.base)) this.makeBundleFolder(bundle.name);
         });
