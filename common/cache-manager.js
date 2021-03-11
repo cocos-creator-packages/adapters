@@ -299,10 +299,6 @@ var cacheManager = {
         let localPath = `${time}${suffix++}`;
         let self = this;
         makeDirSync(this._getCachePath(bundle, localPath), true);
-        this.cachedFiles.forEach(function (val, key) {
-            // remove old zip directory
-            if (val.bundle === bundle && self._isZipFile(key)) self.removeCache(key);
-        });
         const unzipTask = { bundle, isZip: true, localPath };
         this.unzipQueue.push(unzipTask);
         this._write();
