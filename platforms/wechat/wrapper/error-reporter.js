@@ -14,7 +14,7 @@ function onErrorMessageHandler (info) {
     if (!env) {
         return;
     }
-    var root = cc.Canvas.instance.node;
+    var root = cc.Canvas.instance ? cc.Canvas.instance.node : null;
     if (!root) {
         return;
     }
