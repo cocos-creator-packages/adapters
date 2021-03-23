@@ -1,16 +1,16 @@
 const utils = require('../../../common/utils');
 
+// NOTE: size and orientation info is wrong at the init phase, especially on iOS device
+function isLandscape () {
+    let systemInfo = wx.getSystemInfoSync();
+    return systemInfo.deviceOrientation ? (systemInfo.deviceOrientation === "landscape"): (systemInfo.screenWidth > systemInfo.screenHeight);
+}
 if (window.__globalAdapter) {
     let globalAdapter = window.__globalAdapter;
     // SystemInfo
     let systemInfo = wx.getSystemInfoSync();
     let windowWidth = systemInfo.windowWidth;
     let windowHeight = systemInfo.windowHeight;
-
-    let screenWidth = systemInfo.screenWidth;
-    let screenHeight = systemInfo.screenHeight;
-    let orientation = systemInfo.deviceOrientation;
-    let isLandscape = orientation ? (orientation === "landscape"): (screenWidth > screenHeight);
 
     globalAdapter.isSubContext = (wx.getOpenDataContext === undefined);
     globalAdapter.isDevTool = (systemInfo.platform === 'devtools');
@@ -86,7 +86,7 @@ if (window.__globalAdapter) {
                     let resClone = {};
                     let x = res.x;
                     let y = res.y;
-                    if (isLandscape) {
+                    if (isLandscape()) {
                         let tmp = x;
                         x = -y;
                         y = tmp;
@@ -125,14 +125,15 @@ if (window.__globalAdapter) {
     globalAdapter.getSafeArea = function () {
         let { top, left, bottom, right, width, height } = systemInfo.safeArea;
         // HACK: on iOS device, the orientation should mannually rotate
-        if (systemInfo.platform === 'ios' && !globalAdapter.isDevTool && isLandscape) {
-            let tempData = [right, top, left, bottom, width, height];
-            top = windowHeight - tempData[0];
-            left = tempData[1];
-            bottom = windowHeight - tempData[2];
-            right = tempData[3];
-            height = tempData[4];
-            width = tempData[5];
+        if (systemInfo.platform === 'ios' && !globalAdapter.isDevTool && isLandscape()) {
+            let tmpTop = top, tmpLeft = left, tmpBottom = bottom, tmpRight = right, tmpWidth = width, tmpHeight = height;
+            let bottomHeight = windowWidth - tmpBottom;
+            top = windowHeight - tmpRight;
+            left = tmpTop;
+            bottom = windowHeight - tmpLeft - bottomHeight;
+            right = tmpBottom;
+            height = tmpWidth - bottomHeight;
+            width = tmpHeight;
         }
         return { top, left, bottom, right, width, height };
     }
