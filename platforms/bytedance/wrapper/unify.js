@@ -119,6 +119,13 @@ if (window.__globalAdapter) {
     // origin point on the top-left corner
     globalAdapter.getSafeArea = function () {
         let { top, left, bottom, right, width, height } = systemInfo.safeArea;
+        // HACK: on iOS device, the orientation should mannually rotate
+        if (systemInfo.platform === 'ios' && !globalAdapter.isDevTool && isLandscape) {
+            let tmpTop = top, tmpLeft = left, tmpBottom = bottom, tmpRight = right, tmpWidth = width, tmpHeight = height;
+            top = tmpLeft;
+            left = tmpTop;
+            right = tmpRight - tmpTop;
+        }
         return { top, left, bottom, right, width, height };
     }
 }

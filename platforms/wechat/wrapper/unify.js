@@ -127,11 +127,12 @@ if (window.__globalAdapter) {
         // HACK: on iOS device, the orientation should mannually rotate
         if (systemInfo.platform === 'ios' && !globalAdapter.isDevTool && isLandscape()) {
             let tmpTop = top, tmpLeft = left, tmpBottom = bottom, tmpRight = right, tmpWidth = width, tmpHeight = height;
+            let bottomHeight = windowWidth - tmpBottom;
             top = windowHeight - tmpRight;
             left = tmpTop;
-            bottom = windowHeight - tmpLeft;
+            bottom = windowHeight - tmpLeft - bottomHeight;
             right = tmpBottom;
-            height = tmpWidth;
+            height = tmpWidth - bottomHeight;
             width = tmpHeight;
         }
         return { top, left, bottom, right, width, height };
