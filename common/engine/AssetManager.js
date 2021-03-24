@@ -2,7 +2,7 @@ const cacheManager = require('../cache-manager');
 const { fs, downloadFile, readText, readArrayBuffer, readJson, loadSubpackage, getUserDataPath, exists } = window.fsUtils;
 
 const REGEX = /^https?:\/\/.*/;
-
+const cachedSubpackageList = {};
 const downloader = cc.assetManager.downloader;
 const parser = cc.assetManager.parser;
 const presets = cc.assetManager.presets;
@@ -150,15 +150,22 @@ function downloadBundle (nameOrUrl, options, onComplete) {
 
     if (subpackages[bundleName]) {
         var config = `subpackages/${bundleName}/config.${version ? version + '.' : ''}json`;
+        let loadedCb = function () {
+            downloadJson(config, options, function (err, data) {
+                data && (data.base = `subpackages/${bundleName}/`);
+                onComplete(err, data);
+            });
+        };
+        if (cachedSubpackageList[bundleName]) {
+            return loadedCb();
+        }
         loadSubpackage(bundleName, options.onFileProgress, function (err) {
             if (err) {
                 onComplete(err, null);
                 return;
             }
-            downloadJson(config, options, function (err, data) {
-                data && (data.base = `subpackages/${bundleName}/`);
-                onComplete(err, data);
-            });
+            cachedSubpackageList[bundleName] = true;
+            loadedCb();
         });
     }
     else {
