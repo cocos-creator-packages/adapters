@@ -1,3 +1,5 @@
+const { isJSDocNonNullableType } = require("typescript");
+
 /****************************************************************************
  Copyright (c) 2017-2019 Xiamen Yaji Software Co., Ltd.
 
@@ -36,6 +38,11 @@ var fsUtils = {
     getUserDataPath () {
         return my.env.USER_DATA_PATH;
     },
+
+    getUserSpaceSize () {
+        // Xiaomi provides 50M User Space
+        return 50 * 1024;
+    },
     
     checkFsValid () {
         if (!fs) {
@@ -56,6 +63,16 @@ var fsUtils = {
                 onComplete && onComplete(new Error(res.errorMessage));
             }
         });
+    },
+
+    deleteFileSync (filePath) {
+        const result = fs.unlinkSync({ filePath });
+        if (result && result.error) {
+            console.warn(`Delete file failed: path: ${filePath} message: ${result.errorMessage}`);
+            return new Error(result.errorMessage);
+        } else {
+            return null;
+        }
     },
     
     downloadFile (remoteUrl, filePath, header, onProgress, onComplete) {
@@ -114,17 +131,16 @@ var fsUtils = {
     },
     
     writeFileSync (path, data, encoding) {
-        try {
-            fs.writeFileSync({
-                filePath: path,
-                data: data,
-                encoding: encoding,
-            });
-            return null;
-        }
-        catch (e) {
-            console.warn(`Write file failed: path: ${path} message: ${e.message}`);
+        let result = my.getFileSystemManager().writeFileSync({
+            filePath: path,
+            data: data,
+            encoding: encoding,
+        });
+        if (result && result.error) {
+            console.warn(`Write file failed: path: ${path} message: ${result.errorMessage}`);
             return new Error(e.message);
+        } else {
+            return null;
         }
     },
     
@@ -194,26 +210,27 @@ var fsUtils = {
     },
     
     makeDirSync (path, recursive) {
-        try {
-            fs.mkdirSync({
-                dirPath: path,
-                recursive: recursive,
-            });
-            return null;
+        let result = fs.mkdirSync({
+            dirPath: path,
+            recursive: recursive,
+        });
+        if (result && result.error) {
+            console.warn(`Make directory failed: path: ${path} message: ${result.errorMessage}`);
+            return new Error(result.errorMessage);
         }
-        catch (e) {
-            console.warn(`Make directory failed: path: ${path} message: ${e.message}`);
-            return new Error(e.message);
+        else {
+            return null;
         }
     },
 
     rmdirSync (dirPath, recursive) {
-        try {
-            fs.rmdirSync({ dirPath, recursive });
+        let result = fs.rmdirSync({ dirPath, recursive });
+        if (result && result.error) {
+            console.warn(`rm directory failed: path: ${dirPath} message: ${result.errorMessage}`);
+            return new Error(result.errorMessage);
         }
-        catch (e) {
-            console.warn(`rm directory failed: path: ${dirPath} message: ${e.message}`);
-            return new Error(e.message);
+        else {
+            return null;
         }
     },
     
@@ -246,6 +263,17 @@ var fsUtils = {
             },
         })
     },
+
+    statSync (path, recursive) {
+        let result = fs.statSync({ path, recursive });
+        if (result && result.error) {
+            console.warn(`stat file failed: path: ${path} message: ${result.errorMessage}`);
+            return new Error(result.errorMessage);
+        }
+        else {
+            return result.stats;
+        }
+    }
 };
 
 window.fsUtils = module.exports = fsUtils;

@@ -37,6 +37,11 @@ var fsUtils = {
         return wx.env.USER_DATA_PATH;
     },
 
+    getUserSpaceSize () {
+        // WeChat provides 200M User Space
+        return 200 * 1000;
+    },
+
     checkFsValid () {
         if (!fs) {
             console.warn('can not get the file system!');
@@ -56,6 +61,17 @@ var fsUtils = {
                 onComplete && onComplete(new Error(res.errMsg));
             }
         });
+    },
+
+    deleteFileSync (filePath) {
+        try {
+            fs.unlinkSync(filePath);
+            return null;
+        }
+        catch (err) {
+            console.warn(`Delete file failed: path: ${filePath} message: ${err.message}`);
+            return new Error(err.message);
+        }
     },
 
     downloadFile (remoteUrl, filePath, header, onProgress, onComplete) {
@@ -261,6 +277,16 @@ var fsUtils = {
             },
         })
     },
+
+    statSync (filePath, recursive) {
+        try {
+            return fs.statSync(filePath, recursive);
+        }
+        catch (e) {
+            console.warn(`stat file failed: path: ${filePath} message: ${e.message}`);
+            return new Error(e.message);
+        }
+    }
 };
 
 window.fsUtils = module.exports = fsUtils;
