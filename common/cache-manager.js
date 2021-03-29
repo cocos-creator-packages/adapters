@@ -134,7 +134,7 @@ var cacheManager = {
         const content = JSON.stringify({ 
             files: this.cachedFiles._map, 
             version: this.version, 
-            deleteList: this.waitForDeleteList, 
+            deleteList: this.deleteQueue.concat(this.waitForDeleteList), 
             cacheQueue: cacheQueue.map(x => { return { bundle: x.bundle, localPath: x.localPath, isZip: false }}),
             unzipQueue: this.unzipQueue
         });
@@ -148,7 +148,7 @@ var cacheManager = {
             result = writeFileSync(cacheListFile, content, 'utf8');
         }
 
-        this.deleteQueue = this.waitForDeleteList.slice(Math.ceil(this.writeFileInterval / this.deleteInterval));
+        this.deleteQueue = this.deleteQueue.concat(this.waitForDeleteList.splice(0, Math.ceil(this.writeFileInterval / this.deleteInterval)));
         if (result instanceof Error) {
             this.cachedFilesDirty = true;
         } else {
@@ -268,7 +268,6 @@ var cacheManager = {
             deleteFileSync(item.url);
         }
         this.outOfStorage = false;
-        this.waitForDeleteList.shift();
         this.cachedFilesDirty = true;
     },
 
