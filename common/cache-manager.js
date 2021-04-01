@@ -126,7 +126,7 @@ var cacheManager = {
 
         const cacheCount = Math.ceil(this.writeFileInterval / this.cacheInterval);
         
-        const cacheQueue = this.cacheQueue;
+        let cacheQueue = this.cacheQueue;
         if (cacheQueue.length === 0) {
             cacheQueue = cacheQueue.concat(this.waitForCacheList.slice(cacheCount));
         }
