@@ -79,7 +79,7 @@ var cacheManager = {
     getCache (url) {
         if (this.cachedFiles.has(url)) {
             const item = this.cachedFiles.get(url);
-            this._getCachePath(item.bundle, item.localPath);
+            return this._getCachePath(item.bundle, item.localPath);
         } else {
             return '';
         }
@@ -124,11 +124,12 @@ var cacheManager = {
         clearTimeout(writeCacheFileList);
         writeCacheFileList = null;
 
-        const cacheCount = Math.ceil(this.writeFileInterval / this.cacheInterval);
+        let cacheCount = Math.ceil(this.writeFileInterval / this.cacheInterval);
         
         let cacheQueue = this.cacheQueue;
-        if (cacheQueue.length === 0) {
-            cacheQueue = cacheQueue.concat(this.waitForCacheList.slice(cacheCount));
+        cacheCount -= cacheQueue.length;
+        if (cacheCount > 0) {
+            cacheQueue = cacheQueue.concat(this.waitForCacheList.slice(0, cacheCount));
         }
 
         const content = JSON.stringify({ 
@@ -153,7 +154,7 @@ var cacheManager = {
             this.cachedFilesDirty = true;
         } else {
             this.cacheQueue = cacheQueue;
-            this.waitForCacheList.splice(0, cacheCount);
+            if (cacheCount > 0) { this.waitForCacheList.splice(0, cacheCount); }
             this.cachedFilesDirty = false;
         }
     },
@@ -296,12 +297,13 @@ var cacheManager = {
     unzipAndCacheBundle (id, zipFilePath, bundle, size, onComplete) {
         let time = Date.now();
         let localPath = `${time}${suffix++}`;
+        let targetPath = this._getCachePath(bundle, localPath);
         let self = this;
-        makeDirSync(this._getCachePath(bundle, localPath), true);
+        makeDirSync(targetPath, true);
         const unzipTask = { bundle, isZip: true, localPath };
         this.unzipQueue.push(unzipTask);
         this._write();
-        unzip(zipFilePath, this._getCachePath(bundle, localPath), function (err) {
+        unzip(zipFilePath, targetPath, function (err) {
             if (err) {
                 rmdirSync(targetPath, true);
                 if (isOutOfStorage(err.message)) {
@@ -310,7 +312,7 @@ var cacheManager = {
                 onComplete && onComplete(err);
                 return;
             }
-            cc.js.fastRemove(self.unzipQueue, unzipTask);
+            cc.js.array.fastRemove(self.unzipQueue, unzipTask);
             self.cachedFiles.add(id, { bundle, localPath, lastTime: time, size });
             self.cachedSize += size;
             self.cachedFilesDirty = true;

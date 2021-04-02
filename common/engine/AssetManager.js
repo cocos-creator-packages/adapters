@@ -30,10 +30,10 @@ function downloadScript (url, options, onComplete) {
 }
 
 function handleZip (url, options, size, onComplete) {
-    let cachedUnzip = cacheManager.cachedFiles.get(url);
+    let cachedUnzip = cacheManager.getCache(url);
     if (cachedUnzip) {
         cacheManager.updateLastTime(url);
-        onComplete && onComplete(null, cachedUnzip.url);
+        onComplete && onComplete(null, cachedUnzip);
     }
     else if (REGEX.test(url)) {
         downloadFile(url, null, options.header, options.onFileProgress, function (err, downloadedZipPath) {
@@ -360,13 +360,13 @@ var transformUrl = !isSubDomain ? function (url, options) {
     }
     else if (REGEX.test(url)) {
         if (!options.reload) {
-            var cache = cacheManager.cachedFiles.get(url);
+            var cache = cacheManager.getCache(url);
             if (cache) {
                 inCache = true;
-                url = cache.url;
+                url = cache;
             }
             else {
-                var tempUrl = cacheManager.tempFiles.get(url);
+                var tempUrl = cacheManager.getTemp(url);
                 if (tempUrl) { 
                     inLocal = true;
                     url = tempUrl;
