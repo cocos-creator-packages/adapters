@@ -63,14 +63,14 @@ Object.assign(game, {
         if (this._rendererInitialized) return;
 
         // frame and container are useless on minigame platform
-        this.frame = this.container = document.createElement("DIV");
+        this.frame = this.container = window.document.createElement("DIV");
 
         let localCanvas;
         if (__globalAdapter.isSubContext) {
             localCanvas = window.sharedCanvas || __globalAdapter.getSharedCanvas();
         }
         else {
-            localCanvas = canvas;
+            localCanvas = window.canvas;
         }
         this.canvas = localCanvas;
 

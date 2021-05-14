@@ -1,0 +1,1 @@
+export imageConstructor from './Image';
