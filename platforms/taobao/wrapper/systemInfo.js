@@ -5,6 +5,6 @@ Object.assign(adapter, {
     // Extend adaptSys interface
     adaptSys (sys) {
         adaptSysFunc.call(this, sys);
-        sys.platform = sys.ALIPAY_GAME;
+        sys.platform = sys.TAOBAO;
     },
 });
