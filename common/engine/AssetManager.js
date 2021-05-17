@@ -55,7 +55,7 @@ function downloadDomAudio (url, options, onComplete) {
         options = null;
     }
     
-    var dom = document.createElement('audio');
+    var dom = window.document.createElement('audio');
     dom.src = url;
     
     // HACK: wechat does not callback when load large number of assets

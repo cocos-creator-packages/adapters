@@ -2,6 +2,7 @@ import * as _window from './window'
 import HTMLElement from './HTMLElement'
 import Image from './Image'
 import Canvas from './Canvas'
+import Audio from './Audio'
 
 const events = {}
 

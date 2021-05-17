@@ -8,11 +8,7 @@ if (window.__globalAdapter) {
     utils.cloneMethod(globalAdapter, my, 'getSystemInfoSync');
 
     // Audio
-    // globalAdapter.createInnerAudioContext = function() {
-    //     let audio = my.createInnerAudioContext();
-    //     audio.onCanplay = audio.onCanPlay.bind(audio);
-    //     return audio;
-    // };
+    utils.cloneMethod(globalAdapter, my, 'createInnerAudioContext');
 
     // FrameRate
     // utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
