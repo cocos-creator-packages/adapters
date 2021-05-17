@@ -14,15 +14,15 @@ if (window.__globalAdapter) {
     // utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
 
     // Keyboard
-    utils.cloneMethod(globalAdapter, my, 'showKeyboard');
-    utils.cloneMethod(globalAdapter, my, 'hideKeyboard');
-    utils.cloneMethod(globalAdapter, my, 'updateKeyboard');
-    utils.cloneMethod(globalAdapter, my, 'onKeyboardInput');
-    utils.cloneMethod(globalAdapter, my, 'onKeyboardConfirm');
-    utils.cloneMethod(globalAdapter, my, 'onKeyboardComplete');
-    utils.cloneMethod(globalAdapter, my, 'offKeyboardInput');
-    utils.cloneMethod(globalAdapter, my, 'offKeyboardConfirm');
-    utils.cloneMethod(globalAdapter, my, 'offKeyboardComplete');
+    globalAdapter.showKeyboard = () => console.warn('showKeyboard not supported.');
+    globalAdapter.hideKeyboard = () => console.warn('hideKeyboard not supported.');
+    globalAdapter.updateKeyboard = () => console.warn('updateKeyboard not supported.');
+    globalAdapter.onKeyboardInput = () => console.warn('onKeyboardInput not supported.');
+    globalAdapter.onKeyboardConfirm = () => console.warn('onKeyboardConfirm not supported.');
+    globalAdapter.onKeyboardComplete = () => console.warn('onKeyboardComplete not supported.');
+    globalAdapter.offKeyboardInput = () => console.warn('offKeyboardInput not supported.');
+    globalAdapter.offKeyboardConfirm = () => console.warn('offKeyboardConfirm not supported.');
+    globalAdapter.offKeyboardComplete = () => console.warn('offKeyboardComplete not supported.');
 
     // Message
     utils.cloneMethod(globalAdapter, my, 'getOpenDataContext');
