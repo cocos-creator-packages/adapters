@@ -2,6 +2,11 @@ const inputManager = cc.internal.inputManager;
 const renderer = cc.renderer;
 const game = cc.game;
 const dynamicAtlasManager = cc.dynamicAtlasManager;
+const sys = cc.sys
+if (sys.platform === sys.TAOBAO) {
+    document = window.document;
+    canvas = window.canvas;
+}
 
 let originRun = game.run;
 Object.assign(game, {
@@ -64,20 +69,12 @@ Object.assign(game, {
 
         // frame and container are useless on minigame platform
         let sys = cc.sys;
-        if (sys.platform === sys.TAOBAO) {
-            this.frame = this.container = window.document.createElement("DIV");
-        } else {
-            this.frame = this.container = document.createElement("DIV");
-        }
+        this.frame = this.container = document.createElement("DIV");
 
         let localCanvas;
         if (__globalAdapter.isSubContext) {
             localCanvas = window.sharedCanvas || __globalAdapter.getSharedCanvas();
-        }
-        else if (sys.platform === sys.TAOBAO) {
-            localCanvas = window.canvas;
-        }
-        else {
+        } else {
             localCanvas = canvas;
         }
         this.canvas = localCanvas;

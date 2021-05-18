@@ -15,6 +15,11 @@ presets['scene'].maxRequestsPerFrame = 64;
 let SUBCONTEXT_ROOT, REMOTE_SERVER_ROOT;
 let subpackages = {}, remoteBundles = {};
 
+const sys = cc.sys
+if (sys.platform === sys.TAOBAO) {
+    document = window.document;
+}
+
 function downloadScript (url, options, onComplete) {
     if (typeof options === 'function') {
         onComplete = options;
@@ -55,13 +60,7 @@ function downloadDomAudio (url, options, onComplete) {
         options = null;
     }
     
-    let dom;
-    let sys = cc.sys;
-    if (sys.platform === sys.TAOBAO) {
-        dom = window.document.createElement('audio');
-    } else {
-        dom = document.createElement('audio');
-    }
+    let dom = document.createElement('audio');
     dom.src = url;
     
     // HACK: wechat does not callback when load large number of assets
