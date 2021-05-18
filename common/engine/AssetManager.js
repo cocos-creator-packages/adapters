@@ -15,9 +15,9 @@ presets['scene'].maxRequestsPerFrame = 64;
 let SUBCONTEXT_ROOT, REMOTE_SERVER_ROOT;
 let subpackages = {}, remoteBundles = {};
 
-const sys = cc.sys
+const sys = cc.sys;
 if (sys.platform === sys.TAOBAO) {
-    document = window.document;
+    var document = window.document;
 }
 
 function downloadScript (url, options, onComplete) {
@@ -210,7 +210,6 @@ function downloadBundle (nameOrUrl, options, onComplete) {
                     data.base = unzipPath + '/res/';
                     // PATCH: for android alipay version before v10.1.95 (v10.1.95 included)
                     // to remove in the future
-                    let sys = cc.sys;
                     if (sys.platform === sys.ALIPAY_GAME && sys.os === sys.OS_ANDROID) {
                         let resPath = unzipPath + 'res/';
                         if (fs.accessSync({path: resPath})) {

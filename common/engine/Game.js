@@ -2,10 +2,10 @@ const inputManager = cc.internal.inputManager;
 const renderer = cc.renderer;
 const game = cc.game;
 const dynamicAtlasManager = cc.dynamicAtlasManager;
-const sys = cc.sys
+const sys = cc.sys;
 if (sys.platform === sys.TAOBAO) {
-    document = window.document;
-    canvas = window.canvas;
+    var document = window.document;
+    var canvas = window.canvas;
 }
 
 let originRun = game.run;
@@ -68,7 +68,6 @@ Object.assign(game, {
         if (this._rendererInitialized) return;
 
         // frame and container are useless on minigame platform
-        let sys = cc.sys;
         this.frame = this.container = document.createElement("DIV");
 
         let localCanvas;
