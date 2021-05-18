@@ -1,7 +1,15 @@
-const { pixelRatio } = my.getSystemInfoSync()
+const { pixelRatio, screenWidth, screenHeight } = my.getSystemInfoSync()
 const devicePixelRatio = pixelRatio;
 
-let { width, height } = $global.screencanvas.getBoundingClientRect();
+let width, height;
+if ($global.screencanvas.getBoundingClientRect) {
+  let rect = $global.screencanvas.getBoundingClientRect();
+  width = rect.width;
+  height = rect.height;
+} else {
+  width = screenWidth;
+  height = screenHeight;
+}
 export const innerWidth = width;
 export const innerHeight = height;
 export { devicePixelRatio }
