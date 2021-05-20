@@ -1,6 +1,7 @@
 export navigator from './navigator'
 export WebSocket from './WebSocket'
 export Image from './Image'
+export ImageBitmap from './ImageBitmap'
 export HTMLElement from './HTMLElement'
 export HTMLImageElement from './HTMLImageElement'
 export HTMLCanvasElement from './HTMLCanvasElement'
