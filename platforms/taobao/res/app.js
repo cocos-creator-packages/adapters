@@ -1,3 +1,6 @@
+var onShowCB;
+var onHideCB;
+
 App({
   onLaunch(options) {
     console.info('App onLaunched');
@@ -21,11 +24,18 @@ App({
       
       window.boot();
     };
+
+    __globalAdapter.onShow = function (cb) {
+      onShowCB = cb;
+    };
+    __globalAdapter.onHide = function (cb) {
+      onHideCB = cb;
+    };
   },
   onShow(options) {
-    // TODO: implement onShow
+    onShowCB && onShowCB();
   },
   onHide(options) {
-    // TODO: implement onHide
+    onHideCB && onHideCB();
   },
 });
