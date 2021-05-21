@@ -8,6 +8,16 @@
         "**/assets/**/*.ab",
         "**/assets/**/*.mp3",
         "**/assets/**/*.mp4",
-        "**/assets/**/*.plist"
+        "**/assets/**/*.plist",
+
+        "**/remote/**/*.ktx",
+        "**/remote/**/*.json",
+        "**/remote/**/*.txt",
+        "**/remote/**/*.fnt",
+        "**/remote/**/*.bin",
+        "**/remote/**/*.ab",
+        "**/remote/**/*.mp3",
+        "**/remote/**/*.mp4",
+        "**/remote/**/*.plist"
     ]
 }
