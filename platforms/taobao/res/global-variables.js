@@ -11,3 +11,4 @@ var HTMLImageElement = window.HTMLImageElement;
 var ImageBitmap = window.ImageBitmap;
 var document = window.document;
 var DOMParser = window.DOMParser;
+var performance = window.performance;
