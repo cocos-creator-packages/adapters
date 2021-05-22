@@ -12,7 +12,7 @@ Object.assign(adapter, {
     },
 
     adaptEngine () {
-        require('./wrapper/engine');
         require('../../common/engine');
+        require('./wrapper/engine');
     },
 });
