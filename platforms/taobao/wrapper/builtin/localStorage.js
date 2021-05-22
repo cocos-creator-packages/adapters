@@ -12,11 +12,17 @@ const localStorage = {
   },
 
   getItem(key) {
-    return my.getStorageSync(key)
+    let ret =  my.getStorageSync({
+      key,
+    });
+    return ret && ret.data;
   },
 
-  setItem(key, value) {
-    return my.setStorageSync(key, value)
+  setItem(key, data) {
+    return my.setStorageSync({
+      key,
+      data,
+    });
   },
 
   removeItem(key) {
