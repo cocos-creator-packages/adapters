@@ -30,10 +30,24 @@ if (Audio) {
 
         stop () {
             // HACK: on Android, can't call stop before first playing
-            if (sys.os === sys.OS_ANDROID && !this._hasPlayed) {
-                return;
+            if (sys.os === sys.OS_ANDROID) {
+                if (!this._hasPlayed){
+                    return;
+                }
+                originalStop.call(this);
             }
-            originalStop.call(this);
+            // HACK: fix audio seeking on iOS end
+            else {
+                let self = this;
+                this._src && this._src._ensureLoaded(function () {
+                    // should not seek on iOS end
+                    // self._element.seek(0);
+                    self._element.stop();
+                    self._unbindEnded();
+                    self.emit('stop');
+                    self._state = Audio.State.STOPPED;
+                });
+            }
         },
 
         setCurrentTime (num) {
