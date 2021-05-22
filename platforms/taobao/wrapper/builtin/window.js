@@ -9,5 +9,6 @@ export WebGLRenderingContext from './WebGLRenderingContext'
 export localStorage from './localStorage'
 export location from './location'
 export requestAnimationFrame from './requestAnimationFrame'
+export cancelAnimationFrame from './cancelAnimationFrame'
 export * from './WindowProperties'
 
