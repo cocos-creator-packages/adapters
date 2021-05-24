@@ -8,7 +8,33 @@ if (window.__globalAdapter) {
     utils.cloneMethod(globalAdapter, my, 'getSystemInfoSync');
 
     // Audio
-    utils.cloneMethod(globalAdapter, my, 'createInnerAudioContext');
+    globalAdapter.createInnerAudioContext = function () {
+        let audio = my.createInnerAudioContext();
+        if (my.getSystemInfoSync().platform === 'iOS') {
+            let currentTime = 0;
+            let originalSeek = audio.seek;
+            audio.seek = function (time) {
+                // need to access audio.paused in the next tick
+                setTimeout(() => {
+                    if (audio.paused) {
+                        currentTime = time;
+                    } else {
+                        originalSeek.call(audio, time);
+                    }
+                }, 50);
+            };
+
+            let originalPlay = audio.play;
+            audio.play = function () {
+                if (currentTime !== 0) {
+                    audio.seek(currentTime);
+                    currentTime = 0; // clear cached currentTime
+                }
+                originalPlay.call(audio);
+            };
+        }
+        return audio;
+    };
 
     // FrameRate
     // utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');

@@ -1,2 +1,3 @@
-export Canvas from './Canvas'
+let HTMLCanvasElement = my.createOffscreenCanvas().constructor;
 
+export default HTMLCanvasElement;

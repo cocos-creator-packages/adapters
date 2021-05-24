@@ -1,1 +1,4 @@
-export imageConstructor from './Image';
+var screencanvas = $global.screencanvas;
+let HTMLImageElement =  screencanvas.createImage().constructor;
+
+export default HTMLImageElement;

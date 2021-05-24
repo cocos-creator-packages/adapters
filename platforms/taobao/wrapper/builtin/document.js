@@ -21,6 +21,7 @@ var document = {
   body: new HTMLElement('body'),
 
   createElement(tagName) {
+    tagName = tagName.toLowerCase();
     if (tagName === 'canvas') {
       return new Canvas()
     } else if (tagName === 'audio') {
