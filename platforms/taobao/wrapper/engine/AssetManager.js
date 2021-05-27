@@ -13,6 +13,19 @@ downloader.register({
     '.ogg' : doNothing,
     '.wav' : doNothing,
     '.m4a' : doNothing,
+
+    // Image
+    '.png' : doNothing,
+    '.jpg' : doNothing,
+    '.bmp' : doNothing,
+    '.jpeg' : doNothing,
+    '.gif' : doNothing,
+    '.ico' : doNothing,
+    '.tiff' : doNothing,
+    '.image' : doNothing,
+    '.webp' : doNothing,
+    '.pvr': doNothing,
+    '.pkm': doNothing,
 });
 
 parser.register({
