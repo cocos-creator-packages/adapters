@@ -1,3 +1,3 @@
 require('./Audio');
 require('./AssetManager');
-require('./cache-manager')
+require('./cache-manager');
