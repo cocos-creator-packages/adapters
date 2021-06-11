@@ -1,4 +1,4 @@
-<view class="canvas-element" style="flex-direction:row;display:flex;flex:1;">
+<view class="canvas-element" style="flex-direction:row;display:flex;flex:1;background-color:rgba(0,0,0,1);">
   <canvas 
   id="GameCanvas" 
   type="webgl" 
