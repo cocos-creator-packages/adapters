@@ -14,7 +14,7 @@ if (window.__globalAdapter) {
             systemInfoCached = true
         }, delay || 5000);
     }
-    refreshSystemInfo()
+    refreshSystemInfo();
 
     // NOTE: size and orientation info is wrong at the init phase, especially on iOS device
     function isLandscape () {
