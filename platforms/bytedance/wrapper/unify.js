@@ -3,10 +3,22 @@ const utils = require('../../../common/utils');
 if (window.__globalAdapter) {
     let globalAdapter = window.__globalAdapter;
     // SystemInfo
-    let systemInfo = tt.getSystemInfoSync();
-    let windowWidth = systemInfo.windowWidth;
-    let windowHeight = systemInfo.windowHeight;
-    let isLandscape = windowWidth > windowHeight;
+    let systemInfo;
+    let systemInfoCached = false;
+    function refreshSystemInfo(delay){
+        systemInfo = wx.getSystemInfoSync();
+        // refresh systemInfo, some seconds later.
+        setTimeout(function () {
+            systemInfo = tt.getSystemInfoSync();
+            systemInfoCached = true
+        }, delay || 5000);
+    }
+    refreshSystemInfo();
+
+    function isLandscape () {
+        return systemInfo.deviceOrientation ? (systemInfo.deviceOrientation === "landscape"): (systemInfo.screenWidth > systemInfo.screenHeight);
+    }
+
     globalAdapter.isSubContext = (tt.getOpenDataContext === undefined);
     globalAdapter.isDevTool = (systemInfo.platform === 'devtools');
     utils.cloneMethod(globalAdapter, tt, 'getSystemInfoSync');
@@ -65,14 +77,17 @@ if (window.__globalAdapter) {
     let deviceOrientation = 1;
     if (tt.onDeviceOrientationChange) {
         tt.onDeviceOrientationChange(function (res) {
+            refreshSystemInfo();
+
             if (res.value === 'landscape') {
-            deviceOrientation = 1;
+                deviceOrientation = 1;
             }
             else if (res.value === 'landscapeReverse') {
-            deviceOrientation = -1;
+                deviceOrientation = -1;
             }
         });
     }
+
     Object.assign(globalAdapter, {
         startAccelerometer (cb) {
             if (!isAccelerometerInit) {
@@ -81,7 +96,7 @@ if (window.__globalAdapter) {
                     let resClone = {};
                     let x = res.x;
                     let y = res.y;
-                    if (isLandscape) {
+                    if (isLandscape()) {
                         let tmp = x;
                         x = -y;
                         y = tmp;
@@ -118,9 +133,11 @@ if (window.__globalAdapter) {
     // safeArea
     // origin point on the top-left corner
     globalAdapter.getSafeArea = function () {
+        systemInfo = systemInfoCached ? systemInfo : tt.getSystemInfoSync();
+
         let { top, left, bottom, right, width, height } = systemInfo.safeArea;
         // HACK: on iOS device, the orientation should mannually rotate
-        if (systemInfo.platform === 'ios' && !globalAdapter.isDevTool && isLandscape) {
+        if (systemInfo.platform === 'ios' && !globalAdapter.isDevTool && isLandscape()) {
             let tmpTop = top, tmpLeft = left, tmpBottom = bottom, tmpRight = right, tmpWidth = width, tmpHeight = height;
             top = tmpLeft;
             left = tmpTop;
