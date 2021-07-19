@@ -6,7 +6,7 @@ if (window.__globalAdapter) {
     let systemInfo;
     let systemInfoCached = false;
     function refreshSystemInfo(delay){
-        systemInfo = wx.getSystemInfoSync();
+        systemInfo = tt.getSystemInfoSync();
         // refresh systemInfo, some seconds later.
         setTimeout(function () {
             systemInfo = tt.getSystemInfoSync();
