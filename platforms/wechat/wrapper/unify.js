@@ -10,7 +10,7 @@ if (window.__globalAdapter) {
         systemInfo = wx.getSystemInfoSync();
         // refresh systemInfo, some seconds later.
         setTimeout(function () {
-            systemInfo = tt.getSystemInfoSync();
+            systemInfo = wx.getSystemInfoSync();
             systemInfoCached = true
         }, delay || 5000);
     }
