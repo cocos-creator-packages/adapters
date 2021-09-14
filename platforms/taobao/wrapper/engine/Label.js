@@ -1,6 +1,7 @@
 if (cc && cc.Label) {
     const gfx = cc.gfx;
     const Label = cc.Label;
+    const CacheMode = Label.CacheMode;
 
     // shared label canvas
     let _sharedLabelCanvas = document.createElement('canvas');
@@ -22,8 +23,17 @@ if (cc && cc.Label) {
     });
 
     let _originUpdateMaterial = Label.prototype._updateMaterialWebgl;
+    let _originOnEnable = Label.prototype.onEnable;
     // fix ttf font black border
     Object.assign(Label.prototype, {
+        onEnable () {
+            _originOnEnable.call(this);
+            // NOTE: fix crashing on gl.texSubImage2D()
+            if (this.cacheMode === CacheMode.CHAR) {
+                this.cacheMode = CacheMode.NONE;
+            }
+        },
+
         _updateMaterialWebgl () {
             _originUpdateMaterial.call(this);
 
