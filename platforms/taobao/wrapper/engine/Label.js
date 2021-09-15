@@ -4,7 +4,7 @@ if (cc && cc.Label) {
     const CacheMode = Label.CacheMode;
 
     // shared label canvas
-    let _sharedLabelCanvas = document.createElement('canvas');
+    let _sharedLabelCanvas = my.createOffscreenCanvas();
     let _sharedLabelCanvasCtx = _sharedLabelCanvas.getContext('2d');
     let canvasData = {
         canvas: _sharedLabelCanvas,
