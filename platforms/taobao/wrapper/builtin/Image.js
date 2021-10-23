@@ -11,7 +11,7 @@ let ImageProxy = new Proxy(Image, {
                 if (eventName === 'load') {
                     img.onload = eventCB;
                 } else if (eventName === 'error') {
-                    img.onerror = eventCB;
+                    // img.onerror = eventCB;
                 }
             };
         }
@@ -21,7 +21,7 @@ let ImageProxy = new Proxy(Image, {
             if (eventName === 'load') {
               img.onload = null;
             } else if (eventName === 'error') {
-              img.onerror = null;
+              // img.onerror = null;
             }
           };
         }
