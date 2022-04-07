@@ -1,16 +1,25 @@
 const utils = require('../../../common/utils');
 
-// NOTE: size and orientation info is wrong at the init phase, especially on iOS device
-function isLandscape () {
-    let systemInfo = wx.getSystemInfoSync();
-    return systemInfo.deviceOrientation ? (systemInfo.deviceOrientation === "landscape"): (systemInfo.screenWidth > systemInfo.screenHeight);
-}
 if (window.__globalAdapter) {
+
     let globalAdapter = window.__globalAdapter;
     // SystemInfo
-    let systemInfo = wx.getSystemInfoSync();
-    let windowWidth = systemInfo.windowWidth;
-    let windowHeight = systemInfo.windowHeight;
+    let systemInfo;
+    let systemInfoCached = false;
+    function refreshSystemInfo(delay){
+        systemInfo = wx.getSystemInfoSync();
+        // refresh systemInfo, some seconds later.
+        setTimeout(function () {
+            systemInfo = wx.getSystemInfoSync();
+            systemInfoCached = true
+        }, delay || 5000);
+    }
+    refreshSystemInfo();
+
+    // NOTE: size and orientation info is wrong at the init phase, especially on iOS device
+    function isLandscape () {
+        return systemInfo.deviceOrientation ? (systemInfo.deviceOrientation === "landscape"): (systemInfo.screenWidth > systemInfo.screenHeight);
+    }
 
     globalAdapter.isSubContext = (wx.getOpenDataContext === undefined);
     globalAdapter.isDevTool = (systemInfo.platform === 'devtools');
@@ -70,14 +79,23 @@ if (window.__globalAdapter) {
     let deviceOrientation = 1;
     if (wx.onDeviceOrientationChange) {
         wx.onDeviceOrientationChange(function (res) {
+            refreshSystemInfo();
+
             if (res.value === 'landscape') {
-            deviceOrientation = 1;
+                deviceOrientation = 1;
             }
             else if (res.value === 'landscapeReverse') {
-            deviceOrientation = -1;
+                deviceOrientation = -1;
             }
         });
     }
+
+    if (wx.onWindowResize) {
+        wx.onWindowResize(function () {
+            refreshSystemInfo();
+        });
+    }
+
     Object.assign(globalAdapter, {
         startAccelerometer (cb) {
             if (!isAccelerometerInit) {
@@ -123,6 +141,10 @@ if (window.__globalAdapter) {
     // safeArea
     // origin point on the top-left corner
     globalAdapter.getSafeArea = function () {
+        systemInfo = systemInfoCached ? systemInfo : wx.getSystemInfoSync();
+        let windowWidth = systemInfo.windowWidth;
+        let windowHeight = systemInfo.windowHeight;
+
         let { top, left, bottom, right, width, height } = systemInfo.safeArea;
         // HACK: on iOS device, the orientation should mannually rotate
         if (systemInfo.platform === 'ios' && !globalAdapter.isDevTool && isLandscape()) {
