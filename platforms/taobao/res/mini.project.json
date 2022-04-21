@@ -1,23 +1,6 @@
 {
     "include": [
-        "**/assets/**/*.ktx",
-        "**/assets/**/*.json",
-        "**/assets/**/*.txt",
-        "**/assets/**/*.fnt",
-        "**/assets/**/*.bin",
-        "**/assets/**/*.ab",
-        "**/assets/**/*.mp3",
-        "**/assets/**/*.mp4",
-        "**/assets/**/*.plist",
-
-        "**/remote/**/*.ktx",
-        "**/remote/**/*.json",
-        "**/remote/**/*.txt",
-        "**/remote/**/*.fnt",
-        "**/remote/**/*.bin",
-        "**/remote/**/*.ab",
-        "**/remote/**/*.mp3",
-        "**/remote/**/*.mp4",
-        "**/remote/**/*.plist"
+        "**/assets/**/*",
+        "**/remote/**/*"
     ]
 }
