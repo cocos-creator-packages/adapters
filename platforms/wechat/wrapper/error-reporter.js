@@ -14,7 +14,12 @@ function onErrorMessageHandler (info) {
     if (!env) {
         return;
     }
-    var root = cc.Canvas.instance.node;
+
+    if (!cc.Canvas.instance) {
+        return;
+    }
+
+    var root = cc.Canvas.instance.node
     if (!root) {
         return;
     }
