@@ -12,3 +12,4 @@ var ImageBitmap = window.ImageBitmap;
 var document = window.document;
 var DOMParser = window.DOMParser;
 var performance = window.performance;
+var XMLHttpRequest = window.XMLHttpRequest;
