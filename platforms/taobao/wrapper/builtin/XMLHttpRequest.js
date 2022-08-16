@@ -98,8 +98,8 @@ export default class XMLHttpRequest extends EventTarget {
         dataType: 'other',
         responseType: this.responseType === 'arraybuffer' ? 'arraybuffer' : 'text',
         timeout: this.timeout || undefined,
-        success: ({ data, statusCode, header }) => {
-          this.status = statusCode
+        success: ({ data, status, header }) => {
+          this.status = status
           _responseHeader.set(this, header)
           _triggerEvent.call(this, 'loadstart')
           _changeReadyState.call(this, XMLHttpRequest.HEADERS_RECEIVED)
