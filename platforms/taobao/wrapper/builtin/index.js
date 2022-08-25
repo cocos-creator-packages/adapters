@@ -48,6 +48,11 @@ function inject () {
     // window = global
     // window.top = window.parent = window
   }
+  
+  global.setTimeout = setTimeout;
+  global.clearTimeout = clearTimeout;
+  global.setInterval = setInterval;
+  global.clearInterval = clearInterval;
 }
 
 if (!global.__isAdapterInjected) {
