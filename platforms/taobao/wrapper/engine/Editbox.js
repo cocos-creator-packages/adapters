@@ -28,12 +28,6 @@
     const BaseClass = EditBox._ImplClass;
     function MiniGameEditBoxImpl () {
         BaseClass.call(this);
-
-        this._eventListeners = {
-            onKeyboardInput: null,
-            onKeyboardConfirm: null,
-            onKeyboardComplete: null,
-        };
     }
 
     js.extend(MiniGameEditBoxImpl, BaseClass);
