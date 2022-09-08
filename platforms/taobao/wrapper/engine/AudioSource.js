@@ -67,10 +67,6 @@ Object.defineProperties(proto, {
     },
 })
 Object.assign(proto, {
-    __preload: function () {
-        this.audio = Audio.load(this._clip.nativeUrl).audio;
-    },
-
     onLoad: function () {
         if (this._clip) {
             this.audio = Audio.load(this._clip.nativeUrl, this._clip.duration).audio;

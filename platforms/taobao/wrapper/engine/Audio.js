@@ -11,7 +11,7 @@ const State = {
 
 function Audio (nativeAudio, loadPromise, serializedDuration) {
     this._nativeAudio = nativeAudio;
-    this._src = '';
+    this._src = nativeAudio.src;
     this._et = new EventTarget();
     this._serializedDuration = serializedDuration;
     this.reset();
