@@ -23,7 +23,7 @@ Object.defineProperties(proto, {
             this._clip = value;
             this.audio.stop();
             this.audio.destroy();
-            this.audio = Audio.load(value.nativeUrl, value.duration).audio;
+            this.audio = new Audio(value.nativeUrl, value.duration);
         },
     },
     
@@ -69,7 +69,7 @@ Object.defineProperties(proto, {
 Object.assign(proto, {
     onLoad: function () {
         if (this._clip) {
-            this.audio = Audio.load(this._clip.nativeUrl, this._clip.duration).audio;
+            this.audio = new Audio(this._clip.nativeUrl, this._clip.duration);
         }
     },
 

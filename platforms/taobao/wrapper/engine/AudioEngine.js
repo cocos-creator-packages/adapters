@@ -19,14 +19,9 @@ function handleVolume (volume) {
 };
 
 function getOrCreateAudio (path, serializedDuration) {
-    const audio = _audioPool.pop();
-    if (audio) {
-        audio.id = ++_instanceId;
-        return { audio, loadPromise: Promise.resolve(), };
-    }
-    const { audio: loadedAudio, loadPromise } = Audio.load(path, serializedDuration);
-    loadedAudio.id = ++_instanceId;
-    return { audio: loadedAudio, loadPromise };
+    const audio = _audioPool.pop() || new Audio(path, serializedDuration);
+    audio.id = ++_instanceId;
+    return audio;
 }
 
 function putOrDestroyAudio (audio) {
@@ -84,18 +79,16 @@ cc.audioEngine = {
             return cc.error('Wrong type of AudioClip.');
         }
         let path = clip.nativeUrl;
-        let { audio, loadPromise } = getOrCreateAudio(path, clip.duration);
+        let audio = getOrCreateAudio(path, clip.duration);
 
         volume = handleVolume(volume);
-        loadPromise.then(() => {
-            audio.setSrc(path);
-            audio.setLoop(loop || false);
-            audio.setVolume(volume);
-    
-            stopAudioIfNeccessary();
-            audio.play();
-            addPlaying(audio);
-        });
+        audio.setSrc(path);
+        audio.setLoop(loop || false);
+        audio.setVolume(volume);
+
+        stopAudioIfNeccessary();
+        audio.play();
+        addPlaying(audio);
 
         return audio;
     },
