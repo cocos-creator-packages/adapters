@@ -295,7 +295,7 @@ cc.audioEngine = {
 
     
     playMusic: function (clip, loop) {
-        if (this._music.getSrc() !== clip.nativeUrl) {
+        if (this._music && this._music.getSrc() !== clip.nativeUrl) {
             this._music.stop();
             removePlaying(this._music);
             putOrDestroyAudio(this._music);
