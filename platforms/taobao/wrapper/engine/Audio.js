@@ -9,10 +9,11 @@ const State = {
     STOPPED: 3,
 }
 
-function Audio (nativeAudio, loadPromise) {
+function Audio (nativeAudio, loadPromise, serializedDuration) {
     this._nativeAudio = nativeAudio;
     this._src = '';
     this._et = new EventTarget();
+    this._serializedDuration = serializedDuration;
     this.reset();
     loadPromise.then(() => {
         this._duration = nativeAudio.duration;
@@ -73,9 +74,9 @@ Audio.loadNative = function (url) {
     return { nativeAudio, loadPromise };
 };
 
-Audio.load = function (url) {
+Audio.load = function (url, serializedDuration) {
     const { nativeAudio, loadPromise } = Audio.loadNative(url);
-    const audio = new Audio(nativeAudio, loadPromise);
+    const audio = new Audio(nativeAudio, loadPromise, serializedDuration);
     return { audio, loadPromise };
 };
 
@@ -108,7 +109,7 @@ Object.assign(Audio.prototype, {
         this._src = path;
     },
     getState () { return this._state; },
-    getDuration () { return this._duration; },
+    getDuration () { return this._serializedDuration ? this._serializedDuration : this._duration; },
     // getCurrentTime () { return this._currentTime; },  // onTimeUpdate not working...
     getCurrentTime () { return this._nativeAudio.currentTime; },
     seek (val) {

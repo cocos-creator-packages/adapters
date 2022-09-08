@@ -7,13 +7,13 @@ const _id2audio = {};
 const _audioPool = [];
 const _maxPoolSize = 32;
 
-function getOrCreateAudio (path) {
+function getOrCreateAudio (path, serializedDuration) {
     const audio = _audioPool.pop();
     if (audio) {
         audio.id = ++_instanceId;
         return { audio, loadPromise: Promise.resolve(), };
     }
-    const { audio: loadedAudio, loadPromise } = Audio.load(path);
+    const { audio: loadedAudio, loadPromise } = Audio.load(path, serializedDuration);
     loadedAudio.id = ++_instanceId;
     return { audio: loadedAudio, loadPromise };
 }
@@ -73,7 +73,7 @@ cc.audioEngine = {
             return cc.error('Wrong type of AudioClip.');
         }
         let path = clip.nativeUrl;
-        let { audio, loadPromise } = getOrCreateAudio(path);
+        let { audio, loadPromise } = getOrCreateAudio(path, clip.duration);
 
         loadPromise.then(() => {
             audio.setSrc(path);
