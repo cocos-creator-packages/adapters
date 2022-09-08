@@ -15,9 +15,11 @@ function Audio (nativeAudio, loadPromise, serializedDuration) {
     this._et = new EventTarget();
     this._serializedDuration = serializedDuration;
     this.reset();
-    loadPromise.then(() => {
-        this._duration = nativeAudio.duration;
-    });
+    // BUG: access duration invokes onEnded callback.
+    // loadPromise.then(() => {
+    //     this._duration = nativeAudio.duration;
+    // });
+    this._duration = 1;
     this._onShow = () => {
         if (this._blocked) {
             this._nativeAudio.play();
@@ -30,16 +32,13 @@ function Audio (nativeAudio, loadPromise, serializedDuration) {
             this._blocked = true;
         }
     };
-    // HACK: the onEnded callback strangely executes before playing...
-    setTimeout(() => {
-        nativeAudio.onEnded(() => {
-            this.finishCB && this.finishCB();
-            this._state = State.INITIALZING;
-            this._et.emit('ended');
-        });
-    }, 100);
+    nativeAudio.onEnded(() => {
+        this.finishCB && this.finishCB();
+        this._state = State.INITIALZING;
+        this._et.emit('ended');
+    });
     nativeAudio.onStop(() => { this._et.emit('stop'); });
-    nativeAudio.onTimeUpdate(() => { this._currentTime = nativeAudio.currentTime; });
+    nativeAudio.onTimeUpdate(() => { this._currentTime = nativeAudio.currentTime; });  // BUG: onTimeUpdate not working
     game.on(game.EVENT_SHOW, this._onShow);
     game.on(game.EVENT_HIDE, this._onHide);
 }
