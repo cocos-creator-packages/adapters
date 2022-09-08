@@ -7,6 +7,17 @@ const _id2audio = {};
 const _audioPool = [];
 const _maxPoolSize = 32;
 
+function handleVolume (volume) {
+    if (volume === undefined) {
+        // set default volume as 1
+        volume = 1;
+    }
+    else if (typeof volume === 'string') {
+        volume = Number.parseFloat(volume);
+    }
+    return volume;
+};
+
 function getOrCreateAudio (path, serializedDuration) {
     const audio = _audioPool.pop();
     if (audio) {
@@ -75,6 +86,7 @@ cc.audioEngine = {
         let path = clip.nativeUrl;
         let { audio, loadPromise } = getOrCreateAudio(path, clip.duration);
 
+        volume = handleVolume(volume);
         loadPromise.then(() => {
             audio.setSrc(path);
             audio.setLoop(loop || false);
@@ -110,6 +122,7 @@ cc.audioEngine = {
     },
 
     setVolume: function (id, volume) {
+        volume = handleVolume(volume);
         const audio = this._id2audio[id];
         if (audio) {
             return audio.setVolume(volume);
@@ -325,6 +338,7 @@ cc.audioEngine = {
     },
     
     setMusicVolume: function (volume) {
+        volume = handleVolume(volume);
         if (this._music) {
             this._music.setVolume(volume);
         }
@@ -342,6 +356,7 @@ cc.audioEngine = {
     },
     
     setEffectsVolume: function (volume) {
+        volume = handleVolume(volume);
         this._effect.audios.forEach(audio => {
             audio.setVolume(volume);
         });
