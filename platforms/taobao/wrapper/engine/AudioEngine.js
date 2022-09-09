@@ -36,32 +36,7 @@ function putOrDestroyAudio (audio) {
     }
 }
 
-const _playingAudio = [];
 const _maxPlayingAudio = 10;
-
-function addPlaying (audio) {
-    if (!_playingAudio.includes(audio)) {
-        _playingAudio.push(audio);
-    }
-}
-
-function removePlaying (audio) {
-    const index = _playingAudio.indexOf(audio);
-    if (index !== -1) {
-        js.array.fastRemoveAt(_playingAudio, index);
-    }
-}
-
-function stopAudioIfNeccessary () {
-    if (_playingAudio.length >= _maxPlayingAudio) {
-        const oldestAudio = _playingAudio.shift();
-        if (oldestAudio.getState() === Audio.State.PLAYING) {
-            oldestAudio.stop();
-        }
-        removePlaying(oldestAudio);
-        putOrDestroyAudio(oldestAudio);
-    }
-}
 
 
 cc.audioEngine = {
@@ -86,9 +61,7 @@ cc.audioEngine = {
         audio.setLoop(loop || false);
         audio.setVolume(volume);
 
-        stopAudioIfNeccessary();
         audio.play();
-        addPlaying(audio);
 
         return audio;
     },
@@ -297,7 +270,6 @@ cc.audioEngine = {
     playMusic: function (clip, loop) {
         if (this._music && this._music.getSrc() !== clip.nativeUrl) {
             this._music.stop();
-            removePlaying(this._music);
             putOrDestroyAudio(this._music);
         }
         const audio = this._play(clip, loop);
@@ -308,19 +280,16 @@ cc.audioEngine = {
     
     stopMusic: function () {
         this._music.stop();
-        removePlaying(this._music);
     },
 
     
     pauseMusic: function () {
-        this._music.pause();
-        removePlaying(this._music);        
+        this._music.pause();     
     },
 
     
     resumeMusic: function () {
         this._music.resume();
-        addPlaying(this._music);     
     },
     
     getMusicVolume: function () {
@@ -344,7 +313,6 @@ cc.audioEngine = {
     playEffect: function (clip, loop) {
         const audio = this._play(clip, loop, this._effect.volume);
         this._effect.audios.push(audio);
-        addPlaying(audio);
         return audio.id;
     },
     
@@ -364,7 +332,6 @@ cc.audioEngine = {
         this._effect.audios.some(audio => {
             if (audio.id === id) {
                 audio.pause();
-                removePlaying(audio);
                 return true;
             }
             return false;
@@ -374,7 +341,6 @@ cc.audioEngine = {
     pauseAllEffects: function () {
         this._effect.audios.forEach(audio => {
             audio.pause();
-            removePlaying(audio);
         });        
     },
     
@@ -382,7 +348,6 @@ cc.audioEngine = {
         this._effect.audios.some(audio => {
             if (audio.id === id) {
                 audio.resume();
-                addPlaying(audio);
                 return true;
             }
             return false;
@@ -392,7 +357,6 @@ cc.audioEngine = {
     resumeAllEffects: function () {
         this._effect.audios.forEach(audio => {
             audio.resume();
-            addPlaying(audio);
         });        
     },
     
@@ -400,7 +364,6 @@ cc.audioEngine = {
         this._effect.audios.some(audio => {
             if (audio.id === id) {
                 audio.stop();
-                removePlaying(audio);
                 return true;
             }
             return false;
@@ -410,7 +373,6 @@ cc.audioEngine = {
     stopAllEffects: function () {
         this._effect.audios.forEach(audio => {
             audio.stop();
-            removePlaying(audio);
         });        
     }
 };
