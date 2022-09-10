@@ -19,8 +19,25 @@ function handleVolume (volume) {
 };
 
 function getOrCreateAudio (path, serializedDuration) {
-    const audio = _audioPool.pop() || new Audio(path, serializedDuration);
+    let audio;
+    _audioPool.some((item, index) => {
+        if (item.getSrc() === path) {
+            audio = item;
+            _audioPool.splice(index, 1);
+            return true;
+        }
+        return false;
+    });
+    if (!audio) {
+        audio = new Audio(path, serializedDuration);
+    }
     audio.id = ++_instanceId;
+    audio.onEnded(() => {
+        putOrDestroyAudio(audio);
+    });
+    audio.onStop(() => {
+        putOrDestroyAudio(audio);
+    });
     return audio;
 }
 
