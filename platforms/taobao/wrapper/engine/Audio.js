@@ -12,7 +12,7 @@ const State = {
 function Audio (url, serializedDuration) {
     this._nativeAudio = my.createInnerAudioContext();
     this._et = new EventTarget();
-    this.loadPromise = this.setSrc(url);
+    this._loadPromise = this._setSrc(url);
     const nativeAudio = this._nativeAudio;
     this._serializedDuration = serializedDuration;
     this.reset();
@@ -76,11 +76,11 @@ Object.assign(Audio.prototype, {
     },
 
     getSrc () { return this._src; },
-    setSrc (path) { 
+    // NOTE: don't set src twice, which is not supported on TAOBAO
+    _setSrc (path) { 
         if (this._src === path) {
             return;
         }
-        this.reset();
         const nativeAudio = this._nativeAudio;
         const loadPromise = new Promise((resolve, reject) => {
             let done = false;

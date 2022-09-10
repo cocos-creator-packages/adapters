@@ -60,7 +60,6 @@ cc.audioEngine = {
         let audio = getOrCreateAudio(path, clip.duration);
 
         volume = handleVolume(volume);
-        audio.setSrc(path);
         audio.setLoop(loop || false);
         audio.setVolume(volume);
 
