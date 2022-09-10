@@ -50,10 +50,12 @@ cc.audioEngine = {
     _pauseIDCache: [],
 
     _play (clip, loop, volume) {
-        if (!(clip instanceof AudioClip)) {
-            return cc.error('Wrong type of AudioClip.');
+        let path;
+        if (typeof clip === 'string') {
+            path = clip;
+        } else {
+            path = clip.nativeUrl;
         }
-        let path = clip.nativeUrl;
         let audio = getOrCreateAudio(path, clip.duration);
 
         volume = handleVolume(volume);
