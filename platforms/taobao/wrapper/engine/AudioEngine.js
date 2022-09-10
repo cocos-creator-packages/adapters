@@ -29,6 +29,7 @@ function putOrDestroyAudio (audio) {
         return;
     }
     delete _id2audio[audio.id];
+    audio.reset();
     if (_audioPool.length < _maxPoolSize) {
         _audioPool.push(audio);
     } else {
