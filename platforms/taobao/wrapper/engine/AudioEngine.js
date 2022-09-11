@@ -42,9 +42,6 @@ function getOrCreateAudio (path, serializedDuration) {
             putOrDestroyAudio(audio);
         }
     });
-    audio.onStop(() => {
-        putOrDestroyAudio(audio);
-    });
     return audio;
 }
 
@@ -294,13 +291,21 @@ cc.audioEngine = {
 
     
     playMusic: function (clip, loop) {
-        if (this._music && this._music.getSrc() !== clip.nativeUrl) {
-            this._music.stop();
-            putOrDestroyAudio(this._music);
+        if (this._music) {
+            if (this._music.getSrc() !== clip.nativeUrl) {
+                this._music.stop();
+                putOrDestroyAudio(this._music);
+                const audio = this._play(clip, loop);
+                this._music = audio;
+            } else {
+                this._music.stop();
+                this._music.play();
+            }
+        } else {
+            const audio = this._play(clip, loop);
+            this._music = audio;
         }
-        const audio = this._play(clip, loop);
-        this._music = audio;
-        return audio.id;
+        return this._music.id;
     },
 
     
