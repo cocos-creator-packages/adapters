@@ -17,7 +17,7 @@ function Audio (url, serializedDuration) {
     this._serializedDuration = serializedDuration;
     this.reset();
     // BUG: access duration invokes onEnded callback.
-    // this.loadPromise.then(() => {
+    // this._loadPromise.then(() => {
     //     this._duration = nativeAudio.duration;
     // });
     this._duration = 1;
@@ -117,7 +117,7 @@ Object.assign(Audio.prototype, {
         if (this._currentTime === val) {
             return;
         }
-        this.loadPromise.then(() => {
+        this._loadPromise.then(() => {
             this._nativeAudio.seek(val);
             this._currentTime = val;
         });
@@ -127,7 +127,7 @@ Object.assign(Audio.prototype, {
         if (this._loop === val) {
             return;
         }
-        this.loadPromise.then(() => {
+        this._loadPromise.then(() => {
             this.nativeAudio.loop = val;
             this._loop = val;
         });
@@ -137,7 +137,7 @@ Object.assign(Audio.prototype, {
         if (this._volume === val) {
             return;
         }
-        this.loadPromise.then(() => {
+        this._loadPromise.then(() => {
             this.nativeAudio.volume = val;
             this._volume = val;
         });
