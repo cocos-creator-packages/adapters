@@ -12,12 +12,12 @@ const State = {
 function Audio (url, serializedDuration) {
     this._nativeAudio = my.createInnerAudioContext();
     this._et = new EventTarget();
-    this._loadPromise = this._setSrc(url);
+    this._setSrc(url);
     const nativeAudio = this._nativeAudio;
     this._serializedDuration = serializedDuration;
     this.reset();
     // BUG: access duration invokes onEnded callback.
-    // this._loadPromise.then(() => {
+    // this._ensureLoaded(() => {
     //     this._duration = nativeAudio.duration;
     // });
     this._duration = 1;
@@ -58,11 +58,13 @@ Object.assign(Audio.prototype, {
         this._currentTime = 0;
         this._volume = 1;
         this._blocked = false;
+        this._loaded = false;
 
         this.offLoad();
         this.offError();
         this.offEnded();
         this.offStop();
+        this.offAudioLoad();
     },
 
     destroy () {
@@ -82,32 +84,29 @@ Object.assign(Audio.prototype, {
             return;
         }
         const nativeAudio = this._nativeAudio;
-        const loadPromise = new Promise((resolve, reject) => {
-            let done = false;
-            // HACK: onCanplay callback not working on Taobao.
-            let timer = setTimeout(() => {
-                if (done) { return; }
-                cc.warn('Timeout to load audio');
-                done = true;
-                resolve(nativeAudio);
-            }, 3000);
-            this.onLoad(() => {
-                if (done) { return; }
-                clearTimeout(timer);
-                done = true;
-                resolve(nativeAudio);
-            });
-            this.onError((err) => {
-                if (done) { return; }
-                clearTimeout(timer);
-                done = true;
-                reject(err);
-            });
-            nativeAudio.src = url;
+        let done = false;
+        this._loaded = false;
+        // HACK: onCanplay callback not working on Taobao.
+        let timer = setTimeout(() => {
+            if (done) { return; }
+            cc.warn('Timeout to load audio');
+            done = true;
+            this._et.emit('audio-load');
+        }, 3000);
+        this.onLoad(() => {
+            if (done) { return; }
+            clearTimeout(timer);
+            done = true;
+            this._et.emit('audio-load');
         });
-        this._nativeAudio.src = path;
+        this.onError((err) => {
+            if (done) { return; }
+            clearTimeout(timer);
+            done = true;
+            cc.error(err);
+        });
+        nativeAudio.src = path;
         this._src = path;
-        return loadPromise;
     },
     getState () { return this._state; },
     getDuration () { return this._serializedDuration ? this._serializedDuration : this._duration; },
@@ -117,7 +116,7 @@ Object.assign(Audio.prototype, {
         if (this._currentTime === val) {
             return;
         }
-        this._loadPromise.then(() => {
+        this._ensureLoaded(() => {
             this._nativeAudio.seek(val);
             this._currentTime = val;
         });
@@ -127,8 +126,8 @@ Object.assign(Audio.prototype, {
         if (this._loop === val) {
             return;
         }
-        this._loadPromise.then(() => {
-            this.nativeAudio.loop = val;
+        this._ensureLoaded(() => {
+            this._nativeAudio.loop = val;
             this._loop = val;
         });
     },
@@ -137,8 +136,8 @@ Object.assign(Audio.prototype, {
         if (this._volume === val) {
             return;
         }
-        this._loadPromise.then(() => {
-            this.nativeAudio.volume = val;
+        this._ensureLoaded(() => {
+            this._nativeAudio.volume = val;
             this._volume = val;
         });
     },
@@ -166,6 +165,8 @@ Object.assign(Audio.prototype, {
         this._state = State.STOPPED;
     },
 
+    onceAudioLoad (cb) { this._et.once('audio-load', cb); },
+    offAudioLoad (cb = undefined) { this._et.off('audio-load', cb); },
     onLoad (cb) { this._et.on('load', cb); },
     offLoad (cb = undefined) { this._et.off('load', cb); },
     onError (cb) { this._et.on('error', cb); },
@@ -174,6 +175,17 @@ Object.assign(Audio.prototype, {
     offEnded (cb = undefined) { this._et.off('ended', cb); },
     onStop (cb) { this._et.on('stop', cb); },
     offStop (cb = undefined) { this._et.off('stop', cb); },
+
+    _ensureLoaded (cb) {
+        if (this._loaded) {
+            cb();
+        } else {
+            this.onceAudioLoad(() => {
+                this._loaded = true;
+                cb();
+            });
+        }
+    }
 });
 
 module.exports = Audio;
