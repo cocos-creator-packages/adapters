@@ -1,62 +1,191 @@
-const Audio = cc._Audio;
-const sys = cc.sys;
+const game = cc.game;
+const EventTarget = cc.EventTarget;
 
-const originalPlay = Audio.prototype.play;
-const originalSetCurrentTime = Audio.prototype.setCurrentTime;
-const originalStop = Audio.prototype.stop;
-
-if (Audio) {
-    Object.assign(Audio.prototype, {
-        _currentTime: 0,
-        _hasPlayed: false,
-
-        _createElement () {
-            let url = this._src._nativeAsset;
-            // Reuse dom audio element
-            if (!this._element) {
-                this._element = __globalAdapter.createInnerAudioContext();
-            }
-            this._element.src = url;
-        },
-
-        play () {
-            this._hasPlayed = true;
-            originalPlay.call(this);
-            if (sys.os === sys.OS_ANDROID && this._currentTime !== 0 && this._element) {
-                this._element.seek(this._currentTime);
-                this._currentTime = 0;  // clear currentTime cache
-            }
-        },
-
-        stop () {
-            // HACK: on Android, can't call stop before first playing
-            if (sys.os === sys.OS_ANDROID) {
-                if (!this._hasPlayed){
-                    return;
-                }
-                originalStop.call(this);
-            }
-            // HACK: fix audio seeking on iOS end
-            else {
-                let self = this;
-                this._src && this._src._ensureLoaded(function () {
-                    // should not seek on iOS end
-                    // self._element.seek(0);
-                    self._element.stop();
-                    self._unbindEnded();
-                    self.emit('stop');
-                    self._state = Audio.State.STOPPED;
-                });
-            }
-        },
-
-        setCurrentTime (num) {
-            // HACK: on Android, cannot call seek before playing
-            if (sys.os === sys.OS_ANDROID && this._element && this._element.paused) {
-                this._currentTime = num;
-            } else {
-                originalSetCurrentTime.call(this, num);
-            }
-        },
-    });
+const State = {
+    ERROR: -1,
+    INITIALZING: 0,
+    PLAYING: 1,
+    PAUSED: 2,
+    STOPPED: 3,
 }
+
+function Audio (url, serializedDuration) {
+    this._nativeAudio = my.createInnerAudioContext();
+    this._et = new EventTarget();
+    this._setSrc(url);
+    const nativeAudio = this._nativeAudio;
+    this._serializedDuration = serializedDuration;
+    this.reset();
+    // BUG: access duration invokes onEnded callback.
+    // this._ensureLoaded(() => {
+    //     this._duration = nativeAudio.duration;
+    // });
+    this._duration = 1;
+    this._onShow = () => {
+        if (this._blocked) {
+            this._nativeAudio.play();
+        }
+        this._blocked = false;
+    };
+    this._onHide = () => {
+        if (this.getState() === State.PLAYING) {
+            this._nativeAudio.pause();
+            this._blocked = true;
+        }
+    };
+    nativeAudio.onCanplay(() => { this._et.emit('load'); });
+    nativeAudio.onError((err) => { this._et.emit('error', err); });
+    nativeAudio.onEnded(() => {
+        this.finishCB && this.finishCB();
+        this._state = State.INITIALZING;
+        this._et.emit('ended');
+    });
+    nativeAudio.onStop(() => { this._et.emit('stop'); });
+    // nativeAudio.onTimeUpdate(() => { this._currentTime = nativeAudio.currentTime; });  // BUG: onTimeUpdate not working
+    game.on(game.EVENT_SHOW, this._onShow);
+    game.on(game.EVENT_HIDE, this._onHide);
+}
+
+Audio.State = State;
+
+Object.assign(Audio.prototype, {
+
+    reset () {
+        this.id = -1;
+        this.finishCB = null;  // For audioEngine custom ended callback.
+        this._state = State.INITIALZING;
+        this._loop = false;
+        this._currentTime = 0;
+        this._volume = 1;
+        this._blocked = false;
+        this._loaded = false;
+
+        this.offLoad();
+        this.offError();
+        this.offEnded();
+        this.offStop();
+        this.offAudioLoad();
+    },
+
+    destroy () {
+        this.reset();
+        game.off(game.EVENT_SHOW, this._onShow);
+        game.off(game.EVENT_HIDE, this._onHide);
+        // offCanplay offOnError offStop offEnded is not supported for now.
+
+        this._nativeAudio.destroy();
+        this._nativeAudio = null;
+    },
+
+    getSrc () { return this._src; },
+    // NOTE: don't set src twice, which is not supported on TAOBAO
+    _setSrc (path) { 
+        if (this._src === path) {
+            return;
+        }
+        const nativeAudio = this._nativeAudio;
+        let done = false;
+        this._loaded = false;
+        // HACK: onCanplay callback not working on Taobao.
+        let timer = setTimeout(() => {
+            if (done) { return; }
+            cc.warn('Timeout to load audio');
+            done = true;
+            this._et.emit('audio-load');
+        }, 3000);
+        this.onLoad(() => {
+            if (done) { return; }
+            clearTimeout(timer);
+            done = true;
+            this._et.emit('audio-load');
+        });
+        this.onError((err) => {
+            if (done) { return; }
+            clearTimeout(timer);
+            done = true;
+            cc.error(err);
+        });
+        nativeAudio.src = path;
+        this._src = path;
+    },
+    getState () { return this._state; },
+    getDuration () { return this._serializedDuration ? this._serializedDuration : this._duration; },
+    // getCurrentTime () { return this._currentTime; },  // onTimeUpdate not working...
+    getCurrentTime () { return this._nativeAudio.currentTime; },
+    seek (val) {
+        if (this._currentTime === val) {
+            return;
+        }
+        this._ensureLoaded(() => {
+            this._nativeAudio.seek(val);
+            this._currentTime = val;
+        });
+    },
+    getLoop () { return this._loop; },
+    setLoop (val) {
+        if (this._loop === val) {
+            return;
+        }
+        this._ensureLoaded(() => {
+            this._nativeAudio.loop = val;
+            this._loop = val;
+        });
+    },
+    getVolume () { return this._volume; },
+    setVolume (val) {
+        if (this._volume === val) {
+            return;
+        }
+        this._ensureLoaded(() => {
+            this._nativeAudio.volume = val;
+            this._volume = val;
+        });
+    },
+
+    play () {
+        if (this.getState() !== State.PLAYING) {
+            this._nativeAudio.play();
+            this._state = State.PLAYING;
+        }
+    },
+    resume () {
+        if (this.getState() === State.PAUSED) {
+            this._nativeAudio.play();
+            this._state = State.PLAYING;
+        }
+    },
+    pause () {
+        if (this.getState() === State.PLAYING) {
+            this._nativeAudio.pause();
+            this._state = State.PAUSED;
+        }
+    },
+    stop () {
+        this._nativeAudio.stop();
+        this._state = State.STOPPED;
+    },
+
+    onceAudioLoad (cb) { this._et.once('audio-load', cb); },
+    offAudioLoad (cb = undefined) { this._et.off('audio-load', cb); },
+    onLoad (cb) { this._et.on('load', cb); },
+    offLoad (cb = undefined) { this._et.off('load', cb); },
+    onError (cb) { this._et.on('error', cb); },
+    offError (cb = undefined) { this._et.off('error', cb); },
+    onEnded (cb) { this._et.on('ended', cb); },
+    offEnded (cb = undefined) { this._et.off('ended', cb); },
+    onStop (cb) { this._et.on('stop', cb); },
+    offStop (cb = undefined) { this._et.off('stop', cb); },
+
+    _ensureLoaded (cb) {
+        if (this._loaded) {
+            cb();
+        } else {
+            this.onceAudioLoad(() => {
+                this._loaded = true;
+                cb();
+            });
+        }
+    }
+});
+
+module.exports = Audio;
