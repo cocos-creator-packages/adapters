@@ -283,12 +283,8 @@ cc.audioEngine = {
     // Classification of interface
 
     _music: null,
-
-    _effect: {
-        audios: [],
-        volume: 1,
-    },
-
+    
+    _effectVolume: 1,
     
     playMusic: function (clip, loop) {
         if (this._music) {
@@ -342,69 +338,61 @@ cc.audioEngine = {
     },
     
     playEffect: function (clip, loop) {
-        const audio = this._play(clip, loop, this._effect.volume);
-        this._effect.audios.push(audio);
-        return audio.id;
+        return this.play(clip, loop, this._effectVolume);
     },
     
     setEffectsVolume: function (volume) {
         volume = handleVolume(volume);
-        this._effect.audios.forEach(audio => {
+        var musicId = this._music.id;
+        this._effectVolume = volume;
+        for (var id in _id2audio) {
+            var audio = _id2audio[id];
+            if (!audio || audio.id === musicId) continue;
             audio.setVolume(volume);
-        });
-        this._effect.volume = volume;
+        }
     },
     
     getEffectsVolume: function () {
-        return this._effect.volume;
+        return this._effectVolume;
     },
     
     pauseEffect: function (id) {
-        this._effect.audios.some(audio => {
-            if (audio.id === id) {
-                audio.pause();
-                return true;
-            }
-            return false;
-        });
+        return this.pause(id);
     },
     
     pauseAllEffects: function () {
-        this._effect.audios.forEach(audio => {
+        var musicId = this._music.id;
+        for (var id in _id2audio) {
+            var audio = _id2audio[id];
+            if (!audio || audio.id === musicId) continue;
             audio.pause();
-        });        
+        }
     },
     
     resumeEffect: function (id) {
-        this._effect.audios.some(audio => {
-            if (audio.id === id) {
-                audio.resume();
-                return true;
-            }
-            return false;
-        });        
+        this.resume(id);   
     },
     
     resumeAllEffects: function () {
-        this._effect.audios.forEach(audio => {
+        var musicId = this._music.id;
+        for (var id in _id2audio) {
+            var audio = _id2audio[id];
+            if (!audio || audio.id === musicId) continue;
             audio.resume();
-        });        
+        }     
     },
     
     stopEffect: function (id) {
-        this._effect.audios.some(audio => {
-            if (audio.id === id) {
-                audio.stop();
-                return true;
-            }
-            return false;
-        });        
+        return this.stop(id);    
     },
     
     stopAllEffects: function () {
-        this._effect.audios.forEach(audio => {
+        var musicId = this._music.id;
+        for (var id in _id2audio) {
+            var audio = _id2audio[id];
+            if (!audio || audio.id === musicId) continue;
             audio.stop();
-        });        
+        } 
     }
 };
  
