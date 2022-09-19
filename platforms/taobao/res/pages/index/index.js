@@ -54,6 +54,10 @@ Page({
 		my.createCanvas({
 			id:'GameCanvas', 
 			success(canvas){
+			        if (!canvas) {
+    				        console.error('failed to create canvas.');
+			                return;
+			        }
 				$global.screencanvas = canvas;
 				$global.__cocosCallback();
 			},
