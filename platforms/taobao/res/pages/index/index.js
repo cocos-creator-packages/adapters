@@ -30,16 +30,6 @@ Page({
 		__globalAdapter.onTouchMove = function (cb) {
 			touchmoveCB = cb;
 		}
-		my.createCanvas({
-			id:'GameCanvas', 
-			success(canvas){
-				$global.screencanvas = canvas;
-				$global.__cocosCallback();
-			},
-			fail (err) {
-				console.error('failed to init on screen canvas', err)
-			}
-		});
 	},
 	onError (err) {
 		console.error('error in page: ', err);
@@ -61,5 +51,19 @@ Page({
 		touchmoveCB && touchmoveCB(event);
 	},
 	canvasOnReady () {
+		my.createCanvas({
+			id:'GameCanvas', 
+			success(canvas){
+			        if (!canvas) {
+    				        console.error('failed to create canvas.');
+			                return;
+			        }
+				$global.screencanvas = canvas;
+				$global.__cocosCallback();
+			},
+			fail (err) {
+				console.error('failed to init on screen canvas', err)
+			}
+		});
 	}
 });

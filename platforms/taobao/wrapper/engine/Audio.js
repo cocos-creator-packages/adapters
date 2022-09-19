@@ -12,10 +12,10 @@ const State = {
 function Audio (url, serializedDuration) {
     this._nativeAudio = my.createInnerAudioContext();
     this._et = new EventTarget();
+    this.reset();
     this._setSrc(url);
     const nativeAudio = this._nativeAudio;
     this._serializedDuration = serializedDuration;
-    this.reset();
     // BUG: access duration invokes onEnded callback.
     // this._ensureLoaded(() => {
     //     this._duration = nativeAudio.duration;
