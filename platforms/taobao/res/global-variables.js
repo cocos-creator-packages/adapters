@@ -13,6 +13,7 @@ var document = window.document;
 var DOMParser = window.DOMParser;
 var performance = window.performance;
 var XMLHttpRequest = window.XMLHttpRequest;
+var WebSocket = window.WebSocket;
 var __extends = window.__extends;
 var __assign = window.__assign;
 var __rest = window.__rest;
