@@ -1,3 +1,4 @@
+if(!cc.AudioClip || !cc.AudioSource) return;
 const Audio = require('./Audio');
 const AudioClip = cc.AudioClip;
 const proto = cc.AudioSource.prototype;
