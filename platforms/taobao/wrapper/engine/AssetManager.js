@@ -85,6 +85,7 @@ downloader.register({
     '.webp' : doNothing,
     '.pvr': doNothing,
     '.pkm': doNothing,
+    '.astc': doNothing,
 });
 
 parser.register({
