@@ -1,7 +1,4 @@
 const Audio = require('./Audio');
-const AudioClip = cc.AudioClip;
-const js = cc.js;
-const isAndroid = cc.sys.os = cc.sys.OS_ANDROID;
 
 let _instanceId = 0;
 const _id2audio = {};
@@ -34,13 +31,7 @@ function getOrCreateAudio (path, serializedDuration) {
     }
     audio.id = ++_instanceId;
     audio.onEnded(() => {
-        if (isAndroid) {
-            // BUG: audio can't reuse after ended on Taobao Android end.
-            delete _id2audio[audio.id];
-            audio.destroy();
-        } else {
-            putOrDestroyAudio(audio);
-        }
+        putOrDestroyAudio(audio);
     });
     return audio;
 }
