@@ -161,7 +161,10 @@ Object.assign(Audio.prototype, {
         }
     },
     stop () {
-        this._nativeAudio.stop();
+        // NOTE: On taobao, it is designed that audio is useless after stopping.
+        // this._nativeAudio.stop();
+        this._nativeAudio.pause();
+        this._nativeAudio.seek(0);
         this._state = State.STOPPED;
     },
 
