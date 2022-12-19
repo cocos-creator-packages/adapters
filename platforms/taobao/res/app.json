@@ -6,6 +6,7 @@
     "defaultTitle": "CocosCreator",
     "allowsBounceVertical":"NO",
     "enableMultiAudio":true,
+    "enableAudioAlign":true,
     "enableSkia":true
   }
 }

@@ -16,10 +16,9 @@ function Audio (url, serializedDuration) {
     this._setSrc(url);
     const nativeAudio = this._nativeAudio;
     this._serializedDuration = serializedDuration;
-    // BUG: access duration invokes onEnded callback.
-    // this._ensureLoaded(() => {
-    //     this._duration = nativeAudio.duration;
-    // });
+    this._ensureLoaded(() => {
+        this._duration = nativeAudio.duration;
+    });
     this._duration = 1;
     this._onShow = () => {
         if (this._blocked) {
@@ -41,9 +40,10 @@ function Audio (url, serializedDuration) {
         this._et.emit('ended');
     });
     nativeAudio.onStop(() => { this._et.emit('stop'); });
-    // nativeAudio.onTimeUpdate(() => { this._currentTime = nativeAudio.currentTime; });  // BUG: onTimeUpdate not working
+    nativeAudio.onTimeUpdate(() => { this._currentTime = nativeAudio.currentTime; });
     game.on(game.EVENT_SHOW, this._onShow);
     game.on(game.EVENT_HIDE, this._onHide);
+    this.onError((err) => { cc.error(err); });
 }
 
 Audio.State = State;
@@ -64,7 +64,6 @@ Object.assign(Audio.prototype, {
         this.offError();
         this.offEnded();
         this.offStop();
-        this.offAudioLoad();
     },
 
     destroy () {
@@ -84,34 +83,13 @@ Object.assign(Audio.prototype, {
             return;
         }
         const nativeAudio = this._nativeAudio;
-        let done = false;
         this._loaded = false;
-        // HACK: onCanplay callback not working on Taobao.
-        let timer = setTimeout(() => {
-            if (done) { return; }
-            cc.warn('Timeout to load audio');
-            done = true;
-            this._et.emit('audio-load');
-        }, 3000);
-        this.onLoad(() => {
-            if (done) { return; }
-            clearTimeout(timer);
-            done = true;
-            this._et.emit('audio-load');
-        });
-        this.onError((err) => {
-            if (done) { return; }
-            clearTimeout(timer);
-            done = true;
-            cc.error(err);
-        });
         nativeAudio.src = path;
         this._src = path;
     },
     getState () { return this._state; },
     getDuration () { return this._serializedDuration ? this._serializedDuration : this._duration; },
-    // getCurrentTime () { return this._currentTime; },  // onTimeUpdate not working...
-    getCurrentTime () { return this._nativeAudio.currentTime; },
+    getCurrentTime () { return this._currentTime; },
     seek (val) {
         if (this._currentTime === val) {
             return;
@@ -161,12 +139,14 @@ Object.assign(Audio.prototype, {
         }
     },
     stop () {
-        this._nativeAudio.stop();
+        // NOTE: On taobao, it is designed that audio is useless after stopping.
+        // this._nativeAudio.stop();
+        this._nativeAudio.pause();
+        this._nativeAudio.seek(0);
         this._state = State.STOPPED;
     },
 
-    onceAudioLoad (cb) { this._et.once('audio-load', cb); },
-    offAudioLoad (cb = undefined) { this._et.off('audio-load', cb); },
+    onceLoad (cb) { this._et.once('load', cb); },
     onLoad (cb) { this._et.on('load', cb); },
     offLoad (cb = undefined) { this._et.off('load', cb); },
     onError (cb) { this._et.on('error', cb); },
@@ -180,7 +160,7 @@ Object.assign(Audio.prototype, {
         if (this._loaded) {
             cb();
         } else {
-            this.onceAudioLoad(() => {
+            this.onceLoad(() => {
                 this._loaded = true;
                 cb();
             });
