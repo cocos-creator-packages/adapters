@@ -111,6 +111,7 @@ Object.assign(game, {
     },
 
     _initEvents () {
+        let sys = cc.sys;
         // register system events
         if (this.config.registerSystemEvent) {
             inputManager.registerSystemEvent(this.canvas);
@@ -135,13 +136,18 @@ Object.assign(game, {
             }
         }
         
-        __globalAdapter.onAudioInterruptionEnd && __globalAdapter.onAudioInterruptionEnd(function () {
-            if (cc.audioEngine) cc.audioEngine._restore();
-            
-        });
-        __globalAdapter.onAudioInterruptionBegin && __globalAdapter.onAudioInterruptionBegin(function () {
-            if (cc.audioEngine) cc.audioEngine._break();
-        });
+        // NOTE: onAudioInterruptionEnd and onAudioInterruptionBegin on ByteDance platform is not designed to behave the same as the ones on WeChat platform,
+        // the callback is invoked on game show or hide on ByteDance platform, while is not invoked on WeChat platform.
+        // See the docs on WeChat: https://developers.weixin.qq.com/minigame/dev/api/base/app/app-event/wx.onAudioInterruptionBegin.html
+        if (sys.platform !== sys.BYTEDANCE_GAME) {
+            __globalAdapter.onAudioInterruptionEnd && __globalAdapter.onAudioInterruptionEnd(function () {
+                if (cc.audioEngine) cc.audioEngine._restore();
+                
+            });
+            __globalAdapter.onAudioInterruptionBegin && __globalAdapter.onAudioInterruptionBegin(function () {
+                if (cc.audioEngine) cc.audioEngine._break();
+            });
+        }
 
         // Maybe not support in open data context
         __globalAdapter.onShow && __globalAdapter.onShow(onShown);
