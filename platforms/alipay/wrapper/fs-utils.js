@@ -231,7 +231,7 @@ var fsUtils = {
 
     loadSubpackage (name, onProgress, onComplete) {
         var task = my.loadSubpackage({
-            'packages':[name],
+            packages : [name],
             success : (res)=>{
                 onComplete && onComplete();
             },
