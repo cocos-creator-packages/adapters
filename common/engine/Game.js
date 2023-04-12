@@ -64,7 +64,7 @@ Object.assign(game, {
 
         // frame and container are useless on minigame platform
         let sys = cc.sys;
-        if (sys.platform === sys.TAOBAO) {
+        if (sys.platform === sys.TAOBAO || sys.platform === sys.TAOBAO_MINIGAME) {
             this.frame = this.container = window.document.createElement("DIV");
         } else {
             this.frame = this.container = document.createElement("DIV");
@@ -74,7 +74,7 @@ Object.assign(game, {
         if (__globalAdapter.isSubContext) {
             localCanvas = window.sharedCanvas || __globalAdapter.getSharedCanvas();
         }
-        else if (sys.platform === sys.TAOBAO) {
+        else if (sys.platform === sys.TAOBAO || sys.platform === sys.TAOBAO_MINIGAME) {
             localCanvas = window.canvas;
         }
         else {

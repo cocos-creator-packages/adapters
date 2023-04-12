@@ -57,7 +57,7 @@ function downloadDomAudio (url, options, onComplete) {
     
     let dom;
     let sys = cc.sys;
-    if (sys.platform === sys.TAOBAO) {
+    if (sys.platform === sys.TAOBAO || sys.platform === sys.TAOBAO_MINIGAME) {
         dom = window.document.createElement('audio');
     } else {
         dom = document.createElement('audio');
@@ -153,12 +153,32 @@ function subdomainTransformUrl (url, options, onComplete) {
 function downloadBundle (nameOrUrl, options, onComplete) {
     let bundleName = cc.path.basename(nameOrUrl);
     var version = options.version || cc.assetManager.downloader.bundleVers[bundleName];
+    const suffix = version ? `${version}.` : '';
+
+    function getConfigPathForSubPackage () {
+        let sys = cc.sys;
+        if (sys.platform === sys.TAOBAO_MINIGAME) {
+            return `${bundleName}/config.${suffix}json`;
+        }
+        return `subpackages/${bundleName}/config.${suffix}json`;
+    }
+
+    function appendBaseToJsonData (data) {
+        if (!data) return;
+
+        let sys = cc.sys;
+        if (sys.platform === sys.TAOBAO_MINIGAME) {
+            data.base = `${bundleName}/`;
+        } else {
+            data.base = `subpackages/${bundleName}/`;
+        }
+    }
 
     if (subpackages[bundleName]) {
-        var config = `subpackages/${bundleName}/config.${version ? version + '.' : ''}json`;
+        var config = getConfigPathForSubPackage();
         let loadedCb = function () {
             downloadJson(config, options, function (err, data) {
-                data && (data.base = `subpackages/${bundleName}/`);
+                appendBaseToJsonData(data);
                 onComplete(err, data);
             });
         };
