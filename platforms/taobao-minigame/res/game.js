@@ -1,7 +1,3 @@
-globalThis.__taobaoRequire = (urlNoSchema) => {
-    require("./" + urlNoSchema);
-};
-
 require('./ccRequire');
 require('adapter-js-path');
 __globalAdapter.init();
