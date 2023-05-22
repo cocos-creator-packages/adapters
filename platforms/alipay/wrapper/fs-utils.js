@@ -229,10 +229,10 @@ var fsUtils = {
         });
     },
 
-    loadSubpackage (name, onProgress, onComplete) {
+    loadSubpackage(name, onProgress, onComplete) {
         var task = my.loadSubpackage({
-            packages : [name],
-            success : (res)=>{
+            name,
+            success: (res) => {
                 onComplete && onComplete();
             },
             fail : (res)=>{
