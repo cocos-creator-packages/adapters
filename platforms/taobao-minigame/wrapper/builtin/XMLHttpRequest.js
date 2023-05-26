@@ -90,61 +90,25 @@ export default class XMLHttpRequest extends EventTarget {
     if (this.readyState !== XMLHttpRequest.OPENED) {
       throw new Error("Failed to execute 'send' on 'XMLHttpRequest': The object's state must be OPENED.")
     } else {
-      let myRequestTask = my.request({
-        data,
+      let myRequestTask = my.tb.request({
+        body: JSON.stringify(data),
         url: _url.get(this),
         method: _method.get(this),
         headers: _requestHeader.get(this),
-        dataType: 'other',
-        responseType: this.responseType === 'arraybuffer' ? 'arraybuffer' : 'text',
-        timeout: this.timeout || undefined,
-        success: ({ data, status, headers }) => {
-          this.status = status
-          _responseHeader.set(this, headers)
+        options: {timeout: this.timeout, enableSystemParams: true},
+        success: (res) => {
+          this.status = res.code;
+          this.responseText = this.response = res.content;
+          _responseHeader.set(this, _requestHeader.get(this))
           _triggerEvent.call(this, 'loadstart')
           _changeReadyState.call(this, XMLHttpRequest.HEADERS_RECEIVED)
           _changeReadyState.call(this, XMLHttpRequest.LOADING)
-
-          switch (this.responseType) {
-            case 'json':
-              this.responseText = data;
-              try {
-                this.response = JSON.parse(data);
-              }
-              catch (e) {
-                this.response = null;
-              }
-              break;
-            case '':
-            case 'text':
-              this.responseText = this.response = data;
-              break;
-            case 'arraybuffer': 
-              this.response = data;
-              this.responseText = '';
-              var bytes = new Uint8Array(data);
-              var len = bytes.byteLength;
-
-              for (var i = 0; i < len; i++) {
-                this.responseText += String.fromCharCode(bytes[i]);
-              }
-              break;
-            default:
-              this.response = null;
-          }
           _changeReadyState.call(this, XMLHttpRequest.DONE)
           _triggerEvent.call(this, 'load')
           _triggerEvent.call(this, 'loadend')
         },
-        fail: ({ error, errorMessage }) => {
-          // TODO 规范错误
-          if (9 === error || errorMessage.indexOf('abort') !== -1) {
-            _triggerEvent.call(this, 'abort')
-          } else if (13 === error || errorMessage.indexOf('超时') !== -1) {
-            _triggerEvent.call(this, 'timeout')
-          } else {
-            _triggerEvent.call(this, 'error', errorMessage)
-          }
+        fail: (res) => {
+          _triggerEvent.call(this, 'error', res)
           _triggerEvent.call(this, 'loadend')
         }
       })
