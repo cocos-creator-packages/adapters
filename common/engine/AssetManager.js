@@ -234,7 +234,7 @@ function downloadBundle (nameOrUrl, options, onComplete) {
                     let sys = cc.sys;
                     if (sys.platform === sys.ALIPAY_GAME && sys.os === sys.OS_ANDROID) {
                         let resPath = unzipPath + 'res/';
-                        if (fs.accessSync({path: resPath})) {
+                        if (fs.accessSync({path: resPath}).success) {
                             data.base = resPath;
                         }
                     }
