@@ -22,6 +22,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
+// TODO: verify the my API
 var fs = my.getFileSystemManager ? my.getFileSystemManager() : null;
 var outOfStorageRegExp = /the maximum size of the file storage/;  // not exactly right
 
@@ -218,30 +219,40 @@ var fsUtils = {
     },
     
     exists (filePath, onComplete) {
-        fs.access({
-            path: filePath,
-            success: function () {
+        // fs.access is not supported.
+        // fs.access({
+        //     path: filePath,
+        //     success: function () {
+        //         onComplete && onComplete(true);
+        //     },
+        //     fail: function () {
+        //         onComplete && onComplete(false);
+        //     }
+        // });
+        fs.readFile({
+            filePath: filePath,
+            success () {
                 onComplete && onComplete(true);
             },
-            fail: function () {
-                onComplete && onComplete(false);
+            fail () {
+                onComplete && onComplete (false);
             }
         });
     },
 
-    loadSubpackage(name, onProgress, onComplete) {
-        var task = my.loadSubpackage({
+    loadSubpackage (name, onProgress, onComplete) {
+        const task = my.loadSubPackage({
             name,
-            success: (res) => {
+            success () {
                 onComplete && onComplete();
             },
-            fail : (res)=>{
-                console.warn(`Load Subpackage failed: path: ${name} message: ${res.errMsg}`);
-                onComplete && onComplete(new Error(`Failed to load subpackage ${name}: ${res.errMsg}`));
-            }
+            fail (res) {
+                console.warn(`Load Subpackage failed: path: ${name} message: ${res.errorMessage}`);
+                onComplete && onComplete(new Error(`Failed to load subpackage ${name}: ${res.errorMessage}`));
+            },
         });
-        onProgress && task.onProgressUpdate(onProgress);
-        return task;
+        // onProgress && task.onProgressUpdate(onProgress);
+        return {};
     },
 
     unzip (zipFilePath, targetPath, onComplete) {

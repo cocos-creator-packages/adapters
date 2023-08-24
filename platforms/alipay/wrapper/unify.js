@@ -56,17 +56,11 @@ if (window.__globalAdapter) {
     utils.cloneMethod(globalAdapter, my, 'getOpenDataContext');
     utils.cloneMethod(globalAdapter, my, 'onMessage');
 
-    // Subpackage not supported
-    // utils.cloneMethod(globalAdapter, my, 'loadSubpackage');
-
     // SharedCanvas
     utils.cloneMethod(globalAdapter, my, 'getSharedCanvas');
 
     // Font
-    globalAdapter.loadFont = function (url) {
-        // my.loadFont crash when url is not in user data path
-        return "Arial";
-    };
+    utils.cloneMethod(globalAdapter, my, 'loadFont');
 
     // hide show Event
     utils.cloneMethod(globalAdapter, my, 'onShow');
