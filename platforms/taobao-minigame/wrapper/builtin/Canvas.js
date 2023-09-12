@@ -31,17 +31,21 @@ let CanvasProxy = new Proxy(Canvas, {
     }
   
     canvas.addEventListener = function (type, listener, options = {}) {
-      console.log('canvas.addEventListener', type);
-      // $global.document.addEventListener(type, listener, options);
+      // console.log('canvas.addEventListener', type);
+      if (my.isIDE) {
+        $global.document.addEventListener(type, listener, options);
+      }
     }
   
     canvas.removeEventListener = function (type, listener) {
-      console.log('canvas.removeEventListener', type);
-      // $global.document.removeEventListener(type, listener);
+      // console.log('canvas.removeEventListener', type);
+      if (my.isIDE) {
+        $global.document.removeEventListener(type, listener);
+      }
     }
   
     canvas.dispatchEvent = function (event = {}) {
-      console.log('canvas.dispatchEvent' , event.type, event);
+      // console.log('canvas.dispatchEvent' , event.type, event);
       if (my.isIDE) {
         $global.document.dispatchEvent(event);
       }
