@@ -86,13 +86,16 @@
             cbs.onKeyboardConfirm = function (res) {
                 delegate.editBoxEditingReturn();
                 let cbs = self._eventListeners;
-                cbs.onKeyboardComplete && cbs.onKeyboardComplete();
+                cbs.onKeyboardComplete && cbs.onKeyboardComplete(res);
             }
 
-            cbs.onKeyboardComplete = function () {
+            cbs.onKeyboardComplete = function (res) {
                 self._editing = false;
                 _currentEditBoxImpl = null;
                 self._unregisterKeyboardEvent();
+                if (res && res.value && delegate._string !== res.value) {
+                    delegate.editBoxTextChanged(res.value);
+                }
                 delegate.editBoxEditingDidEnded();
             }
 
