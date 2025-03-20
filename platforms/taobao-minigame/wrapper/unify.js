@@ -41,6 +41,46 @@ if (window.__globalAdapter) {
         return audio;
     };
 
+
+    let windowInfo;
+    let windowInfoCached = false;
+    function refreshWindowInfo(delay){
+        windowInfo = my.getWindowInfoSync();
+        // refresh windowInfo, some seconds later.
+        setTimeout(function () {
+            windowInfo = my.getWindowInfoSync();
+            windowInfoCached = true
+        }, delay || 5000);
+    }
+    refreshWindowInfo();
+
+    if (my.onWindowResize) {
+        my.onWindowResize(function () {
+            refreshWindowInfo();
+            window.dispatchEvent('resize');
+        });
+    }
+
+    // safeArea
+    // origin point on the top-left corner
+    globalAdapter.getSafeArea = function () {
+        windowInfo = windowInfoCached ? windowInfo : my.getWindowInfoSync();
+        if (typeof windowInfo.safeArea !== 'undefined') {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return windowInfo.safeArea;
+        }
+
+        console.warn('getSafeArea is not supported on this platform');
+        return {
+            top: 0,
+            left: 0,
+            bottom: windowInfo.windowHeight,
+            right: windowInfo.windowWidth,
+            width: windowInfo.windowWidth,
+            height: windowInfo.windowHeight,
+        };
+    }
+
     // FrameRate
     // utils.cloneMethod(globalAdapter, my, 'setPreferredFramesPerSecond');
 
@@ -74,9 +114,8 @@ if (window.__globalAdapter) {
 
     // Accelerometer
     let accelerometerCallback = null;
-    let systemInfo = my.getSystemInfoSync();
-    let windowWidth = systemInfo.windowWidth;
-    let windowHeight = systemInfo.windowHeight;
+    let windowWidth = windowInfo.windowWidth;
+    let windowHeight = windowInfo.windowHeight;
     let isLandscape = windowWidth > windowHeight;
     function accelerometerChangeCallback (res, cb) {
         let resClone = {};
