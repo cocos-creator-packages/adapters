@@ -33,8 +33,9 @@ function adaptView (viewProto) {
                 locFrameSize.height = sharedCanvas.height;
             }
             else {
-                locFrameSize.width = window.innerWidth;
-                locFrameSize.height = window.innerHeight;
+                const { screenWidth, screenHeight } = __globalAdapter.getSystemInfoSync();
+                locFrameSize.width = screenWidth;
+                locFrameSize.height = screenHeight;
             }
         },
     });

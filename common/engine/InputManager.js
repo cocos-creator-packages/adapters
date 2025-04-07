@@ -15,7 +15,11 @@ if (mgr) {
     
             this._glView = cc.view;
             let self = this;
-    
+            window.addEventListener("resize", ()=> {
+                const { screenWidth, screenHeight } = __globalAdapter.getSystemInfoSync();
+                canvasPosition.width = screenWidth;
+                canvasPosition.height = screenHeight;
+            });
             //register touch event
             let _touchEventsMap = {
                 onTouchStart: this.handleTouchesBegin,

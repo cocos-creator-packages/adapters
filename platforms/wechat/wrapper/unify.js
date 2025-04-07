@@ -93,7 +93,7 @@ if (window.__globalAdapter) {
     if (wx.onWindowResize) {
         wx.onWindowResize(function () {
             refreshSystemInfo();
-            window.dispatchEvent('resize');
+            window.dispatchEvent({type: 'resize'});
         });
     }
 
