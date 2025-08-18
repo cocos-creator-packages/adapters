@@ -27,7 +27,37 @@ Object.assign(adapter, {
         else {
           sys.platform = sys.WECHAT_GAME;
         }
+        // We need to set sys.platform first before calling adaptSysFunc.
+        adaptSysFunc.call(this, sys);
 
+        let loader = new Promise(function (resolve, reject) {
+            // HACK: webp base64 doesn't support on Wechat Android, which reports some internal error log.
+            if (sys.os === sys.OS_ANDROID) {
+                sys.capabilities.webp = false;
+                return;
+            }
+            try {
+                let img = document.createElement('img');
+                let timer = setTimeout(function () {
+                    resolve(false);
+                }, 500);
+                img.onload = function onload() {
+                    clearTimeout(timer);
+                    let result = img.width > 0 && img.height > 0;
+                    resolve(result);
+                };
+                img.onerror = function onerror(err) {
+                    clearTimeout(timer);
+                    resolve(false);
+                };
+                img.src = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA';
+            } catch (error) {
+                resolve(false);
+            }
+        });
+        loader.then(function (isSupport) {
+            sys.capabilities.webp = isSupport;
+        });
         // sys.glExtension = function (name) {
         //     if (name === 'OES_texture_float') {
         //         return false;

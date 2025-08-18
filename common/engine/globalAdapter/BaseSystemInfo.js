@@ -45,11 +45,13 @@ function adaptSys (sys, env) {
 
     var _supportWebGL = __globalAdapter.isSubContext ? false : true;;
     var _supportWebp = false;
-    try {
-        var _canvas = document.createElement("canvas");
-        _supportWebp = _canvas.toDataURL('image/webp').startsWith('data:image/webp');
+    if (sys.platform !== sys.WECHAT_GAME && sys.platform !== sys.WECHAT_GAME_SUB) {
+        try {
+            var _canvas = document.createElement("canvas");
+            _supportWebp = _canvas.toDataURL('image/webp').startsWith('data:image/webp');
+        }
+        catch (err) { }
     }
-    catch (err) { }
 
     sys.capabilities = {
         "canvas": true,
